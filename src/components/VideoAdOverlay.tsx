@@ -17,10 +17,13 @@ interface AdData {
 interface VideoAdOverlayProps {
   ad: AdData;
   onClose: () => void;
+  onNavigate?: () => void;
 }
 
-export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
+export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps) {
   const navigate = useNavigate();
+  const appId = (ad as any)?.app?.id ?? (ad as any)?.app_id;
+  const buildDetailUrl = (id: string) => `/app/${id}?refresh=${Date.now()}`;
   const [countdown, setCountdown] = useState(ad.skip_after_seconds || 5);
   const [canSkip, setCanSkip] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -62,7 +65,32 @@ export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
   return (
     <div className="fixed inset-0 z-[100] bg-black flex flex-col">
       {/* Video */}
-      <div className="flex-1 relative">
+      <div
+        className="flex-1 relative"
+        role="button"
+        tabIndex={0}
+        onClick={() => {
+          if (!appId) return;
+          if (onNavigate) {
+            onNavigate();
+          } else {
+            onClose();
+          }
+          navigate(buildDetailUrl(appId));
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (!appId) return;
+            if (onNavigate) {
+              onNavigate();
+            } else {
+              onClose();
+            }
+            navigate(buildDetailUrl(appId));
+          }
+        }}
+      >
         <video
           ref={videoRef}
           src={ad.video_url}
@@ -78,7 +106,10 @@ export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
         <div className="absolute top-4 right-4">
           {canSkip ? (
             <button
-              onClick={onClose}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
               className="flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur px-4 py-2 text-white text-sm font-medium hover:bg-black/80 transition-colors"
             >
               <X className="h-4 w-4" />
@@ -100,7 +131,10 @@ export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
 
         {/* Mute toggle */}
         <button
-          onClick={() => setIsMuted((prev) => !prev)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsMuted((prev) => !prev);
+          }}
           className="absolute bottom-28 left-4 flex items-center gap-2 rounded-full bg-black/60 backdrop-blur px-3 py-2 text-white text-xs font-medium hover:bg-black/80 transition-colors"
           aria-label={isMuted ? 'Unmute ad' : 'Mute ad'}
         >
@@ -116,14 +150,24 @@ export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
           role="button"
           tabIndex={0}
           onClick={() => {
-            onClose();
-            navigate(`/app/${ad.app.id}`);
+            if (!appId) return;
+            if (onNavigate) {
+              onNavigate();
+            } else {
+              onClose();
+            }
+            navigate(`/app/${appId}`);
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              onClose();
-              navigate(`/app/${ad.app.id}`);
+              if (!appId) return;
+              if (onNavigate) {
+                onNavigate();
+              } else {
+                onClose();
+              }
+              navigate(buildDetailUrl(appId));
             }
           }}
         >
@@ -136,7 +180,10 @@ export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
             <p className="text-xs text-white/60 truncate">{ad.app.category?.name || 'App'}</p>
           </span>
           <button
-            onClick={() => setShowDisclaimer(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDisclaimer(true);
+            }}
             className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/80 hover:bg-white/15"
           >
             <Info className="h-3.5 w-3.5" />
@@ -145,12 +192,17 @@ export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onClose();
-              navigate(`/app/${ad.app.id}`);
+              if (!appId) return;
+              if (onNavigate) {
+                onNavigate();
+              } else {
+                onClose();
+              }
+              navigate(buildDetailUrl(appId));
             }}
             className="flex-shrink-0 rounded-full bg-blue-500 px-5 py-1.5 text-sm font-semibold text-white hover:bg-blue-600 transition-colors"
           >
-            View
+            Get
           </button>
           {ad.app.has_in_app_purchases && (
             <span className="text-[10px] text-white/40 absolute -bottom-5 right-4">In-App Purchases</span>

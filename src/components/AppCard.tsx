@@ -43,15 +43,12 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
               <h4 className="font-semibold text-foreground truncate">{app.name}</h4>
               <p className="text-xs text-muted-foreground truncate">{app.tagline}</p>
             </div>
-            <a
-              href={app.website_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+            <Link
+              to={`/app/${app.id}`}
               className="flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80"
             >
               Get
-            </a>
+            </Link>
           </div>
         </div>
       </Link>
@@ -69,14 +66,12 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
           <h4 className="font-medium text-foreground leading-tight">{app.name}</h4>
           <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
         </Link>
-        <a
-          href={app.website_url}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to={`/app/${app.id}`}
           className="flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80"
         >
           Get
-        </a>
+        </Link>
       </div>
     );
   }
@@ -95,15 +90,12 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
             </div>
           )}
         </div>
-        <a
-          href={app.website_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
+        <Link
+          to={`/app/${app.id}`}
           className="flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80 mt-1"
         >
           Get
-        </a>
+        </Link>
       </div>
     </Link>
   );

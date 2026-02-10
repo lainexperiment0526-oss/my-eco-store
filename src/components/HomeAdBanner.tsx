@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useActiveAds } from '@/hooks/useAds';
 import { VideoAdOverlay } from './VideoAdOverlay';
 import { AppIcon } from './AppIcon';
@@ -23,7 +23,7 @@ export function HomeAdBanner() {
             <div
               key={ad.id}
               className="flex-shrink-0 w-[85vw] max-w-md rounded-2xl overflow-hidden bg-card shadow-sm relative group cursor-pointer"
-              onClick={() => navigate(ad.app?.id ? `/app/${ad.app.id}` : '#')}
+              onClick={() => navigate(ad.app?.id ? `/app/${ad.app.id}?refresh=${Date.now()}` : '#')}
             >
               {/* Video thumbnail */}
               <div className="aspect-[16/9] bg-muted relative">
@@ -62,15 +62,19 @@ export function HomeAdBanner() {
                     {ad.title || ad.app?.tagline || ad.app?.category?.name || 'Sponsored'}
                   </p>
                 </div>
-                <a
-                  href={ad.app?.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex-shrink-0 rounded-full bg-primary px-5 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-                >
-                  Get
-                </a>
+                {ad.app?.id ? (
+                  <Link
+                    to={`/app/${ad.app.id}?refresh=${Date.now()}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-shrink-0 rounded-full bg-primary px-5 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                  >
+                    Get
+                  </Link>
+                ) : (
+                  <span className="flex-shrink-0 rounded-full bg-primary px-5 py-1.5 text-sm font-semibold text-primary-foreground opacity-70">
+                    Get
+                  </span>
+                )}
               </div>
             </div>
           ))}

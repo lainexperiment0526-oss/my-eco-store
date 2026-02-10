@@ -50,8 +50,12 @@ export function AdInterstitial({ onComplete, trigger }: AdInterstitialProps) {
     onComplete();
   }, [onComplete]);
 
+  const handleNavigate = useCallback(() => {
+    setShowingAppAd(null);
+  }, []);
+
   if (showingAppAd) {
-    return <VideoAdOverlay ad={showingAppAd} onClose={handleClose} />;
+    return <VideoAdOverlay ad={showingAppAd} onClose={handleClose} onNavigate={handleNavigate} />;
   }
 
   return null;

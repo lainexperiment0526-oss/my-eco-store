@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useApp } from '@/hooks/useApps';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsBookmarked, useToggleBookmark } from '@/hooks/useBookmarks';
@@ -14,14 +14,15 @@ import { ArrowLeft, ExternalLink, Share2, ChevronRight, ChevronDown, Bookmark, B
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function AppDetail() {
   const { id } = useParams<{ id: string }>();
-  const { data: app, isLoading, error } = useApp(id || '');
+  const location = useLocation();
+  const { data: app, isLoading, error, refetch } = useApp(id || '');
   const { user } = useAuth();
   const { data: isBookmarked } = useIsBookmarked(id || '', user?.id);
   const toggleBookmark = useToggleBookmark();
@@ -56,7 +57,7 @@ export default function AppDetail() {
     setShowAd(false);
     setIsOpening(false);
     if (pendingUrl) {
-      window.open(pendingUrl, '_blank', 'noopener,noreferrer');
+      window.location.assign(pendingUrl);
       setPendingUrl(null);
     }
   }, [pendingUrl]);
@@ -75,6 +76,12 @@ export default function AppDetail() {
     if (!user) { toast.error('Sign in to bookmark'); return; }
     toggleBookmark.mutate({ app_id: id!, user_id: user.id, isBookmarked: !!isBookmarked });
   };
+
+  useEffect(() => {
+    if (location.search.includes('refresh=')) {
+      refetch();
+    }
+  }, [location.search, refetch]);
 
   if (isLoading) {
     return (
@@ -142,7 +149,7 @@ export default function AppDetail() {
                   disabled={isOpening}
                   className="rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-70"
                 >
-                  {isOpening ? 'Opening...' : 'Open'}
+                  {isOpening ? 'Opening...' : 'Open App'}
                 </button>
                 <Button variant="ghost" size="icon" className="rounded-full" onClick={handleShare}>
                   <Share2 className="h-5 w-5 text-primary" />
