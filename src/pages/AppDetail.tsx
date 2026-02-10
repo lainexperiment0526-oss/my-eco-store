@@ -138,12 +138,12 @@ export default function AppDetail() {
   const appKey = app.name.toLowerCase();
   const badgeMap: Record<string, { light: string; dark: string }> = {
     'flappy pi': {
-      light: 'https://i.ibb.co/bMxDPrtR/verify.png',
-      dark: 'https://i.ibb.co/SDQVs1hN/verify-1.png',
+      light: 'https://i.ibb.co/BVQYVbyb/verified.png',
+      dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
     },
     'droplink': {
-      light: 'https://i.ibb.co/bMxDPrtR/verify.png',
-      dark: 'https://i.ibb.co/SDQVs1hN/verify-1.png',
+      light: 'https://i.ibb.co/BVQYVbyb/verified.png',
+      dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
     },
     'mrwain hub': {
       light: 'https://i.ibb.co/p6HtQ2c5/verify-3.png',

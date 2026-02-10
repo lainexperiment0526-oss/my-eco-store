@@ -3,6 +3,7 @@ import { X, Volume2, VolumeX, Info } from 'lucide-react';
 import { AppIcon } from './AppIcon';
 import { ImagePreviewDialog } from './ImagePreviewDialog';
 import { RecommendedApps } from './RecommendedApps';
+import { useTheme } from '@/hooks/useTheme';
 import { App, Category } from '@/types/app';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -24,6 +25,7 @@ interface VideoAdOverlayProps {
 
 export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps) {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const appId = (ad as any)?.app?.id ?? (ad as any)?.app_id;
   const buildDetailUrl = (id: string) => `/app/${id}?refresh=${Date.now()}`;
   const [countdown, setCountdown] = useState(ad.skip_after_seconds || 5);
@@ -38,6 +40,27 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
   const screenshots = (ad.app?.screenshots || [])
     .slice()
     .sort((a, b) => a.display_order - b.display_order);
+
+  const getBadgeSrc = (name?: string | null) => {
+    const key = (name || '').toLowerCase();
+    const badgeMap: Record<string, { light: string; dark: string }> = {
+      'flappy pi': {
+        light: 'https://i.ibb.co/BVQYVbyb/verified.png',
+        dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
+      },
+      'droplink': {
+        light: 'https://i.ibb.co/BVQYVbyb/verified.png',
+        dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
+      },
+      'mrwain hub': {
+        light: 'https://i.ibb.co/p6HtQ2c5/verify-3.png',
+        dark: 'https://i.ibb.co/p6HtQ2c5/verify-3.png',
+      },
+    };
+    const badge = badgeMap[key];
+    if (!badge) return '';
+    return theme === 'dark' ? badge.dark : badge.light;
+  };
 
   const normalizeUrl = (url?: string | null) => {
     const trimmed = (url || '').trim();
@@ -199,7 +222,12 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
           </span>
           <span className="flex-1 min-w-0">
             <p className="text-xs text-white/60">OpenApp &middot; Sponsored</p>
-            <h4 className="text-white font-medium text-sm truncate">{ad.app.name}</h4>
+            <h4 className="text-white font-medium text-sm truncate flex items-center gap-2">
+              {ad.app.name}
+              {getBadgeSrc(ad.app.name) && (
+                <img src={getBadgeSrc(ad.app.name)} alt="Verified" className="h-4 w-4" />
+              )}
+            </h4>
             <p className="text-xs text-white/60 truncate">{ad.app.category?.name || 'App'}</p>
           </span>
           <button
@@ -260,7 +288,12 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
               <div className="flex items-start gap-4">
                 <AppIcon src={ad.app.logo_url} name={ad.app.name} size="md" />
                 <div className="min-w-0">
-                  <h3 className="text-lg font-semibold text-foreground truncate">{ad.app.name}</h3>
+                  <h3 className="text-lg font-semibold text-foreground truncate flex items-center gap-2">
+                    {ad.app.name}
+                    {getBadgeSrc(ad.app.name) && (
+                      <img src={getBadgeSrc(ad.app.name)} alt="Verified" className="h-5 w-5" />
+                    )}
+                  </h3>
                   <p className="text-sm text-muted-foreground truncate">{ad.app.tagline || ad.app.category?.name || 'App'}</p>
                   <p className="mt-2 text-sm text-foreground/90 line-clamp-3">{ad.description || ad.title || 'Sponsored app'}</p>
                 </div>

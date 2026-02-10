@@ -5,6 +5,7 @@ import { useActiveCampaigns } from '@/hooks/useAdCampaigns';
 import { VideoAdOverlay } from './VideoAdOverlay';
 import { AppIcon } from './AppIcon';
 import { Play } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 
 export function HomeAdBanner() {
   const { data: ads } = useActiveAds();
@@ -12,6 +13,7 @@ export function HomeAdBanner() {
   const [activeAd, setActiveAd] = useState<any | null>(null);
   const [videoErrors, setVideoErrors] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const handleClose = useCallback(() => setActiveAd(null), []);
   const openAdDetails = useCallback((ad: any) => {
@@ -19,6 +21,27 @@ export function HomeAdBanner() {
       navigate(`/app/${ad.app.id}?refresh=${Date.now()}`);
     }
   }, [navigate]);
+
+  const getBadgeSrc = useCallback((name?: string | null) => {
+    const key = (name || '').toLowerCase();
+    const badgeMap: Record<string, { light: string; dark: string }> = {
+      'flappy pi': {
+        light: 'https://i.ibb.co/BVQYVbyb/verified.png',
+        dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
+      },
+      'droplink': {
+        light: 'https://i.ibb.co/BVQYVbyb/verified.png',
+        dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
+      },
+      'mrwain hub': {
+        light: 'https://i.ibb.co/p6HtQ2c5/verify-3.png',
+        dark: 'https://i.ibb.co/p6HtQ2c5/verify-3.png',
+      },
+    };
+    const badge = badgeMap[key];
+    if (!badge) return '';
+    return theme === 'dark' ? badge.dark : badge.light;
+  }, [theme]);
 
   const bannerCampaigns = (campaigns || []).filter((ad) => ad.ad_type === 'banner');
   const combinedCards = [
@@ -146,8 +169,13 @@ export function HomeAdBanner() {
                 {/* App info */}
                 <div className="flex items-center gap-3 p-3">
                   <AppIcon src={ad.app?.logo_url} name={ad.app?.name || 'App'} size="sm" />
-                  <div className="flex-1 min-w-0 text-left">
-                    <h4 className="font-medium text-foreground text-sm truncate">{ad.app?.name}</h4>
+                <div className="flex-1 min-w-0 text-left">
+                    <h4 className="font-medium text-foreground text-sm truncate flex items-center gap-2">
+                      {ad.app?.name}
+                      {getBadgeSrc(ad.app?.name) && (
+                        <img src={getBadgeSrc(ad.app?.name)} alt="Verified" className="h-4 w-4" />
+                      )}
+                    </h4>
                     <p className="text-xs text-muted-foreground truncate">
                       {ad.title || ad.app?.tagline || ad.app?.category?.name || 'Sponsored'}
                     </p>
