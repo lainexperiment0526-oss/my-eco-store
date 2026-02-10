@@ -1,6 +1,7 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { useApp } from '@/hooks/useApps';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import { useIsBookmarked, useToggleBookmark } from '@/hooks/useBookmarks';
 import { Header } from '@/components/Header';
 import { AppIcon } from '@/components/AppIcon';
@@ -24,6 +25,7 @@ export default function AppDetail() {
   const location = useLocation();
   const { data: app, isLoading, error, refetch } = useApp(id || '');
   const { user } = useAuth();
+  const { theme } = useTheme();
   const { data: isBookmarked } = useIsBookmarked(id || '', user?.id);
   const toggleBookmark = useToggleBookmark();
   const queryClient = useQueryClient();
@@ -133,6 +135,24 @@ export default function AppDetail() {
   }
 
   const sortedScreenshots = app.screenshots?.sort((a, b) => a.display_order - b.display_order) || [];
+  const appKey = app.name.toLowerCase();
+  const badgeMap: Record<string, { light: string; dark: string }> = {
+    'flappy pi': {
+      light: 'https://i.ibb.co/bMxDPrtR/verify.png',
+      dark: 'https://i.ibb.co/SDQVs1hN/verify-1.png',
+    },
+    'droplink': {
+      light: 'https://i.ibb.co/bMxDPrtR/verify.png',
+      dark: 'https://i.ibb.co/SDQVs1hN/verify-1.png',
+    },
+    'mrwain hub': {
+      light: 'https://i.ibb.co/p6HtQ2c5/verify-3.png',
+      dark: 'https://i.ibb.co/p6HtQ2c5/verify-3.png',
+    },
+  };
+  const badge = badgeMap[appKey];
+  const isVerified = !!badge;
+  const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : '';
 
   return (
     <>
@@ -157,7 +177,12 @@ export default function AppDetail() {
           <div className={`flex items-start gap-4 ${sortedScreenshots.length ? '-mt-12 relative z-10' : 'pt-6'}`}>
             <AppIcon src={app.logo_url} name={app.name} size="lg" className="shadow-lg" />
             <div className="flex-1 min-w-0 pt-2">
-              <h1 className="text-xl font-bold text-foreground">{app.name}</h1>
+              <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+                {app.name}
+                {isVerified && (
+                  <img src={badgeSrc} alt="Verified" className="h-5 w-5" />
+                )}
+              </h1>
               <p className="text-sm text-muted-foreground">{app.tagline}</p>
               <div className="mt-3 flex items-center gap-2">
                 <button

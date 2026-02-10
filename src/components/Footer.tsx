@@ -8,6 +8,7 @@ export function Footer() {
         <div className="flex items-center gap-3">
           <Link to="/terms" className="hover:text-foreground transition-colors">Legal</Link>
           <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+          <Link to="/license" className="hover:text-foreground transition-colors">License</Link>
         </div>
       </div>
     </footer>

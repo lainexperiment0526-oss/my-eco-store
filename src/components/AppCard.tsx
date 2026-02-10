@@ -1,6 +1,7 @@
 import { App, Category, Screenshot } from '@/types/app';
 import { Link } from 'react-router-dom';
 import { AppIcon } from './AppIcon';
+import { useTheme } from '@/hooks/useTheme';
 import { StarRating } from './StarRating';
 import { ChevronRight } from 'lucide-react';
 
@@ -10,6 +11,26 @@ interface AppCardProps {
 }
 
 export function AppCard({ app, variant = 'default' }: AppCardProps) {
+  const { theme } = useTheme();
+  const appKey = app.name.toLowerCase();
+  const badgeMap: Record<string, { light: string; dark: string }> = {
+    'flappy pi': {
+      light: 'https://i.ibb.co/bMxDPrtR/verify.png',
+      dark: 'https://i.ibb.co/SDQVs1hN/verify-1.png',
+    },
+    'droplink': {
+      light: 'https://i.ibb.co/bMxDPrtR/verify.png',
+      dark: 'https://i.ibb.co/SDQVs1hN/verify-1.png',
+    },
+    'mrwain hub': {
+      light: 'https://i.ibb.co/p6HtQ2c5/verify-3.png',
+      dark: 'https://i.ibb.co/p6HtQ2c5/verify-3.png',
+    },
+  };
+  const badge = badgeMap[appKey];
+  const isVerified = !!badge;
+  const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : '';
+
   // Featured story card - large hero style
   if (variant === 'featured') {
     return (
@@ -32,7 +53,12 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
             <p className="text-xs font-semibold uppercase tracking-wider text-white/80 mb-1">
               {app.is_featured ? 'FEATURED' : 'NOW AVAILABLE'}
             </p>
-            <h3 className="text-xl font-bold text-white">{app.name}</h3>
+            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              {app.name}
+              {isVerified && (
+                <img src={badgeSrc} alt="Verified" className="h-5 w-5" />
+              )}
+            </h3>
             <p className="text-sm text-white/80 line-clamp-1">{app.tagline}</p>
           </div>
           
@@ -40,7 +66,12 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
           <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3 rounded-xl bg-card/90 backdrop-blur-sm p-3">
             <AppIcon src={app.logo_url} name={app.name} size="sm" />
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-foreground truncate">{app.name}</h4>
+            <h4 className="font-semibold text-foreground truncate flex items-center gap-2">
+              {app.name}
+              {isVerified && (
+                <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+              )}
+            </h4>
               <p className="text-xs text-muted-foreground truncate">{app.tagline}</p>
             </div>
             <Link
@@ -63,7 +94,12 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
           <AppIcon src={app.logo_url} name={app.name} size="sm" />
         </Link>
         <Link to={`/app/${app.id}`} className="flex-1 min-w-0">
-          <h4 className="font-medium text-foreground leading-tight">{app.name}</h4>
+          <h4 className="font-medium text-foreground leading-tight flex items-center gap-2">
+            {app.name}
+            {isVerified && (
+              <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+            )}
+          </h4>
           <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
         </Link>
         <Link
@@ -82,7 +118,12 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
       <div className="flex items-start gap-3">
         <AppIcon src={app.logo_url} name={app.name} size="sm" />
         <div className="flex-1 min-w-0 py-1">
-          <h4 className="font-medium text-foreground truncate leading-tight">{app.name}</h4>
+          <h4 className="font-medium text-foreground truncate leading-tight flex items-center gap-2">
+            {app.name}
+            {isVerified && (
+              <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+            )}
+          </h4>
           <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
           {app.ratings_count > 0 && (
             <div className="mt-1">
