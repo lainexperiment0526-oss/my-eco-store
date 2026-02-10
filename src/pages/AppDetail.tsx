@@ -10,7 +10,6 @@ import { ReviewSection } from '@/components/ReviewSection';
 import { FeedbackDialog } from '@/components/FeedbackDialog';
 import { RecommendedApps } from '@/components/RecommendedApps';
 import { ImagePreviewDialog } from '@/components/ImagePreviewDialog';
-import { AdInterstitial } from '@/components/AdInterstitial';
 import { ArrowLeft, ExternalLink, Share2, ChevronRight, ChevronDown, Bookmark, BookmarkCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -32,8 +31,6 @@ export default function AppDetail() {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
-  const [showAd, setShowAd] = useState(false);
-  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const [isOpening, setIsOpening] = useState(false);
 
   const normalizeUrl = useCallback((url: string) => {
@@ -62,19 +59,10 @@ export default function AppDetail() {
     if (user?.id) {
       recordDownload(appId, user.id).catch(() => {});
     }
-    setPendingUrl(normalizedUrl);
     setIsOpening(true);
-    setShowAd(true);
+    setTimeout(() => setIsOpening(false), 1500);
+    window.location.assign(normalizedUrl);
   }, [normalizeUrl, recordDownload, user?.id]);
-
-  const handleAdComplete = useCallback(() => {
-    setShowAd(false);
-    setIsOpening(false);
-    if (pendingUrl) {
-      window.location.assign(pendingUrl);
-      setPendingUrl(null);
-    }
-  }, [pendingUrl]);
 
   const handleShare = async () => {
     const url = app?.website_url ? normalizeUrl(app.website_url) : window.location.href;
@@ -156,7 +144,6 @@ export default function AppDetail() {
 
   return (
     <>
-    {showAd && <AdInterstitial trigger="app-open" onComplete={handleAdComplete} />}
     <div className="min-h-screen bg-background pb-20">
       <Header />
       
