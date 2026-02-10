@@ -30,6 +30,31 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const badge = badgeMap[appKey];
   const isVerified = !!badge;
   const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : '';
+  const normalizedWebsite = (() => {
+    const raw = (app.website_url || '').trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return `https://${raw}`;
+  })();
+  const renderGetButton = (className: string) => {
+    if (normalizedWebsite) {
+      return (
+        <a
+          href={normalizedWebsite}
+          rel="noopener noreferrer"
+          className={className}
+          onClick={(e) => e.stopPropagation()}
+        >
+          Get
+        </a>
+      );
+    }
+    return (
+      <Link to={`/app/${app.id}`} className={className} onClick={(e) => e.stopPropagation()}>
+        Get
+      </Link>
+    );
+  };
 
   // Featured story card - large hero style
   if (variant === 'featured') {
@@ -74,12 +99,7 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
             </h4>
               <p className="text-xs text-muted-foreground truncate">{app.tagline}</p>
             </div>
-            <Link
-              to={`/app/${app.id}`}
-              className="flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80"
-            >
-              Get
-            </Link>
+            {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80")}
           </div>
         </div>
       </Link>
@@ -102,12 +122,7 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
           </h4>
           <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
         </Link>
-        <Link
-          to={`/app/${app.id}`}
-          className="flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80"
-        >
-          Get
-        </Link>
+        {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80")}
       </div>
     );
   }
@@ -131,12 +146,7 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
             </div>
           )}
         </div>
-        <Link
-          to={`/app/${app.id}`}
-          className="flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80 mt-1"
-        >
-          Get
-        </Link>
+        {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80 mt-1")}
       </div>
     </Link>
   );

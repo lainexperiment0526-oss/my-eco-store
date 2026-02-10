@@ -1,0 +1,2 @@
+ALTER TABLE public.ad_campaigns
+ADD COLUMN IF NOT EXISTS duration_days INTEGER NOT NULL DEFAULT 1;

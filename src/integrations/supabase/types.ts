@@ -69,6 +69,7 @@ export type Database = {
           clicks_count: number | null
           created_at: string | null
           daily_budget: number | null
+          duration_days: number
           description: string | null
           destination_url: string
           id: string
@@ -91,6 +92,7 @@ export type Database = {
           clicks_count?: number | null
           created_at?: string | null
           daily_budget?: number | null
+          duration_days?: number
           description?: string | null
           destination_url: string
           id?: string
@@ -113,6 +115,7 @@ export type Database = {
           clicks_count?: number | null
           created_at?: string | null
           daily_budget?: number | null
+          duration_days?: number
           description?: string | null
           destination_url?: string
           id?: string
