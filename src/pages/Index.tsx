@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SearchBar } from '@/components/SearchBar';
@@ -10,9 +10,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from '@/components/Logo';
 
 export default function Index() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get('category');
-  const [search, setSearch] = useState('');
+  const queryParam = searchParams.get('q') ?? '';
+  const [search, setSearch] = useState(queryParam);
   
   const { data: apps, isLoading: appsLoading } = useApps();
   const { data: featuredApps } = useFeaturedApps();
@@ -24,18 +25,43 @@ export default function Index() {
     return apps?.filter(app => app.status === 'approved' || !app.status) || [];
   }, [apps]);
 
+  useEffect(() => {
+    if (queryParam !== search) {
+      setSearch(queryParam);
+    }
+  }, [queryParam, search]);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+    const next = new URLSearchParams(searchParams);
+    const trimmed = value.trim();
+    if (trimmed) {
+      next.set('q', trimmed);
+    } else {
+      next.delete('q');
+    }
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   const filteredApps = useMemo(() => {
     let filtered = approvedApps;
     if (categoryFilter) {
-      filtered = filtered.filter(app => app.category_id === categoryFilter);
+      filtered = filtered.filter(app => String(app.category_id ?? '') === String(categoryFilter));
     }
     if (search) {
-      const searchLower = search.toLowerCase();
+      const searchLower = search.trim().toLowerCase();
+      if (!searchLower) return filtered;
       filtered = filtered.filter(app =>
         app.name.toLowerCase().includes(searchLower) ||
         app.tagline?.toLowerCase().includes(searchLower) ||
         app.description?.toLowerCase().includes(searchLower) ||
-        app.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+        app.category?.name?.toLowerCase().includes(searchLower) ||
+        app.developer_name?.toLowerCase().includes(searchLower) ||
+        (Array.isArray(app.tags)
+          ? app.tags.some(tag => tag.toLowerCase().includes(searchLower))
+          : typeof app.tags === 'string'
+            ? app.tags.toLowerCase().includes(searchLower)
+            : false)
       );
     }
     return filtered;
@@ -87,7 +113,7 @@ export default function Index() {
 
         {/* Search */}
         <div className="mb-6">
-          <SearchBar value={search} onChange={setSearch} />
+          <SearchBar value={search} onChange={handleSearchChange} />
         </div>
 
         {isSearching ? (

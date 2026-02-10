@@ -17,6 +17,7 @@ import MyApps from "./pages/MyApps";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
 import AdModeration from "./pages/AdModeration";
 import Analytics from "./pages/Analytics";
+import Profile from "./pages/Profile";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import License from "./pages/License";
@@ -58,6 +59,7 @@ const App = () => {
                   <Route path="/advertiser" element={<AdvertiserDashboard />} />
                   <Route path="/ad-moderation" element={<AdModeration />} />
                   <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/profile" element={<Profile />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/license" element={<License />} />

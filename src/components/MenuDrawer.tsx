@@ -22,6 +22,7 @@ import {
   LogOut,
   PlusCircle,
   AppWindow,
+  User,
 } from 'lucide-react';
 
 interface MenuItemProps {
@@ -76,6 +77,7 @@ export function MenuDrawer() {
           <MenuItem icon={<Home className="h-5 w-5" />} label="Home" href="/" />
           <MenuItem icon={<Grid3X3 className="h-5 w-5" />} label="Browse Apps" href="/" />
           <MenuItem icon={<PlusCircle className="h-5 w-5" />} label="Submit App" href="/submit" />
+          {user && <MenuItem icon={<User className="h-5 w-5" />} label="Profile" href="/profile" />}
         </div>
 
         <div className="px-3 py-2 border-t border-border mt-2 pt-3 space-y-1">
