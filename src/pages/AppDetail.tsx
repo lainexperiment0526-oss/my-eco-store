@@ -9,11 +9,12 @@ import { ReviewSection } from '@/components/ReviewSection';
 import { FeedbackDialog } from '@/components/FeedbackDialog';
 import { RecommendedApps } from '@/components/RecommendedApps';
 import { ImagePreviewDialog } from '@/components/ImagePreviewDialog';
+import { AdInterstitial } from '@/components/AdInterstitial';
 import { ArrowLeft, ExternalLink, Share2, ChevronRight, ChevronDown, Bookmark, BookmarkCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
 export default function AppDetail() {
@@ -25,6 +26,21 @@ export default function AppDetail() {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
+  const [showAd, setShowAd] = useState(false);
+  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+
+  const handleOpenApp = useCallback((url: string) => {
+    setPendingUrl(url);
+    setShowAd(true);
+  }, []);
+
+  const handleAdComplete = useCallback(() => {
+    setShowAd(false);
+    if (pendingUrl) {
+      window.open(pendingUrl, '_blank', 'noopener,noreferrer');
+      setPendingUrl(null);
+    }
+  }, [pendingUrl]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -77,6 +93,8 @@ export default function AppDetail() {
   const sortedScreenshots = app.screenshots?.sort((a, b) => a.display_order - b.display_order) || [];
 
   return (
+    <>
+    {showAd && <AdInterstitial trigger="app-open" onComplete={handleAdComplete} />}
     <div className="min-h-screen bg-background pb-20">
       <Header />
       
@@ -100,10 +118,10 @@ export default function AppDetail() {
               <h1 className="text-xl font-bold text-foreground">{app.name}</h1>
               <p className="text-sm text-muted-foreground">{app.tagline}</p>
               <div className="mt-3 flex items-center gap-2">
-                <a href={app.website_url} target="_blank" rel="noopener noreferrer"
+                <button onClick={() => handleOpenApp(app.website_url)}
                   className="rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground">
                   Open
-                </a>
+                </button>
                 <Button variant="ghost" size="icon" className="rounded-full" onClick={handleShare}>
                   <Share2 className="h-5 w-5 text-primary" />
                 </Button>
@@ -254,6 +272,7 @@ export default function AppDetail() {
         </div>
       </main>
     </div>
+    </>
   );
 }
 

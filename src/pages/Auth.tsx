@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { Logo } from '@/components/Logo';
 import { Separator } from '@/components/ui/separator';
+import { AdInterstitial } from '@/components/AdInterstitial';
 
 const emailSchema = z.string().email('Please enter a valid email');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -22,6 +23,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAd, setShowAd] = useState(true);
 
   useEffect(() => {
     if (user && !loading) {
@@ -115,6 +117,8 @@ export default function Auth() {
   }
 
   return (
+    <>
+      {showAd && <AdInterstitial trigger="auth" onComplete={() => setShowAd(false)} />}
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
@@ -128,12 +132,9 @@ export default function Auth() {
           <Button
             onClick={handlePiAuth}
             disabled={!isPiReady || piLoading}
-            className="w-full mb-4 bg-[#7B2FF2] hover:bg-[#6B1FE2] text-white font-semibold"
+            className="w-full mb-4 bg-[#7B2FF2] hover:bg-[#6B1FE2] dark:bg-[#9B59B6] dark:hover:bg-[#8E44AD] text-white font-semibold"
             size="lg"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5 mr-2" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6zm4 4h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
             {piLoading ? 'Connecting...' : 'Sign in with Pi Network'}
           </Button>
           
@@ -227,5 +228,6 @@ export default function Auth() {
         </div>
       </div>
     </div>
+    </>
   );
 }
