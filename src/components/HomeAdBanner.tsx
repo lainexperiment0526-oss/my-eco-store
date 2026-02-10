@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useActiveAds } from '@/hooks/useAds';
 import { VideoAdOverlay } from './VideoAdOverlay';
 import { AppIcon } from './AppIcon';
@@ -7,6 +8,7 @@ import { Play } from 'lucide-react';
 export function HomeAdBanner() {
   const { data: ads } = useActiveAds();
   const [activeAd, setActiveAd] = useState<any | null>(null);
+  const navigate = useNavigate();
 
   const handleClose = useCallback(() => setActiveAd(null), []);
 
@@ -18,10 +20,10 @@ export function HomeAdBanner() {
       <section className="mb-6">
         <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-4 px-4">
           {ads.map((ad: any) => (
-            <button
+            <div
               key={ad.id}
-              onClick={() => setActiveAd(ad)}
-              className="flex-shrink-0 w-[85vw] max-w-md rounded-2xl overflow-hidden bg-card shadow-sm relative group"
+              className="flex-shrink-0 w-[85vw] max-w-md rounded-2xl overflow-hidden bg-card shadow-sm relative group cursor-pointer"
+              onClick={() => navigate(ad.app?.id ? `/app/${ad.app.id}` : '#')}
             >
               {/* Video thumbnail */}
               <div className="aspect-[16/9] bg-muted relative">
@@ -31,14 +33,24 @@ export function HomeAdBanner() {
                   muted
                   preload="metadata"
                 />
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition-colors">
-                  <div className="h-14 w-14 rounded-full bg-white/90 flex items-center justify-center">
-                    <Play className="h-6 w-6 text-black ml-0.5" fill="black" />
-                  </div>
-                </div>
+                <div className="absolute inset-0 bg-black/30 transition-colors group-hover:bg-black/40" />
                 <span className="absolute top-3 left-3 rounded bg-yellow-500/90 px-2 py-0.5 text-xs font-bold text-black uppercase">
                   Ad
                 </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setActiveAd(ad);
+                  }}
+                  className="absolute inset-0 flex items-center justify-center"
+                  aria-label="Play ad video"
+                >
+                  <span className="h-14 w-14 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                    <Play className="h-6 w-6 text-black ml-0.5" fill="black" />
+                  </span>
+                </button>
               </div>
               
               {/* App info */}
@@ -55,12 +67,12 @@ export function HomeAdBanner() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="flex-shrink-0 rounded-full bg-primary px-5 py-1.5 text-sm font-semibold text-primary-foreground"
+                  className="flex-shrink-0 rounded-full bg-primary px-5 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
                 >
                   Get
                 </a>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       </section>

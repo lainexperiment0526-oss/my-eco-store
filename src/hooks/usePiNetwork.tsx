@@ -69,6 +69,14 @@ export function PiProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Skip Pi SDK loading on localhost if not in Pi Browser to avoid cross-origin errors
+    const isPiBrowser = navigator.userAgent.includes('PiBrowser');
+    if (!isPiBrowser && window.location.hostname === 'localhost') {
+      console.log('Pi SDK loading skipped on localhost (not in Pi Browser)');
+      setPiLoading(false);
+      return;
+    }
+
     const script = document.createElement('script');
     script.src = PI_SDK_URL;
     script.async = true;
