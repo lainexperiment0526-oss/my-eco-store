@@ -43,6 +43,8 @@ export default function Index() {
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 
+  const normalize = useCallback((value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ''), []);
+
   const filteredApps = useMemo(() => {
     let filtered = approvedApps;
     if (categoryFilter) {
@@ -50,22 +52,30 @@ export default function Index() {
     }
     if (search) {
       const searchLower = search.trim().toLowerCase();
+      const searchCompact = normalize(search);
       if (!searchLower) return filtered;
       filtered = filtered.filter(app =>
         app.name.toLowerCase().includes(searchLower) ||
-        app.tagline?.toLowerCase().includes(searchLower) ||
-        app.description?.toLowerCase().includes(searchLower) ||
-        app.category?.name?.toLowerCase().includes(searchLower) ||
-        app.developer_name?.toLowerCase().includes(searchLower) ||
+        normalize(app.name).includes(searchCompact) ||
+        (app.tagline ? app.tagline.toLowerCase().includes(searchLower) : false) ||
+        (app.tagline ? normalize(app.tagline).includes(searchCompact) : false) ||
+        (app.description ? app.description.toLowerCase().includes(searchLower) : false) ||
+        (app.description ? normalize(app.description).includes(searchCompact) : false) ||
+        (app.category?.name ? app.category.name.toLowerCase().includes(searchLower) : false) ||
+        (app.category?.name ? normalize(app.category.name).includes(searchCompact) : false) ||
+        (app.developer_name ? app.developer_name.toLowerCase().includes(searchLower) : false) ||
+        (app.developer_name ? normalize(app.developer_name).includes(searchCompact) : false) ||
         (Array.isArray(app.tags)
-          ? app.tags.some(tag => tag.toLowerCase().includes(searchLower))
+          ? app.tags.some(tag =>
+              tag.toLowerCase().includes(searchLower) || normalize(tag).includes(searchCompact)
+            )
           : typeof app.tags === 'string'
-            ? app.tags.toLowerCase().includes(searchLower)
+            ? app.tags.toLowerCase().includes(searchLower) || normalize(app.tags).includes(searchCompact)
             : false)
       );
     }
     return filtered;
-  }, [approvedApps, categoryFilter, search]);
+  }, [approvedApps, categoryFilter, normalize, search]);
 
   // Group apps by category for the home view
   const appsByCategory = useMemo(() => {

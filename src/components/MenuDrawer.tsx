@@ -21,6 +21,7 @@ import {
   FileText,
   Scale,
   ShieldCheck,
+  Info,
   LogIn,
   LogOut,
   PlusCircle,
@@ -100,6 +101,7 @@ export function MenuDrawer() {
 
         <div className="px-3 py-2 border-t border-border mt-2 pt-3 space-y-1">
           <p className="px-3 text-xs font-semibold text-muted-foreground uppercase mb-2">Legal</p>
+          <MenuItem icon={<Info className="h-5 w-5" />} label="About OpenApp" href="/about" />
           <MenuItem icon={<ShieldCheck className="h-5 w-5" />} label="Privacy Policy" href="/privacy" />
           <MenuItem icon={<Scale className="h-5 w-5" />} label="Terms of Service" href="/terms" />
           <MenuItem icon={<FileText className="h-5 w-5" />} label="License" href="/license" />

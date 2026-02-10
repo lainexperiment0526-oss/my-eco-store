@@ -17,7 +17,10 @@ import MyApps from "./pages/MyApps";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
 import AdModeration from "./pages/AdModeration";
 import Analytics from "./pages/Analytics";
+import NewApps from "./pages/NewApps";
+import TopApps from "./pages/TopApps";
 import Profile from "./pages/Profile";
+import AboutOpenApp from "./pages/AboutOpenApp";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import License from "./pages/License";
@@ -51,16 +54,19 @@ const App = () => {
               <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/app/:id" element={<AppDetail />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/submit" element={<SubmitApp />} />
-                  <Route path="/my-apps" element={<MyApps />} />
-                  <Route path="/advertiser" element={<AdvertiserDashboard />} />
-                  <Route path="/ad-moderation" element={<AdModeration />} />
-                  <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/privacy" element={<Privacy />} />
+                <Route path="/app/:id" element={<AppDetail />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/submit" element={<SubmitApp />} />
+                <Route path="/my-apps" element={<MyApps />} />
+                <Route path="/advertiser" element={<AdvertiserDashboard />} />
+                <Route path="/ad-moderation" element={<AdModeration />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/new" element={<NewApps />} />
+                <Route path="/top" element={<TopApps />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/about" element={<AboutOpenApp />} />
+                <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/license" element={<License />} />
                   <Route path="*" element={<NotFound />} />

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Volume2, VolumeX, Info } from 'lucide-react';
 import { AppIcon } from './AppIcon';
 import { App, Category } from '@/types/app';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface AdData {
   id: string;
@@ -20,6 +20,7 @@ interface VideoAdOverlayProps {
 }
 
 export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
+  const navigate = useNavigate();
   const [countdown, setCountdown] = useState(ad.skip_after_seconds || 5);
   const [canSkip, setCanSkip] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -100,7 +101,7 @@ export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
         {/* Mute toggle */}
         <button
           onClick={() => setIsMuted((prev) => !prev)}
-          className="absolute bottom-24 left-4 flex items-center gap-2 rounded-full bg-black/60 backdrop-blur px-3 py-2 text-white text-xs font-medium hover:bg-black/80 transition-colors"
+          className="absolute bottom-28 left-4 flex items-center gap-2 rounded-full bg-black/60 backdrop-blur px-3 py-2 text-white text-xs font-medium hover:bg-black/80 transition-colors"
           aria-label={isMuted ? 'Unmute ad' : 'Mute ad'}
         >
           {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
@@ -108,35 +109,53 @@ export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
         </button>
       </div>
 
-      {/* App info bar at bottom - like App Store */}
-      <div className="bg-black/90 backdrop-blur-xl border-t border-white/10 px-4 py-3 flex items-center gap-3 safe-area-inset-bottom">
-        <Link to={`/app/${ad.app.id}`} onClick={onClose} className="flex-shrink-0">
-          <AppIcon src={ad.app.logo_url} name={ad.app.name} size="sm" />
-        </Link>
-        <Link to={`/app/${ad.app.id}`} onClick={onClose} className="flex-1 min-w-0">
-          <p className="text-xs text-white/60">OpenApp &middot; Sponsored</p>
-          <h4 className="text-white font-medium text-sm truncate">{ad.app.name}</h4>
-          <p className="text-xs text-white/60 truncate">{ad.app.category?.name || 'App'}</p>
-        </Link>
-        <button
-          onClick={() => setShowDisclaimer(true)}
-          className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/80 hover:bg-white/15"
+      {/* Floating app card */}
+      <div className="absolute bottom-4 left-4 right-4 z-[110]">
+        <div
+          className="rounded-2xl bg-black/90 backdrop-blur-xl border border-white/10 px-4 py-3 flex items-center gap-3"
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            onClose();
+            navigate(`/app/${ad.app.id}`);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onClose();
+              navigate(`/app/${ad.app.id}`);
+            }
+          }}
         >
-          <Info className="h-3.5 w-3.5" />
-          About
-        </button>
-        <a
-          href={ad.app.website_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="flex-shrink-0 rounded-full bg-blue-500 px-5 py-1.5 text-sm font-semibold text-white hover:bg-blue-600 transition-colors"
-        >
-          Get
-        </a>
-        {ad.app.has_in_app_purchases && (
-          <span className="text-[10px] text-white/40 absolute bottom-1 right-4">In-App Purchases</span>
-        )}
+          <span className="flex-shrink-0">
+            <AppIcon src={ad.app.logo_url} name={ad.app.name} size="sm" />
+          </span>
+          <span className="flex-1 min-w-0">
+            <p className="text-xs text-white/60">OpenApp &middot; Sponsored</p>
+            <h4 className="text-white font-medium text-sm truncate">{ad.app.name}</h4>
+            <p className="text-xs text-white/60 truncate">{ad.app.category?.name || 'App'}</p>
+          </span>
+          <button
+            onClick={() => setShowDisclaimer(true)}
+            className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/80 hover:bg-white/15"
+          >
+            <Info className="h-3.5 w-3.5" />
+            About
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+              navigate(`/app/${ad.app.id}`);
+            }}
+            className="flex-shrink-0 rounded-full bg-blue-500 px-5 py-1.5 text-sm font-semibold text-white hover:bg-blue-600 transition-colors"
+          >
+            View
+          </button>
+          {ad.app.has_in_app_purchases && (
+            <span className="text-[10px] text-white/40 absolute -bottom-5 right-4">In-App Purchases</span>
+          )}
+        </div>
       </div>
 
       {showDisclaimer && (
@@ -159,14 +178,14 @@ export function VideoAdOverlay({ ad, onClose }: VideoAdOverlayProps) {
             <div className="mt-4 space-y-3 text-sm text-muted-foreground">
               <p>
                 This advertisement is provided by a third-party developer. OpenApp does not
-                endorse or guarantee external apps, offers, or content.
+                endorse, sponsor, or warrant any external application, offer, or content.
               </p>
               <p>
-                Tapping the ad opens the app details page so you can review the information
-                before choosing to install or visit.
+                Selecting the ad will open the app details page so you can review information
+                before choosing to install, access, or transact with the service.
               </p>
               <p>
-                You can close the ad at any time using the Skip button when it becomes available.
+                You may dismiss the ad at any time using the Skip button when it becomes available.
               </p>
             </div>
             <div className="mt-5 flex justify-end">
