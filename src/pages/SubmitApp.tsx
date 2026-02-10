@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePiNetwork } from '@/hooks/usePiNetwork';
@@ -12,17 +12,21 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Upload, X, Image, ArrowLeft, CheckCircle, Video } from 'lucide-react';
+import { Upload, X, Image, ArrowLeft, CheckCircle, Video, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+type SubmitStep = 'details' | 'payment' | 'submitting' | 'done';
 
 export default function SubmitApp() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const { createPiPayment, isPiReady } = usePiNetwork();
+  const { createPiPayment, isPiReady, authenticateWithPi, isPiAuthenticated } = usePiNetwork();
   const { data: categories } = useCategories();
   const addScreenshot = useAddScreenshot();
   const createAd = useCreateAd();
-  const [hasPaid, setHasPaid] = useState(false);
+
+  const [step, setStep] = useState<SubmitStep>('details');
+  const [draftId, setDraftId] = useState<string | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -44,7 +48,21 @@ export default function SubmitApp() {
   const [videoAdFile, setVideoAdFile] = useState<File | null>(null);
   const [adTitle, setAdTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Load existing drafts
+  const [drafts, setDrafts] = useState<any[]>([]);
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('app_drafts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false })
+        .then(({ data }) => {
+          if (data) setDrafts(data);
+        });
+    }
+  }, [user]);
 
   if (!loading && !user) {
     return (
@@ -68,41 +86,171 @@ export default function SubmitApp() {
     return publicUrl;
   };
 
+  const saveDraft = async (): Promise<string> => {
+    if (!user) throw new Error('Not authenticated');
+
+    let logo_url: string | null = null;
+    if (logoFile) {
+      logo_url = await uploadFile(logoFile, 'logos');
+    }
+
+    const screenshotUrls: string[] = [];
+    for (const file of screenshotFiles) {
+      const url = await uploadFile(file, 'screenshots');
+      screenshotUrls.push(url);
+    }
+
+    let videoAdUrl: string | null = null;
+    if (videoAdFile) {
+      videoAdUrl = await uploadFile(videoAdFile, 'ads');
+    }
+
+    const draftData = {
+      user_id: user.id,
+      name: formData.name,
+      tagline: formData.tagline || null,
+      description: formData.description || null,
+      website_url: formData.website_url,
+      category_id: formData.category_id || null,
+      tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      version: formData.version,
+      logo_url,
+      developer_name: formData.developer_name || null,
+      age_rating: formData.age_rating,
+      whats_new: formData.whats_new || null,
+      privacy_policy_url: formData.privacy_policy_url || null,
+      developer_website_url: formData.developer_website_url || null,
+      screenshot_urls: screenshotUrls,
+      video_ad_url: videoAdUrl,
+      ad_title: adTitle || null,
+      payment_status: 'pending' as const,
+    };
+
+    if (draftId) {
+      const { error } = await supabase
+        .from('app_drafts')
+        .update(draftData)
+        .eq('id', draftId);
+      if (error) throw error;
+      return draftId;
+    } else {
+      const { data, error } = await supabase
+        .from('app_drafts')
+        .insert(draftData)
+        .select('id')
+        .single();
+      if (error) throw error;
+      return data.id;
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!formData.name || !formData.website_url) {
+      toast.error('Name and website URL are required to save draft');
+      return;
+    }
+    try {
+      const id = await saveDraft();
+      setDraftId(id);
+      toast.success('Draft saved!');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save draft');
+    }
+  };
+
+  const loadDraft = (draft: any) => {
+    setFormData({
+      name: draft.name || '',
+      tagline: draft.tagline || '',
+      description: draft.description || '',
+      website_url: draft.website_url || '',
+      category_id: draft.category_id || '',
+      tags: draft.tags?.join(', ') || '',
+      version: draft.version || '1.0',
+      developer_name: draft.developer_name || '',
+      age_rating: draft.age_rating || '4+',
+      whats_new: draft.whats_new || '',
+      privacy_policy_url: draft.privacy_policy_url || '',
+      developer_website_url: draft.developer_website_url || '',
+    });
+    setDraftId(draft.id);
+    setAdTitle(draft.ad_title || '');
+    if (draft.payment_status === 'paid') {
+      setStep('details');
+    }
+    toast.success('Draft loaded');
+  };
+
+  const handleProceedToPayment = async () => {
+    if (!formData.name || !formData.website_url) {
+      toast.error('Name and website URL are required');
+      return;
+    }
+    try {
+      const id = await saveDraft();
+      setDraftId(id);
+      setStep('payment');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save draft');
+    }
+  };
+
   const handlePiPayment = async () => {
     if (!isPiReady) {
       toast.error('Pi Network not available. Please use Pi Browser.');
       return;
     }
+
+    // Ensure Pi authentication with payments scope
+    if (!isPiAuthenticated) {
+      const piUser = await authenticateWithPi();
+      if (!piUser) {
+        toast.error('Pi authentication required for payment');
+        return;
+      }
+    }
+
     setPaymentLoading(true);
     try {
-      await createPiPayment(25, 'App listing fee - OpenApp', { type: 'app_listing' });
-      setHasPaid(true);
-      toast.success('Payment successful! You can now submit your app.');
+      await createPiPayment(
+        25,
+        'App listing fee - OpenApp',
+        { type: 'app_listing', draft_id: draftId }
+      );
+
+      // Payment completed - update draft and submit
+      if (draftId) {
+        await supabase
+          .from('app_drafts')
+          .update({ payment_status: 'paid' })
+          .eq('id', draftId);
+      }
+
+      await submitApp();
     } catch (error: any) {
-      toast.error(error.message || 'Payment failed');
+      if (error.message === 'Payment cancelled') {
+        toast.info('Payment cancelled. Your draft has been saved.');
+        setStep('details');
+      } else {
+        toast.error(error.message || 'Payment failed');
+      }
     } finally {
       setPaymentLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!hasPaid) {
-      toast.error('Please pay the 25 Pi listing fee first');
-      return;
-    }
-    if (!formData.name || !formData.website_url) {
-      toast.error('Name and website URL are required');
-      return;
-    }
-    if (!user) { toast.error('You must be signed in'); return; }
-
+  const submitApp = async () => {
+    if (!user) return;
+    setStep('submitting');
     setIsSubmitting(true);
+
     try {
-      let logo_url: string | null = null;
-      if (logoFile) {
-        logo_url = await uploadFile(logoFile, 'logos');
-      }
+      // Get draft data
+      const { data: draft } = draftId
+        ? await supabase.from('app_drafts').select('*').eq('id', draftId).single()
+        : { data: null };
+
+      const logoUrl = draft?.logo_url || null;
 
       const { data: newApp, error: appError } = await supabase
         .from('apps')
@@ -114,7 +262,7 @@ export default function SubmitApp() {
           category_id: formData.category_id || null,
           tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
           version: formData.version,
-          logo_url,
+          logo_url: logoUrl,
           user_id: user.id,
           developer_name: formData.developer_name || null,
           age_rating: formData.age_rating,
@@ -130,39 +278,45 @@ export default function SubmitApp() {
 
       if (appError) throw appError;
 
-      // Upload screenshots
-      for (let i = 0; i < screenshotFiles.length; i++) {
-        const imageUrl = await uploadFile(screenshotFiles[i], 'screenshots');
-        await addScreenshot.mutateAsync({
-          app_id: newApp.id,
-          image_url: imageUrl,
-          display_order: i,
-        });
+      // Add screenshots from draft
+      if (draft?.screenshot_urls) {
+        for (let i = 0; i < draft.screenshot_urls.length; i++) {
+          await addScreenshot.mutateAsync({
+            app_id: newApp.id,
+            image_url: draft.screenshot_urls[i],
+            display_order: i,
+          });
+        }
       }
 
-      // Upload video ad
-      if (videoAdFile) {
-        const videoUrl = await uploadFile(videoAdFile, 'ads');
+      // Add video ad from draft
+      if (draft?.video_ad_url) {
         await createAd.mutateAsync({
           app_id: newApp.id,
           user_id: user.id,
-          video_url: videoUrl,
-          title: adTitle || null,
+          video_url: draft.video_ad_url,
+          title: draft.ad_title || null,
           skip_after_seconds: 5,
         });
       }
 
-      setIsSubmitted(true);
+      // Mark draft as submitted
+      if (draftId) {
+        await supabase.from('app_drafts').delete().eq('id', draftId);
+      }
+
+      setStep('done');
       toast.success('App submitted for review!');
     } catch (error: any) {
       console.error('Submit error:', error);
       toast.error(error.message || 'Failed to submit app');
+      setStep('payment');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isSubmitted) {
+  if (step === 'done') {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -175,13 +329,73 @@ export default function SubmitApp() {
           <div className="flex gap-4 justify-center">
             <Link to="/"><Button>Browse Apps</Button></Link>
             <Button variant="outline" onClick={() => {
-              setIsSubmitted(false);
+              setStep('details');
+              setDraftId(null);
               setFormData({ name: '', tagline: '', description: '', website_url: '', category_id: '', tags: '', version: '1.0', developer_name: '', age_rating: '4+', whats_new: '', privacy_policy_url: '', developer_website_url: '' });
               setLogoFile(null);
               setScreenshotFiles([]);
               setVideoAdFile(null);
               setAdTitle('');
             }}>Submit Another</Button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (step === 'submitting') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="mx-auto max-w-2xl px-4 py-20 text-center">
+          <div className="animate-pulse text-muted-foreground text-lg">Submitting your app...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (step === 'payment') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="mx-auto max-w-2xl px-4 py-6">
+          <button onClick={() => setStep('details')} className="inline-flex items-center gap-2 text-primary hover:underline mb-6">
+            <ArrowLeft className="h-4 w-4" /> Back to Details
+          </button>
+
+          <div className="rounded-2xl bg-card p-8 shadow-lg border border-border text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-2">Pay 25 Pi to List Your App</h2>
+            <p className="text-muted-foreground mb-2">
+              A one-time fee of 25 Pi is required to submit <strong>{formData.name}</strong> on OpenApp.
+            </p>
+            <p className="text-sm text-muted-foreground mb-6">
+              Your app details have been saved as a draft. If you cancel, you can come back to it later.
+            </p>
+
+            <Button
+              onClick={handlePiPayment}
+              disabled={!isPiReady || paymentLoading}
+              className="w-full bg-[#7B2FF2] hover:bg-[#6B1FE2] dark:bg-[#9B59B6] dark:hover:bg-[#8E44AD] text-white font-semibold"
+              size="lg"
+            >
+              {paymentLoading ? 'Processing Payment...' : 'Pay 25 Pi'}
+            </Button>
+            {!isPiReady && (
+              <p className="text-xs text-muted-foreground text-center mt-3">
+                Pi payment requires Pi Browser
+              </p>
+            )}
+
+            <Button
+              variant="ghost"
+              className="w-full mt-3"
+              onClick={() => {
+                toast.info('Draft saved. You can pay later.');
+                setStep('details');
+              }}
+            >
+              Cancel & Save Draft
+            </Button>
           </div>
         </main>
       </div>
@@ -198,40 +412,37 @@ export default function SubmitApp() {
 
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground">Submit Your App</h1>
-          <p className="text-muted-foreground">Share your app with the community</p>
+          <p className="text-muted-foreground">Share your app with the community • Listing fee: 25 Pi</p>
         </div>
 
-        {/* Pi Payment Section */}
-        {!hasPaid && (
-          <div className="mb-8 rounded-2xl bg-card p-6 shadow-lg border border-border">
-            <h2 className="text-lg font-bold text-foreground mb-2">Listing Fee: 25 Pi</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              A one-time fee of 25 Pi is required to list your app on OpenApp.
-            </p>
-            <Button
-              onClick={handlePiPayment}
-              disabled={!isPiReady || paymentLoading}
-              className="w-full bg-[#7B2FF2] hover:bg-[#6B1FE2] dark:bg-[#9B59B6] dark:hover:bg-[#8E44AD] text-white font-semibold"
-              size="lg"
-            >
-              {paymentLoading ? 'Processing...' : 'Pay 25 Pi to List'}
-            </Button>
-            {!isPiReady && (
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Pi payment requires Pi Browser
-              </p>
-            )}
+        {/* Drafts */}
+        {drafts.length > 0 && !draftId && (
+          <div className="mb-6 rounded-2xl bg-card p-4 border border-border">
+            <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+              <FileText className="h-4 w-4" /> Your Drafts
+            </h3>
+            <div className="space-y-2">
+              {drafts.map((draft) => (
+                <button
+                  key={draft.id}
+                  onClick={() => loadDraft(draft)}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors text-left"
+                >
+                  <div>
+                    <p className="font-medium text-foreground">{draft.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {draft.payment_status === 'paid' ? '✅ Paid' : '⏳ Payment pending'} •
+                      Updated {new Date(draft.updated_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span className="text-primary text-sm">Load</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        {hasPaid && (
-          <div className="mb-4 flex items-center gap-2 text-green-600">
-            <CheckCircle className="h-5 w-5" />
-            <span className="text-sm font-medium">Payment confirmed - 25 Pi</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={(e) => { e.preventDefault(); handleProceedToPayment(); }} className="space-y-8">
           {/* App Icon */}
           <div className="space-y-2">
             <Label>App Icon *</Label>
@@ -355,7 +566,7 @@ export default function SubmitApp() {
           {/* Video Ad */}
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Marketing Video Ad (Optional)</h3>
-            <p className="text-sm text-muted-foreground">Upload a 30-60 second video ad to promote your app on the home feed. Works like App Store video ads.</p>
+            <p className="text-sm text-muted-foreground">Upload a 30-60 second video ad to promote your app on the home feed.</p>
             
             {videoAdFile ? (
               <div className="space-y-3">
@@ -393,9 +604,14 @@ export default function SubmitApp() {
             )}
           </div>
 
-          <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-            {isSubmitting ? 'Submitting...' : 'Submit for Review'}
-          </Button>
+          <div className="flex gap-3">
+            <Button type="button" variant="outline" className="flex-1" onClick={handleSaveDraft}>
+              Save Draft
+            </Button>
+            <Button type="submit" className="flex-1" size="lg" disabled={isSubmitting}>
+              Proceed to Payment (25 Pi)
+            </Button>
+          </div>
         </form>
       </main>
     </div>

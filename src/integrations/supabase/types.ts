@@ -286,6 +286,89 @@ export type Database = {
           },
         ]
       }
+      app_drafts: {
+        Row: {
+          ad_title: string | null
+          age_rating: string | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          developer_name: string | null
+          developer_website_url: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          payment_id: string | null
+          payment_status: string
+          privacy_policy_url: string | null
+          screenshot_urls: string[] | null
+          tagline: string | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+          version: string | null
+          video_ad_url: string | null
+          website_url: string
+          whats_new: string | null
+        }
+        Insert: {
+          ad_title?: string | null
+          age_rating?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          developer_name?: string | null
+          developer_website_url?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          payment_id?: string | null
+          payment_status?: string
+          privacy_policy_url?: string | null
+          screenshot_urls?: string[] | null
+          tagline?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+          version?: string | null
+          video_ad_url?: string | null
+          website_url: string
+          whats_new?: string | null
+        }
+        Update: {
+          ad_title?: string | null
+          age_rating?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          developer_name?: string | null
+          developer_website_url?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          payment_id?: string | null
+          payment_status?: string
+          privacy_policy_url?: string | null
+          screenshot_urls?: string[] | null
+          tagline?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+          version?: string | null
+          video_ad_url?: string | null
+          website_url?: string
+          whats_new?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_drafts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_feedback: {
         Row: {
           app_id: string
@@ -504,6 +587,45 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      pi_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          memo: string | null
+          metadata: Json | null
+          payment_id: string
+          status: string
+          txid: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          memo?: string | null
+          metadata?: Json | null
+          payment_id: string
+          status?: string
+          txid?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          memo?: string | null
+          metadata?: Json | null
+          payment_id?: string
+          status?: string
+          txid?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

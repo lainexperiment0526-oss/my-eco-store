@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -19,9 +21,13 @@ Deno.serve(async (req) => {
     });
   }
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
   try {
     const body = await req.json();
-    const { action, paymentId, txid } = body;
+    const { action, paymentId, txid, userId, amount, memo, metadata } = body;
 
     if (action === "approve") {
       // Approve a payment on Pi server
@@ -34,6 +40,19 @@ Deno.serve(async (req) => {
       });
       const data = await res.json();
       console.log("Payment approved:", data);
+
+      // Track payment in database
+      if (userId) {
+        await supabase.from("pi_payments").insert({
+          user_id: userId,
+          payment_id: paymentId,
+          amount: amount || 0,
+          memo: memo || "",
+          status: "approved",
+          metadata: metadata || {},
+        });
+      }
+
       return new Response(JSON.stringify({ success: true, data }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -51,7 +70,36 @@ Deno.serve(async (req) => {
       });
       const data = await res.json();
       console.log("Payment completed:", data);
+
+      // Update payment status in database
+      await supabase
+        .from("pi_payments")
+        .update({ status: "completed", txid })
+        .eq("payment_id", paymentId);
+
+      // If this is an app listing payment, update draft status
+      if (metadata?.type === "app_listing" && metadata?.draft_id) {
+        await supabase
+          .from("app_drafts")
+          .update({ payment_status: "paid", payment_id: paymentId })
+          .eq("id", metadata.draft_id);
+      }
+
       return new Response(JSON.stringify({ success: true, data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "cancel") {
+      // Update payment status
+      if (paymentId) {
+        await supabase
+          .from("pi_payments")
+          .update({ status: "cancelled" })
+          .eq("payment_id", paymentId);
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

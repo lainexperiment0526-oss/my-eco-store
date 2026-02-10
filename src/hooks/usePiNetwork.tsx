@@ -41,7 +41,12 @@ interface PiContextType {
   isPiAuthenticated: boolean;
   piLoading: boolean;
   authenticateWithPi: () => Promise<PiUser | null>;
-  createPiPayment: (amount: number, memo: string, metadata?: Record<string, any>) => Promise<void>;
+  createPiPayment: (amount: number, memo: string, metadata?: Record<string, any>, callbacks?: {
+    onPaymentApproved?: () => void;
+    onPaymentCompleted?: () => void;
+    onPaymentCancelled?: () => void;
+    onPaymentError?: (error: any) => void;
+  }) => Promise<void>;
   showPiAd: (adType: 'interstitial' | 'rewarded') => Promise<boolean>;
   signOutPi: () => void;
 }
@@ -122,36 +127,69 @@ export function PiProvider({ children }: { children: ReactNode }) {
     }
   }, [onIncompletePaymentFound]);
 
-  const createPiPayment = useCallback(async (amount: number, memo: string, metadata: Record<string, any> = {}) => {
+  const createPiPayment = useCallback(async (
+    amount: number,
+    memo: string,
+    metadata?: Record<string, any>,
+    callbacks?: {
+      onPaymentApproved?: () => void;
+      onPaymentCompleted?: () => void;
+      onPaymentCancelled?: () => void;
+      onPaymentError?: (error: any) => void;
+    }
+  ): Promise<void> => {
     if (!window.Pi) throw new Error('Pi SDK not available');
 
     const baseUrl = import.meta.env.VITE_SUPABASE_URL;
 
-    window.Pi.createPayment(
-      { amount, memo, metadata },
-      {
-        onReadyForServerApproval: async (paymentId: string) => {
-          await fetch(`${baseUrl}/functions/v1/pi-payment`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'approve', paymentId }),
-          });
-        },
-        onReadyForServerCompletion: async (paymentId: string, txid: string) => {
-          await fetch(`${baseUrl}/functions/v1/pi-payment`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'complete', paymentId, txid }),
-          });
-        },
-        onCancel: (paymentId: string) => {
-          console.log('Payment cancelled:', paymentId);
-        },
-        onError: (error: any) => {
-          console.error('Payment error:', error);
-        },
-      }
-    );
+    return new Promise<void>((resolve, reject) => {
+      window.Pi.createPayment(
+        { amount, memo, metadata: metadata || {} },
+        {
+          onReadyForServerApproval: async (paymentId: string) => {
+            try {
+              await fetch(`${baseUrl}/functions/v1/pi-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'approve', paymentId, amount, memo, metadata }),
+              });
+              callbacks?.onPaymentApproved?.();
+            } catch (err) {
+              console.error('Approval failed:', err);
+            }
+          },
+          onReadyForServerCompletion: async (paymentId: string, txid: string) => {
+            try {
+              await fetch(`${baseUrl}/functions/v1/pi-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'complete', paymentId, txid, metadata }),
+              });
+              callbacks?.onPaymentCompleted?.();
+              resolve();
+            } catch (err) {
+              console.error('Completion failed:', err);
+              reject(err);
+            }
+          },
+          onCancel: (paymentId: string) => {
+            console.log('Payment cancelled:', paymentId);
+            fetch(`${baseUrl}/functions/v1/pi-payment`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'cancel', paymentId }),
+            }).catch(console.error);
+            callbacks?.onPaymentCancelled?.();
+            reject(new Error('Payment cancelled'));
+          },
+          onError: (error: any) => {
+            console.error('Payment error:', error);
+            callbacks?.onPaymentError?.(error);
+            reject(error);
+          },
+        }
+      );
+    });
   }, []);
 
   const showPiAd = useCallback(async (adType: 'interstitial' | 'rewarded'): Promise<boolean> => {
