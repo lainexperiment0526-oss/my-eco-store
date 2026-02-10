@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { usePiNetwork } from '@/hooks/usePiNetwork';
 import { Header } from '@/components/Header';
 import { useCategories, useAddScreenshot } from '@/hooks/useApps';
 import { useCreateAd } from '@/hooks/useAds';
@@ -17,9 +18,12 @@ import { Link } from 'react-router-dom';
 export default function SubmitApp() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { createPiPayment, isPiReady } = usePiNetwork();
   const { data: categories } = useCategories();
   const addScreenshot = useAddScreenshot();
   const createAd = useCreateAd();
+  const [hasPaid, setHasPaid] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -64,8 +68,29 @@ export default function SubmitApp() {
     return publicUrl;
   };
 
+  const handlePiPayment = async () => {
+    if (!isPiReady) {
+      toast.error('Pi Network not available. Please use Pi Browser.');
+      return;
+    }
+    setPaymentLoading(true);
+    try {
+      await createPiPayment(25, 'App listing fee - OpenApp', { type: 'app_listing' });
+      setHasPaid(true);
+      toast.success('Payment successful! You can now submit your app.');
+    } catch (error: any) {
+      toast.error(error.message || 'Payment failed');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasPaid) {
+      toast.error('Please pay the 25 Pi listing fee first');
+      return;
+    }
     if (!formData.name || !formData.website_url) {
       toast.error('Name and website URL are required');
       return;
@@ -175,6 +200,36 @@ export default function SubmitApp() {
           <h1 className="text-2xl font-bold text-foreground">Submit Your App</h1>
           <p className="text-muted-foreground">Share your app with the community</p>
         </div>
+
+        {/* Pi Payment Section */}
+        {!hasPaid && (
+          <div className="mb-8 rounded-2xl bg-card p-6 shadow-lg border border-border">
+            <h2 className="text-lg font-bold text-foreground mb-2">Listing Fee: 25 Pi</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              A one-time fee of 25 Pi is required to list your app on OpenApp.
+            </p>
+            <Button
+              onClick={handlePiPayment}
+              disabled={!isPiReady || paymentLoading}
+              className="w-full bg-[#7B2FF2] hover:bg-[#6B1FE2] dark:bg-[#9B59B6] dark:hover:bg-[#8E44AD] text-white font-semibold"
+              size="lg"
+            >
+              {paymentLoading ? 'Processing...' : 'Pay 25 Pi to List'}
+            </Button>
+            {!isPiReady && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Pi payment requires Pi Browser
+              </p>
+            )}
+          </div>
+        )}
+
+        {hasPaid && (
+          <div className="mb-4 flex items-center gap-2 text-green-600">
+            <CheckCircle className="h-5 w-5" />
+            <span className="text-sm font-medium">Payment confirmed - 25 Pi</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* App Icon */}
