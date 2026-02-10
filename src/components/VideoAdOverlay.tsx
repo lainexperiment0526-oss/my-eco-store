@@ -401,7 +401,7 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
             className="w-full max-w-md rounded-2xl border border-white/10 bg-background p-6 text-left shadow-xl"
           >
             <div className="flex items-start justify-between gap-3">
-              <h3 className="text-lg font-semibold text-foreground">OpenApp Ad Disclaimer</h3>
+              <h3 className="text-lg font-semibold text-foreground">Third-Party Applications</h3>
               <button
                 onClick={() => setShowDisclaimer(false)}
                 className="rounded-full p-1 text-muted-foreground hover:text-foreground"
@@ -412,15 +412,17 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
             </div>
             <div className="mt-4 space-y-3 text-sm text-muted-foreground">
               <p>
-                This advertisement is provided by a third-party developer. OpenApp does not
-                endorse, sponsor, or warrant any external application, offer, or content.
+                All applications listed on OpenApp are third-party applications developed and maintained by
+                independent developers. These apps are not owned, operated, or endorsed by OpenApp or the
+                mrwain organization.
               </p>
+              <ul className="list-disc pl-5 space-y-2">
+                <li>Each app is owned and operated by its respective developer.</li>
+                <li>App functionality, security, and privacy policies are managed by individual developers.</li>
+                <li>Always review each app&apos;s terms of service and privacy policy before use.</li>
+              </ul>
               <p>
-                Selecting the ad will open the app details page so you can review information
-                before choosing to install, access, or transact with the service.
-              </p>
-              <p>
-                You may dismiss the ad at any time using the Skip button when it becomes available.
+                Learn more on the <Link to="/about" className="text-primary hover:underline">About OpenApp</Link> page.
               </p>
             </div>
             <div className="mt-5 flex justify-end">

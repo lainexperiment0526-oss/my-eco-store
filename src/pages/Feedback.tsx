@@ -17,10 +17,10 @@ export default function Feedback() {
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const approvedApps = useMemo(
-    () => (apps || []).filter(app => app.status === 'approved' || !app.status),
-    [apps]
-  );
+  const selectableApps = useMemo(() => {
+    const list = apps || [];
+    return [...list].sort((a, b) => a.name.localeCompare(b.name));
+  }, [apps]);
 
   const handleSubmit = async () => {
     if (!user) {
@@ -69,11 +69,14 @@ export default function Feedback() {
                 <SelectValue placeholder="Select an app" />
               </SelectTrigger>
               <SelectContent>
-                {approvedApps.map(app => (
+                {selectableApps.map(app => (
                   <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {selectableApps.length === 0 && (
+              <p className="mt-2 text-xs text-muted-foreground">No apps available.</p>
+            )}
           </div>
 
           <div>

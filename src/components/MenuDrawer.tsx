@@ -83,7 +83,7 @@ export function MenuDrawer() {
           <MenuItem icon={<Home className="h-5 w-5" />} label="Home" href="/" />
           <MenuItem icon={<Grid3X3 className="h-5 w-5" />} label="Browse Apps" href="/" />
           <MenuItem icon={<PlusCircle className="h-5 w-5" />} label="Submit App" href="/submit" />
-          {user && <MenuItem icon={<Bookmark className="h-5 w-5" />} label="Bookmarks" href="/bookmarks" />}
+          {user && <MenuItem icon={<Bookmark className="h-5 w-5" />} label="Favorites" href="/bookmarks" />}
           <MenuItem icon={<MessageSquare className="h-5 w-5" />} label="Feedback" href="/feedback" />
           {user && <MenuItem icon={<User className="h-5 w-5" />} label="Profile" href="/profile" />}
         </div>

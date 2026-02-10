@@ -40,9 +40,10 @@ export default function Bookmarks() {
     <div className="min-h-screen bg-background pb-20">
       <Header />
       <main className="mx-auto max-w-4xl px-4 py-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-foreground">Bookmarks</h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl font-bold text-foreground">Favorites</h1>
         </div>
+        <p className="text-muted-foreground mb-4">Your bookmarked apps are saved here.</p>
 
         {!user && (
           <div className="py-12 text-center">
@@ -68,7 +69,7 @@ export default function Bookmarks() {
 
         {user && !isLoading && apps.length === 0 && (
           <div className="py-12 text-center text-muted-foreground">
-            No bookmarks yet.
+            No favorites yet. Tap the bookmark icon on an app to save it here.
           </div>
         )}
 

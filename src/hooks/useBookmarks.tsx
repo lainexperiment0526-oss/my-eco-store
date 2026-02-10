@@ -38,6 +38,7 @@ export function useToggleBookmark() {
     },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ['bookmark', vars.app_id] });
+      queryClient.invalidateQueries({ queryKey: ['bookmarks', vars.user_id] });
     },
   });
 }
