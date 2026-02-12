@@ -19,6 +19,21 @@ import { Pencil, Trash2, X, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { AppIcon } from '@/components/AppIcon';
 import { PageLoader } from '@/components/PageLoader';
 
+interface FinanceSummary {
+  gross: number;
+  developer: number;
+  platform: number;
+}
+
+interface AdminWithdrawal {
+  id: string;
+  developer_id: string;
+  amount: number;
+  status: string;
+  pi_wallet_address: string | null;
+  created_at: string;
+}
+
 export default function Admin() {
   const navigate = useNavigate();
   const { user, isAdmin, loading } = useAuth();
@@ -48,12 +63,83 @@ export default function Admin() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [financeSummary, setFinanceSummary] = useState<FinanceSummary>({ gross: 0, developer: 0, platform: 0 });
+  const [appFinanceRows, setAppFinanceRows] = useState<Array<{ app_id: string; app_name: string; gross: number; developer: number; platform: number }>>([]);
+  const [withdrawalRequests, setWithdrawalRequests] = useState<AdminWithdrawal[]>([]);
+  const [processingWithdrawalId, setProcessingWithdrawalId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
       navigate('/auth');
     }
   }, [user, isAdmin, loading, navigate]);
+
+  useEffect(() => {
+    if (!isAdmin || !user) return;
+    loadFinanceData();
+  }, [isAdmin, user]);
+
+  const loadFinanceData = async () => {
+    const { data: earningsData } = await supabase
+      .from('developer_earnings')
+      .select('app_id, total_amount, developer_share, platform_fee');
+
+    const appIds = [...new Set((earningsData || []).map((e) => e.app_id))];
+    const { data: appNames } = appIds.length
+      ? await supabase.from('apps').select('id, name').in('id', appIds)
+      : { data: [] };
+    const appNameMap = new Map((appNames || []).map((a) => [a.id, a.name]));
+
+    const grouped: Record<string, { app_id: string; app_name: string; gross: number; developer: number; platform: number }> = {};
+    for (const row of earningsData || []) {
+      if (!grouped[row.app_id]) {
+        grouped[row.app_id] = {
+          app_id: row.app_id,
+          app_name: appNameMap.get(row.app_id) || 'Unknown App',
+          gross: 0,
+          developer: 0,
+          platform: 0,
+        };
+      }
+      grouped[row.app_id].gross += Number(row.total_amount || 0);
+      grouped[row.app_id].developer += Number(row.developer_share || 0);
+      grouped[row.app_id].platform += Number(row.platform_fee || 0);
+    }
+    const rows = Object.values(grouped);
+    setAppFinanceRows(rows);
+    setFinanceSummary({
+      gross: rows.reduce((s, r) => s + r.gross, 0),
+      developer: rows.reduce((s, r) => s + r.developer, 0),
+      platform: rows.reduce((s, r) => s + r.platform, 0),
+    });
+
+    const { data: withdrawals } = await supabase
+      .from('withdrawal_requests')
+      .select('id, developer_id, amount, status, pi_wallet_address, created_at')
+      .order('created_at', { ascending: false });
+    setWithdrawalRequests((withdrawals || []) as AdminWithdrawal[]);
+  };
+
+  const updateWithdrawalStatus = async (id: string, status: 'completed' | 'rejected') => {
+    setProcessingWithdrawalId(id);
+    try {
+      const payload: Record<string, any> = { status };
+      if (status === 'completed') {
+        payload.processed_at = new Date().toISOString();
+      }
+      const { error } = await supabase
+        .from('withdrawal_requests')
+        .update(payload)
+        .eq('id', id);
+      if (error) throw error;
+      toast.success(`Withdrawal ${status}`);
+      await loadFinanceData();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update withdrawal');
+    } finally {
+      setProcessingWithdrawalId(null);
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -291,6 +377,92 @@ export default function Admin() {
             <p className="text-muted-foreground">No apps found</p>
           </div>
         )}
+
+        <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl bg-card p-4 border border-border">
+            <p className="text-xs text-muted-foreground">Total Paid Income</p>
+            <p className="text-2xl font-bold text-foreground">{financeSummary.gross.toFixed(2)} pi</p>
+          </div>
+          <div className="rounded-2xl bg-card p-4 border border-border">
+            <p className="text-xs text-muted-foreground">Developer Share (70%)</p>
+            <p className="text-2xl font-bold text-foreground">{financeSummary.developer.toFixed(2)} pi</p>
+          </div>
+          <div className="rounded-2xl bg-card p-4 border border-border">
+            <p className="text-xs text-muted-foreground">Platform Fee (30%)</p>
+            <p className="text-2xl font-bold text-foreground">{financeSummary.platform.toFixed(2)} pi</p>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-2xl bg-card p-4 border border-border">
+          <h2 className="text-lg font-semibold text-foreground mb-3">Earnings by App</h2>
+          {appFinanceRows.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No paid earnings yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {appFinanceRows.map((row) => (
+                <div key={row.app_id} className="flex items-center justify-between rounded-xl bg-secondary/50 p-3">
+                  <div>
+                    <p className="font-medium text-foreground">{row.app_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Gross: {row.gross.toFixed(2)} pi | Platform: {row.platform.toFixed(2)} pi
+                    </p>
+                  </div>
+                  <p className="font-semibold text-foreground">{row.developer.toFixed(2)} pi</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 rounded-2xl bg-card p-4 border border-border">
+          <h2 className="text-lg font-semibold text-foreground mb-3">Withdrawal Approvals</h2>
+          {withdrawalRequests.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No withdrawal requests.</p>
+          ) : (
+            <div className="space-y-2">
+              {withdrawalRequests.map((w) => (
+                <div key={w.id} className="rounded-xl bg-secondary/50 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-foreground">{Number(w.amount).toFixed(2)} pi</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(w.created_at).toLocaleDateString()} | Dev: {w.developer_id}
+                      </p>
+                      {w.pi_wallet_address && (
+                        <p className="text-xs text-muted-foreground">Wallet: {w.pi_wallet_address}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={w.status === 'completed' ? 'default' : w.status === 'pending' ? 'secondary' : 'destructive'}>
+                        {w.status}
+                      </Badge>
+                      {w.status === 'pending' && (
+                        <>
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            disabled={processingWithdrawalId === w.id}
+                            onClick={() => updateWithdrawalStatus(w.id, 'completed')}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            disabled={processingWithdrawalId === w.id}
+                            onClick={() => updateWithdrawalStatus(w.id, 'rejected')}
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Edit Dialog */}

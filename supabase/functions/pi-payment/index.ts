@@ -71,11 +71,36 @@ Deno.serve(async (req) => {
       const data = await res.json();
       console.log("Payment completed:", data);
 
-      // Update payment status in database
-      await supabase
+      // Ensure payment record exists and is marked completed.
+      let paymentRecordId: string | null = null;
+      const { data: existingPayment } = await supabase
         .from("pi_payments")
-        .update({ status: "completed", txid })
-        .eq("payment_id", paymentId);
+        .select("id")
+        .eq("payment_id", paymentId)
+        .maybeSingle();
+
+      if (existingPayment?.id) {
+        paymentRecordId = existingPayment.id;
+        await supabase
+          .from("pi_payments")
+          .update({ status: "completed", txid, amount: amount || 0, memo: memo || "", metadata: metadata || {} })
+          .eq("payment_id", paymentId);
+      } else if (userId) {
+        const { data: inserted } = await supabase
+          .from("pi_payments")
+          .insert({
+            user_id: userId,
+            payment_id: paymentId,
+            txid: txid || null,
+            amount: amount || 0,
+            memo: memo || "",
+            status: "completed",
+            metadata: metadata || {},
+          })
+          .select("id")
+          .single();
+        paymentRecordId = inserted?.id || null;
+      }
 
       // If this is an app listing payment, update draft status
       if (metadata?.type === "app_listing" && metadata?.draft_id) {
@@ -86,22 +111,15 @@ Deno.serve(async (req) => {
       }
 
       // If this is an app purchase payment, record developer earnings (70/30 split)
-      if (metadata?.type === "app_purchase" && metadata?.app_id && metadata?.developer_id) {
+      if ((metadata?.type === "app_purchase" || metadata?.type === "app_subscription_renewal") && metadata?.app_id && metadata?.developer_id) {
         const totalAmount = amount || 0;
         const developerShare = totalAmount * 0.7;
         const platformFee = totalAmount * 0.3;
 
-        // Get pi_payment record id
-        const { data: paymentRecord } = await supabase
-          .from("pi_payments")
-          .select("id")
-          .eq("payment_id", paymentId)
-          .maybeSingle();
-
         await supabase.from("developer_earnings").insert({
           developer_id: metadata.developer_id,
           app_id: metadata.app_id,
-          payment_id: paymentRecord?.id || null,
+          payment_id: paymentRecordId,
           total_amount: totalAmount,
           developer_share: developerShare,
           platform_fee: platformFee,

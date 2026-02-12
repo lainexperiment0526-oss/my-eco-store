@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { AdInterstitial } from '@/components/AdInterstitial';
+import { PiAuthModal } from '@/components/PiAuthModal';
 
 export default function AppDetail() {
   const { id } = useParams<{ id: string }>();
@@ -40,6 +41,7 @@ export default function AppDetail() {
   const [pendingOpen, setPendingOpen] = useState<{ url: string; appId: string } | null>(null);
   const [isPaying, setIsPaying] = useState(false);
   const [nowMs, setNowMs] = useState(Date.now());
+  const [showPiAuthModal, setShowPiAuthModal] = useState(false);
 
   const normalizeUrl = useCallback((url: string) => {
     const trimmed = url.trim();
@@ -71,8 +73,7 @@ export default function AppDetail() {
     // If the app is paid, verify entitlement and only charge when needed.
     if (app?.pricing_model === 'paid' && app.price_amount > 0) {
       if (!user) {
-        toast.error('Sign in required for paid apps');
-        navigate('/auth');
+        setShowPiAuthModal(true);
         return;
       }
 
@@ -96,6 +97,11 @@ export default function AppDetail() {
       const hasAccess = hasOneTimeAccess || hasMonthlyAccess;
 
       if (!hasAccess) {
+        if (!app.user_id) {
+          toast.error('This app is missing developer payout setup');
+          return;
+        }
+        const purchaseType = app.payment_type === 'monthly' ? 'monthly' : 'onetime';
         if (!isPiReady) {
           toast.error('Pi payment requires Pi Browser');
           return;
@@ -111,11 +117,10 @@ export default function AppDetail() {
         try {
           await createPiPayment(
             app.price_amount,
-            `${purchase?.purchase_type === 'monthly' ? 'Subscription renewal' : 'Payment'} for ${app.name}`,
-            { type: 'app_purchase', app_id: appId, developer_id: app.user_id }
+            `${purchaseType === 'monthly' ? 'Subscription payment' : 'Payment'} for ${app.name}`,
+            { type: 'app_purchase', app_id: appId, developer_id: app.user_id, purchase_type: purchaseType }
           );
 
-          const purchaseType = app.payment_type === 'monthly' ? 'monthly' : 'onetime';
           let expiresAt: string | null = null;
           if (purchaseType === 'monthly') {
             const base = purchase?.purchase_type === 'monthly'
@@ -203,7 +208,7 @@ export default function AppDetail() {
   };
 
   const handleBookmark = () => {
-    if (!user) { toast.error('Sign in to bookmark'); return; }
+    if (!user) { setShowPiAuthModal(true); return; }
     toggleBookmark.mutate({ app_id: id!, user_id: user.id, isBookmarked: !!isBookmarked });
   };
 
@@ -293,6 +298,7 @@ export default function AppDetail() {
 
   return (
     <>
+    <PiAuthModal open={showPiAuthModal} onOpenChange={setShowPiAuthModal} />
     <div className="min-h-screen bg-background pb-20">
       {showOpenAd && <AdInterstitial trigger="app-open" onComplete={handleOpenAfterAd} />}
       <Header />

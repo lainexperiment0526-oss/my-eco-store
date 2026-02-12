@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { ArrowLeft, Wallet, TrendingUp, DollarSign, ArrowDownToLine } from 'lucide-react';
 import { PageLoader } from '@/components/PageLoader';
+import { PiAuthModal } from '@/components/PiAuthModal';
 
 interface EarningsSummary {
   app_id: string;
@@ -17,6 +18,7 @@ interface EarningsSummary {
   total_earned: number;
   developer_share: number;
   platform_fee: number;
+  buyers: string[];
 }
 
 interface WithdrawalRequest {
@@ -25,18 +27,23 @@ interface WithdrawalRequest {
   status: string;
   created_at: string;
   processed_at: string | null;
+  pi_wallet_address?: string | null;
 }
 
 export default function DeveloperDashboard() {
   const { user, loading } = useAuth();
-  const { createPiPayment, isPiReady, authenticateWithPi, isPiAuthenticated } = usePiNetwork();
+  const { piUser, isPiReady, authenticateWithPi, isPiAuthenticated } = usePiNetwork();
   const [earnings, setEarnings] = useState<EarningsSummary[]>([]);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [totalGross, setTotalGross] = useState(0);
   const [totalEarned, setTotalEarned] = useState(0);
+  const [totalPlatformFee, setTotalPlatformFee] = useState(0);
   const [totalWithdrawn, setTotalWithdrawn] = useState(0);
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [piWalletAddress, setPiWalletAddress] = useState('');
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [showPiAuthModal, setShowPiAuthModal] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -48,42 +55,51 @@ export default function DeveloperDashboard() {
     setLoadingData(true);
 
     try {
-      // Load earnings grouped by app
       const { data: earningsData } = await supabase
         .from('developer_earnings')
-        .select('app_id, total_amount, developer_share, platform_fee')
+        .select('app_id, payment_id, total_amount, developer_share, platform_fee')
         .eq('developer_id', user.id);
 
-      // Load app names
-      const appIds = [...new Set(earningsData?.map(e => e.app_id) || [])];
+      const appIds = [...new Set(earningsData?.map((e) => e.app_id) || [])];
+      const paymentIds = [...new Set((earningsData || []).map((e: any) => e.payment_id).filter(Boolean))];
       const { data: appsData } = appIds.length > 0
         ? await supabase.from('apps').select('id, name').in('id', appIds)
         : { data: [] };
+      const { data: paymentData } = paymentIds.length > 0
+        ? await supabase.from('pi_payments').select('id, metadata').in('id', paymentIds)
+        : { data: [] };
 
-      const appNameMap = new Map<string, string>(appsData?.map(a => [a.id, a.name] as [string, string]) || []);
+      const appNameMap = new Map<string, string>(appsData?.map((a) => [a.id, a.name] as [string, string]) || []);
+      const paymentMetaMap = new Map<string, any>((paymentData || []).map((p: any) => [p.id, p.metadata]));
 
-      // Group earnings by app
       const grouped: Record<string, EarningsSummary> = {};
-      earningsData?.forEach(e => {
+      earningsData?.forEach((e) => {
         if (!grouped[e.app_id]) {
           grouped[e.app_id] = {
             app_id: e.app_id,
-            app_name: appNameMap.get(e.app_id) || 'Unknown App' as string,
+            app_name: appNameMap.get(e.app_id) || 'Unknown App',
             total_earned: 0,
             developer_share: 0,
             platform_fee: 0,
+            buyers: [],
           };
         }
         grouped[e.app_id].total_earned += Number(e.total_amount);
         grouped[e.app_id].developer_share += Number(e.developer_share);
         grouped[e.app_id].platform_fee += Number(e.platform_fee);
+        const meta = paymentMetaMap.get((e as any).payment_id);
+        const buyerUsername = meta?.buyer_pi_username;
+        if (buyerUsername && !grouped[e.app_id].buyers.includes(buyerUsername)) {
+          grouped[e.app_id].buyers.push(buyerUsername);
+        }
       });
 
       const summaries = Object.values(grouped);
       setEarnings(summaries);
+      setTotalGross(summaries.reduce((sum, e) => sum + e.total_earned, 0));
       setTotalEarned(summaries.reduce((sum, e) => sum + e.developer_share, 0));
+      setTotalPlatformFee(summaries.reduce((sum, e) => sum + e.platform_fee, 0));
 
-      // Load withdrawals
       const { data: withdrawalData } = await supabase
         .from('withdrawal_requests')
         .select('*')
@@ -93,7 +109,7 @@ export default function DeveloperDashboard() {
       setWithdrawals(withdrawalData || []);
       setTotalWithdrawn(
         (withdrawalData || [])
-          .filter(w => w.status === 'completed')
+          .filter((w) => w.status === 'completed')
           .reduce((sum, w) => sum + Number(w.amount), 0)
       );
     } catch (err) {
@@ -107,6 +123,7 @@ export default function DeveloperDashboard() {
 
   const handleWithdraw = async () => {
     if (!user) return;
+
     const amount = parseFloat(withdrawAmount);
     if (isNaN(amount) || amount <= 0) {
       toast.error('Enter a valid amount');
@@ -115,6 +132,21 @@ export default function DeveloperDashboard() {
     if (amount > availableBalance) {
       toast.error('Insufficient balance');
       return;
+    }
+    if (!piWalletAddress.trim()) {
+      toast.error('Enter your Pi wallet address');
+      return;
+    }
+    if (!isPiReady) {
+      toast.error('Pi authentication requires Pi Browser');
+      return;
+    }
+    if (!isPiAuthenticated) {
+      const authed = await authenticateWithPi();
+      if (!authed) {
+        setShowPiAuthModal(true);
+        return;
+      }
     }
 
     setIsWithdrawing(true);
@@ -125,12 +157,14 @@ export default function DeveloperDashboard() {
           developer_id: user.id,
           amount,
           status: 'pending',
+          pi_wallet_address: piWalletAddress.trim(),
         });
 
       if (error) throw error;
 
-      toast.success('Withdrawal request submitted!');
+      toast.success('Withdrawal request submitted');
       setWithdrawAmount('');
+      setPiWalletAddress('');
       loadDashboardData();
     } catch (err: any) {
       toast.error(err.message || 'Withdrawal failed');
@@ -153,40 +187,60 @@ export default function DeveloperDashboard() {
 
   return (
     <div className="min-h-screen bg-background pb-12">
+      <PiAuthModal
+        open={showPiAuthModal}
+        onOpenChange={setShowPiAuthModal}
+        title="Pi Sign-In Required"
+        description="OpenApp requires Pi authentication before sensitive actions like withdrawals."
+      />
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-6">
         <Link to="/" className="inline-flex items-center gap-2 text-primary hover:underline mb-6">
           <ArrowLeft className="h-4 w-4" /> Back
         </Link>
 
-        <h1 className="text-2xl font-bold text-foreground mb-6">Developer Dashboard</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Developer Dashboard</h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          Pi account: {piUser?.username ? `@${piUser.username}` : 'Not connected'}
+        </p>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-4">
+          <div className="rounded-2xl bg-card p-4 border border-border text-center">
+            <DollarSign className="h-6 w-6 text-primary mx-auto mb-2" />
+            <p className="text-xs text-muted-foreground">Total Income</p>
+            <p className="text-xl font-bold text-foreground">{totalGross.toFixed(2)} pi</p>
+          </div>
           <div className="rounded-2xl bg-card p-4 border border-border text-center">
             <TrendingUp className="h-6 w-6 text-primary mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">Total Earned</p>
-            <p className="text-xl font-bold text-foreground">{totalEarned.toFixed(2)} π</p>
+            <p className="text-xs text-muted-foreground">Developer (70%)</p>
+            <p className="text-xl font-bold text-foreground">{totalEarned.toFixed(2)} pi</p>
+          </div>
+          <div className="rounded-2xl bg-card p-4 border border-border text-center">
+            <DollarSign className="h-6 w-6 text-primary mx-auto mb-2" />
+            <p className="text-xs text-muted-foreground">Platform Fee (30%)</p>
+            <p className="text-xl font-bold text-foreground">{totalPlatformFee.toFixed(2)} pi</p>
           </div>
           <div className="rounded-2xl bg-card p-4 border border-border text-center">
             <Wallet className="h-6 w-6 text-primary mx-auto mb-2" />
             <p className="text-xs text-muted-foreground">Available</p>
-            <p className="text-xl font-bold text-foreground">{availableBalance.toFixed(2)} π</p>
-          </div>
-          <div className="rounded-2xl bg-card p-4 border border-border text-center">
-            <ArrowDownToLine className="h-6 w-6 text-primary mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">Withdrawn</p>
-            <p className="text-xl font-bold text-foreground">{totalWithdrawn.toFixed(2)} π</p>
+            <p className="text-xl font-bold text-foreground">{availableBalance.toFixed(2)} pi</p>
           </div>
         </div>
 
         <p className="text-xs text-muted-foreground mb-6">Revenue split: 70% Developer / 30% Platform Fee</p>
 
-        {/* Withdraw */}
         <div className="rounded-2xl bg-card p-6 border border-border mb-8">
           <h2 className="text-lg font-semibold text-foreground mb-4">Withdraw Earnings</h2>
-          <div className="flex gap-3">
-            <div className="flex-1 space-y-2">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Pi Wallet Address</Label>
+              <Input
+                value={piWalletAddress}
+                onChange={(e) => setPiWalletAddress(e.target.value)}
+                placeholder="Enter your Pi wallet address"
+              />
+            </div>
+            <div className="space-y-2">
               <Label>Amount (Pi)</Label>
               <Input
                 type="number"
@@ -198,21 +252,20 @@ export default function DeveloperDashboard() {
                 placeholder={`Max: ${availableBalance.toFixed(2)}`}
               />
             </div>
-            <div className="flex items-end">
-              <Button onClick={handleWithdraw} disabled={isWithdrawing || availableBalance <= 0}>
-                {isWithdrawing ? 'Processing...' : 'Withdraw'}
-              </Button>
-            </div>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <Button onClick={handleWithdraw} disabled={isWithdrawing || availableBalance <= 0}>
+              {isWithdrawing ? 'Processing...' : 'Withdraw'}
+            </Button>
           </div>
         </div>
 
-        {/* Earnings by App */}
         <div className="rounded-2xl bg-card p-6 border border-border mb-8">
           <h2 className="text-lg font-semibold text-foreground mb-4">Earnings by App</h2>
           {loadingData ? (
             <PageLoader label="Loading dashboard..." fullscreen={false} />
           ) : earnings.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No earnings yet. Submit an app and start earning!</p>
+            <p className="text-muted-foreground text-sm">No earnings yet. Submit an app and start earning.</p>
           ) : (
             <div className="space-y-3">
               {earnings.map((e) => (
@@ -220,17 +273,21 @@ export default function DeveloperDashboard() {
                   <div>
                     <p className="font-medium text-foreground">{e.app_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      Total: {e.total_earned.toFixed(2)} π • Fee: {e.platform_fee.toFixed(2)} π
+                      Total: {e.total_earned.toFixed(2)} pi | Fee: {e.platform_fee.toFixed(2)} pi
                     </p>
+                    {e.buyers.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        Buyers: {e.buyers.map((u) => `@${u}`).join(', ')}
+                      </p>
+                    )}
                   </div>
-                  <p className="text-lg font-bold text-primary">{e.developer_share.toFixed(2)} π</p>
+                  <p className="text-lg font-bold text-primary">{e.developer_share.toFixed(2)} pi</p>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Withdrawal History */}
         <div className="rounded-2xl bg-card p-6 border border-border">
           <h2 className="text-lg font-semibold text-foreground mb-4">Withdrawal History</h2>
           {withdrawals.length === 0 ? (
@@ -240,9 +297,9 @@ export default function DeveloperDashboard() {
               {withdrawals.map((w) => (
                 <div key={w.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
                   <div>
-                    <p className="font-medium text-foreground">{Number(w.amount).toFixed(2)} π</p>
+                    <p className="font-medium text-foreground">{Number(w.amount).toFixed(2)} pi</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(w.created_at).toLocaleDateString()}
+                      {new Date(w.created_at).toLocaleDateString()} {w.pi_wallet_address ? `| ${w.pi_wallet_address}` : ''}
                     </p>
                   </div>
                   <span className={`text-xs font-medium px-2 py-1 rounded-full ${

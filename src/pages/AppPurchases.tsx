@@ -27,6 +27,7 @@ type PurchaseRow = {
     website_url: string;
     price_amount: number | null;
     payment_type: string | null;
+    user_id: string | null;
   } | null;
 };
 
@@ -49,7 +50,7 @@ export default function AppPurchases() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('app_purchases')
-        .select('id, app_id, user_id, purchase_type, status, paid_at, expires_at, app:apps(id, name, logo_url, website_url, price_amount, payment_type)')
+        .select('id, app_id, user_id, purchase_type, status, paid_at, expires_at, app:apps(id, name, logo_url, website_url, price_amount, payment_type, user_id)')
         .eq('user_id', user!.id)
         .order('updated_at', { ascending: false });
       if (error) throw error;
@@ -80,6 +81,10 @@ export default function AppPurchases() {
       toast.error('Invalid subscription price');
       return;
     }
+    if (!item.app.user_id) {
+      toast.error('Developer payout account is missing for this app');
+      return;
+    }
 
     let activePiUser = piUser;
     if (!activePiUser) {
@@ -92,9 +97,11 @@ export default function AppPurchases() {
 
     try {
       await createPiPayment(amount, `Subscription renewal for ${item.app.name}`, {
-        type: 'app_subscription_renewal',
+        type: 'app_purchase',
         app_id: item.app.id,
+        developer_id: item.app.user_id,
         purchase_id: item.id,
+        purchase_type: 'monthly',
       });
 
       const base = item.expires_at && new Date(item.expires_at).getTime() > Date.now() ? new Date(item.expires_at) : new Date();

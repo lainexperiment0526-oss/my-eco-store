@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 declare global {
   interface Window {
@@ -171,17 +172,24 @@ export function PiProvider({ children }: { children: ReactNode }) {
     if (!window.Pi) throw new Error('Pi SDK not available');
 
     const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData.user?.id ?? null;
+    const enrichedMetadata = {
+      ...(metadata || {}),
+      buyer_pi_username: piUser?.username || null,
+      buyer_pi_uid: piUser?.uid || null,
+    };
 
     return new Promise<void>((resolve, reject) => {
       window.Pi.createPayment(
-        { amount, memo, metadata: metadata || {} },
+        { amount, memo, metadata: enrichedMetadata },
         {
           onReadyForServerApproval: async (paymentId: string) => {
             try {
               await fetch(`${baseUrl}/functions/v1/pi-payment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'approve', paymentId, amount, memo, metadata }),
+                body: JSON.stringify({ action: 'approve', paymentId, userId, amount, memo, metadata: enrichedMetadata }),
               });
               callbacks?.onPaymentApproved?.();
             } catch (err) {
@@ -193,7 +201,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
               await fetch(`${baseUrl}/functions/v1/pi-payment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'complete', paymentId, txid, metadata }),
+                body: JSON.stringify({ action: 'complete', paymentId, txid, userId, amount, memo, metadata: enrichedMetadata }),
               });
               callbacks?.onPaymentCompleted?.();
               resolve();
@@ -207,7 +215,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
             fetch(`${baseUrl}/functions/v1/pi-payment`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'cancel', paymentId }),
+              body: JSON.stringify({ action: 'cancel', paymentId, userId }),
             }).catch(console.error);
             callbacks?.onPaymentCancelled?.();
             reject(new Error('Payment cancelled'));
@@ -220,7 +228,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
         }
       );
     });
-  }, []);
+  }, [piUser]);
 
   const showPiAd = useCallback(async (adType: 'interstitial' | 'rewarded'): Promise<boolean> => {
     if (!window.Pi?.Ads) {
