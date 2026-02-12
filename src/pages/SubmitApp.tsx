@@ -699,6 +699,8 @@ export default function SubmitApp() {
                     <SelectItem value="9+">9+</SelectItem>
                     <SelectItem value="12+">12+</SelectItem>
                     <SelectItem value="17+">17+</SelectItem>
+                    <SelectItem value="18+">18+ (Adult)</SelectItem>
+                    <SelectItem value="60+">60+ (Older Adults)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
