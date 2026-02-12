@@ -22,8 +22,8 @@ export function HomeAdBanner() {
     }
   }, [navigate]);
 
-  const getBadgeSrc = useCallback((name?: string | null) => {
-    const key = (name || '').toLowerCase();
+  const getBadgeSrc = useCallback((app?: { name?: string | null; is_verified?: boolean | null; verified_until?: string | null } | null) => {
+    const key = (app?.name || '').toLowerCase();
     const badgeMap: Record<string, { light: string; dark: string }> = {
       'openapp': {
         light: 'https://i.ibb.co/BVQYVbyb/verified.png',
@@ -51,7 +51,9 @@ export function HomeAdBanner() {
       },
     };
     const badge = badgeMap[key];
-    if (!badge) return '';
+    const isSubscriptionVerified = !!app?.is_verified && !!app?.verified_until && new Date(app.verified_until).getTime() > Date.now();
+    if (!badge && !isSubscriptionVerified) return '';
+    if (!badge) return 'https://i.ibb.co/BVQYVbyb/verified.png';
     return theme === 'dark' ? badge.dark : badge.light;
   }, [theme]);
 
@@ -184,8 +186,8 @@ export function HomeAdBanner() {
                 <div className="flex-1 min-w-0 text-left">
                     <h4 className="font-medium text-foreground text-sm truncate flex items-center gap-2">
                       {ad.app?.name}
-                      {getBadgeSrc(ad.app?.name) && (
-                        <img src={getBadgeSrc(ad.app?.name)} alt="Verified" className="h-4 w-4" />
+                      {getBadgeSrc(ad.app) && (
+                        <img src={getBadgeSrc(ad.app)} alt="Verified" className="h-4 w-4" />
                       )}
                     </h4>
                     <p className="text-xs text-muted-foreground truncate">

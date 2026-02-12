@@ -40,8 +40,9 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
     },
   };
   const badge = badgeMap[appKey];
-  const isVerified = !!badge;
-  const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : '';
+  const isSubscriptionVerified = !!app.is_verified && !!app.verified_until && new Date(app.verified_until).getTime() > Date.now();
+  const isVerified = !!badge || isSubscriptionVerified;
+  const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : 'https://i.ibb.co/BVQYVbyb/verified.png';
   const normalizedWebsite = (() => {
     const raw = (app.website_url || '').trim();
     if (!raw) return '';

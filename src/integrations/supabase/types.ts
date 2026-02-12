@@ -532,6 +532,7 @@ export type Database = {
           has_in_app_purchases: boolean | null
           id: string
           is_featured: boolean | null
+          is_verified: boolean
           is_popular: boolean | null
           languages: string[] | null
           logo_url: string | null
@@ -549,6 +550,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           version: string | null
+          verified_until: string | null
           website_url: string
           whats_new: string | null
         }
@@ -565,6 +567,7 @@ export type Database = {
           has_in_app_purchases?: boolean | null
           id?: string
           is_featured?: boolean | null
+          is_verified?: boolean
           is_popular?: boolean | null
           languages?: string[] | null
           logo_url?: string | null
@@ -582,6 +585,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           version?: string | null
+          verified_until?: string | null
           website_url: string
           whats_new?: string | null
         }
@@ -598,6 +602,7 @@ export type Database = {
           has_in_app_purchases?: boolean | null
           id?: string
           is_featured?: boolean | null
+          is_verified?: boolean
           is_popular?: boolean | null
           languages?: string[] | null
           logo_url?: string | null
@@ -615,6 +620,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           version?: string | null
+          verified_until?: string | null
           website_url?: string
           whats_new?: string | null
         }

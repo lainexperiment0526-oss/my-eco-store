@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePiNetwork } from '@/hooks/usePiNetwork';
@@ -36,6 +36,7 @@ export default function MyApps() {
   const [adTitle, setAdTitle] = useState('');
   const [existingAd, setExistingAd] = useState<{ id: string; video_url: string; title: string | null } | null>(null);
   const [isAdLoading, setIsAdLoading] = useState(false);
+  const [badgePaymentAppId, setBadgePaymentAppId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     tagline: '',
@@ -311,6 +312,56 @@ export default function MyApps() {
     }
   };
 
+  const isBadgeActive = (app: App) => {
+    if (!app.is_verified) return false;
+    if (!app.verified_until) return false;
+    return new Date(app.verified_until).getTime() > Date.now();
+  };
+
+  const getNextVerifiedUntil = (current: string | null) => {
+    const base = current && new Date(current).getTime() > Date.now() ? new Date(current) : new Date();
+    const next = new Date(base);
+    next.setMonth(next.getMonth() + 1);
+    return next.toISOString();
+  };
+
+  const handleApplyVerifiedBadge = async (app: App) => {
+    setBadgePaymentAppId(app.id);
+    try {
+      let activePiUser = piUser;
+      if (!activePiUser) {
+        activePiUser = await authenticateWithPi();
+      }
+      if (!activePiUser) {
+        toast.error('Pi authentication required for verified badge');
+        return;
+      }
+
+      await createPiPayment(20, `Verified badge subscription - ${app.name}`, {
+        type: 'verified_badge_subscription',
+        app_id: app.id,
+        user_id: activePiUser.uid,
+      });
+
+      await updateApp.mutateAsync({
+        id: app.id,
+        is_verified: true,
+        verified_until: getNextVerifiedUntil(app.verified_until),
+      });
+
+      toast.success('Verified badge active for 1 month');
+      queryClient.invalidateQueries({ queryKey: ['my-apps'] });
+    } catch (error: any) {
+      if (error?.message === 'Payment cancelled') {
+        toast.info('Verified badge payment cancelled');
+      } else {
+        toast.error(error?.message || 'Failed to apply verified badge');
+      }
+    } finally {
+      setBadgePaymentAppId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -349,9 +400,26 @@ export default function MyApps() {
                   <p className="text-xs text-muted-foreground">
                     {app.category?.name || 'Uncategorized'} • v{app.version}
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {isBadgeActive(app)
+                      ? `Verified badge active until ${new Date(app.verified_until as string).toLocaleDateString()}`
+                      : 'No active verified badge'}
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant={isBadgeActive(app) ? 'outline' : 'default'}
+                    onClick={() => handleApplyVerifiedBadge(app)}
+                    disabled={badgePaymentAppId === app.id}
+                  >
+                    {badgePaymentAppId === app.id
+                      ? 'Processing...'
+                      : isBadgeActive(app)
+                        ? 'Renew Badge (20 Pi)'
+                        : 'Apply Badge (20 Pi/mo)'}
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
@@ -837,3 +905,5 @@ function StatusBadge({ status }: { status: string }) {
       return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
   }
 }
+
+

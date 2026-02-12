@@ -216,8 +216,9 @@ export default function AppDetail() {
     },
   };
   const badge = badgeMap[appKey];
-  const isVerified = !!badge;
-  const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : '';
+  const isSubscriptionVerified = !!app.is_verified && !!app.verified_until && new Date(app.verified_until).getTime() > Date.now();
+  const isVerified = !!badge || isSubscriptionVerified;
+  const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : 'https://i.ibb.co/BVQYVbyb/verified.png';
 
   return (
     <>

@@ -41,8 +41,8 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
     .slice()
     .sort((a, b) => a.display_order - b.display_order);
 
-  const getBadgeSrc = (name?: string | null) => {
-    const key = (name || '').toLowerCase();
+  const getBadgeSrc = (app?: { name?: string | null; is_verified?: boolean | null; verified_until?: string | null } | null) => {
+    const key = (app?.name || '').toLowerCase();
     const badgeMap: Record<string, { light: string; dark: string }> = {
       'openapp': {
         light: 'https://i.ibb.co/BVQYVbyb/verified.png',
@@ -70,7 +70,9 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
       },
     };
     const badge = badgeMap[key];
-    if (!badge) return '';
+    const isSubscriptionVerified = !!app?.is_verified && !!app?.verified_until && new Date(app.verified_until).getTime() > Date.now();
+    if (!badge && !isSubscriptionVerified) return '';
+    if (!badge) return 'https://i.ibb.co/BVQYVbyb/verified.png';
     return theme === 'dark' ? badge.dark : badge.light;
   };
 
@@ -238,8 +240,8 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
             <p className="text-xs text-white/60">OpenApp &middot; Sponsored</p>
             <h4 className="text-white font-medium text-sm truncate flex items-center gap-2">
               {ad.app.name}
-              {getBadgeSrc(ad.app.name) && (
-                <img src={getBadgeSrc(ad.app.name)} alt="Verified" className="h-4 w-4" />
+              {getBadgeSrc(ad.app) && (
+                <img src={getBadgeSrc(ad.app)} alt="Verified" className="h-4 w-4" />
               )}
             </h4>
             <p className="text-xs text-white/60 truncate">{ad.app.category?.name || 'App'}</p>
@@ -304,8 +306,8 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
                 <div className="min-w-0">
                   <h3 className="text-lg font-semibold text-foreground truncate flex items-center gap-2">
                     {ad.app.name}
-                    {getBadgeSrc(ad.app.name) && (
-                      <img src={getBadgeSrc(ad.app.name)} alt="Verified" className="h-5 w-5" />
+                    {getBadgeSrc(ad.app) && (
+                      <img src={getBadgeSrc(ad.app)} alt="Verified" className="h-5 w-5" />
                     )}
                   </h3>
                   <p className="text-sm text-muted-foreground truncate">{ad.app.tagline || ad.app.category?.name || 'App'}</p>

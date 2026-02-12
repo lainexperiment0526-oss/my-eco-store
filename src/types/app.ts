@@ -33,6 +33,8 @@ export interface App {
   payment_type: 'onetime' | 'monthly' | 'free';
   network_type: 'mainnet' | 'testnet' | 'beta';
   notes: string | null;
+  is_verified: boolean;
+  verified_until: string | null;
 }
 
 export interface Category {
