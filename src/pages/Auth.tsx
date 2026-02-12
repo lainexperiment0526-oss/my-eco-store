@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePiNetwork } from '@/hooks/usePiNetwork';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
@@ -19,20 +20,89 @@ export default function Auth() {
     }
   }, [user, loading, navigate]);
 
+  const getStablePiPassword = (piUid: string) => `openapp_pi_auth_${piUid}`;
+  const getLegacyPiPassword = (accessToken: string, piUid: string) => `${accessToken.slice(0, 20)}${piUid}`;
+  const isAlreadyRegisteredError = (error: Error | null) => {
+    if (!error?.message) return false;
+    const message = error.message.toLowerCase();
+    return message.includes('already registered') || message.includes('already been registered');
+  };
+  const isEmailNotConfirmedError = (error: Error | null) => {
+    if (!error?.message) return false;
+    return error.message.toLowerCase().includes('email not confirmed');
+  };
+
+  const ensurePiAccountServerSide = async (piUid: string, username: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('pi-auth', {
+        body: { piUid, username },
+      });
+
+      if (error) {
+        console.warn('pi-auth function invoke failed:', error.message);
+        return null;
+      }
+
+      if (!data?.email || !data?.password) {
+        console.warn('pi-auth function returned incomplete data');
+        return null;
+      }
+
+      return {
+        email: data.email as string,
+        password: data.password as string,
+      };
+    } catch (err) {
+      console.warn('pi-auth function unavailable, using client fallback:', err);
+      return null;
+    }
+  };
+
   const handlePiAuth = async () => {
     const piUser = await authenticateWithPi();
     if (piUser) {
-      const piEmail = `${piUser.uid}@pi.user`;
-      const piPassword = piUser.accessToken.slice(0, 20) + piUser.uid;
+      const ensured = await ensurePiAccountServerSide(piUser.uid, piUser.username);
+      const piEmail = ensured?.email ?? `${piUser.uid}@pi.user`;
+      const stablePassword = ensured?.password ?? getStablePiPassword(piUser.uid);
+      const legacyPassword = getLegacyPiPassword(piUser.accessToken, piUser.uid);
 
-      const { error: signInError } = await signIn(piEmail, piPassword);
+      // First try stable credentials so returning users can log in consistently.
+      let { error: signInError } = await signIn(piEmail, stablePassword);
+
+      // Backward compatibility for accounts created with the older token-derived password.
       if (signInError) {
-        const { error: signUpError } = await signUp(piEmail, piPassword);
-        if (signUpError) {
+        const { error: legacySignInError } = await signIn(piEmail, legacyPassword);
+        if (!legacySignInError) {
+          const { error: updatePasswordError } = await supabase.auth.updateUser({ password: stablePassword });
+          if (updatePasswordError) {
+            console.warn('Pi password migration failed:', updatePasswordError.message);
+          }
+          signInError = null;
+        }
+      }
+
+      // If no existing account works, create one with stable credentials.
+      if (signInError) {
+        const { error: signUpError } = await signUp(piEmail, stablePassword);
+        if (signUpError && !isAlreadyRegisteredError(signUpError)) {
+          console.error('Pi sign-up failed:', signUpError.message);
+          toast.error('Failed to authenticate with Pi Network');
+          return;
+        }
+
+        // Account might already exist; retry sign-in with stable password once.
+        const { error: retrySignInError } = await signIn(piEmail, stablePassword);
+        if (retrySignInError) {
+          if (isEmailNotConfirmedError(retrySignInError)) {
+            toast.error('Pi account exists but is not confirmed. Deploy the pi-auth edge function and try again.');
+            return;
+          }
+          console.error('Pi retry sign-in failed:', retrySignInError.message);
           toast.error('Failed to authenticate with Pi Network');
           return;
         }
       }
+
       toast.success(`Welcome, ${piUser.username}!`);
       navigate('/');
     } else {

@@ -63,8 +63,8 @@ export function AdInterstitial({ onComplete, trigger }: AdInterstitialProps) {
       return;
     }
 
-    // Default behavior (e.g. auth): randomly choose between Pi AdNetwork and app/campaign ads
-    const usePiAd = Math.random() > 0.5 && isPiReady;
+    // Auth flow: prefer OpenApp inventory first, then fallback to Pi AdNetwork.
+    const usePiAd = !hasInventory && isPiReady;
 
     if (usePiAd) {
       const adType = Math.random() > 0.5 ? 'interstitial' : 'rewarded';

@@ -54,6 +54,12 @@ interface PiContextType {
 const PiContext = createContext<PiContextType | undefined>(undefined);
 
 const PI_SDK_URL = 'https://sdk.minepi.com/pi-sdk.js';
+const isPiBrowser = () => /pibrowser|pi browser/i.test(navigator.userAgent);
+const initPi = () => {
+  if (!window.Pi) return false;
+  window.Pi.init({ version: '2.0' });
+  return true;
+};
 
 export function PiProvider({ children }: { children: ReactNode }) {
   const [piUser, setPiUser] = useState<PiUser | null>(null);
@@ -62,16 +68,14 @@ export function PiProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Check if already loaded
-    if (window.Pi) {
-      window.Pi.init({ version: '2.0' });
+    if (initPi()) {
       setIsPiReady(true);
       setPiLoading(false);
       return;
     }
 
     // Skip Pi SDK loading on localhost if not in Pi Browser to avoid cross-origin errors
-    const isPiBrowser = navigator.userAgent.includes('PiBrowser');
-    if (!isPiBrowser && window.location.hostname === 'localhost') {
+    if (!isPiBrowser() && window.location.hostname === 'localhost') {
       console.log('Pi SDK loading skipped on localhost (not in Pi Browser)');
       setPiLoading(false);
       return;
@@ -81,11 +85,29 @@ export function PiProvider({ children }: { children: ReactNode }) {
     script.src = PI_SDK_URL;
     script.async = true;
     script.onload = () => {
-      if (window.Pi) {
-        window.Pi.init({ version: '2.0' });
+      // Pi object can be attached slightly after script onload on some WebViews.
+      if (initPi()) {
         setIsPiReady(true);
+        setPiLoading(false);
+        return;
       }
-      setPiLoading(false);
+
+      let retries = 0;
+      const maxRetries = 10;
+      const retryInterval = window.setInterval(() => {
+        retries += 1;
+        if (initPi()) {
+          window.clearInterval(retryInterval);
+          setIsPiReady(true);
+          setPiLoading(false);
+          return;
+        }
+        if (retries >= maxRetries) {
+          window.clearInterval(retryInterval);
+          console.warn('Pi SDK loaded but Pi object is unavailable');
+          setPiLoading(false);
+        }
+      }, 200);
     };
     script.onerror = () => {
       console.warn('Pi SDK not available (not in Pi Browser)');
