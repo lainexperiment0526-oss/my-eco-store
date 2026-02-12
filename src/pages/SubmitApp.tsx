@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Upload, X, Image, ArrowLeft, CheckCircle, Video, FileText } from 'lucide-react';
+import { Upload, X, Image, ArrowLeft, CheckCircle, Video, FileText, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type SubmitStep = 'details' | 'payment' | 'submitting' | 'done';
@@ -122,6 +122,7 @@ export default function SubmitApp() {
   const [step, setStep] = useState<SubmitStep>('details');
   const [draftId, setDraftId] = useState<string | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [draftActionLoading, setDraftActionLoading] = useState<'save' | 'proceed' | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -282,12 +283,15 @@ export default function SubmitApp() {
       toast.error('Name, website URL, category, and at least one language are required to save draft');
       return;
     }
+    setDraftActionLoading('save');
     try {
       const id = await saveDraft();
       setDraftId(id);
       toast.success('Draft saved!');
     } catch (error: any) {
       toast.error(error.message || 'Failed to save draft');
+    } finally {
+      setDraftActionLoading(null);
     }
   };
 
@@ -327,12 +331,15 @@ export default function SubmitApp() {
       toast.error('Name, website URL, category, and at least one language are required');
       return;
     }
+    setDraftActionLoading('proceed');
     try {
       const id = await saveDraft();
       setDraftId(id);
       setStep('payment');
     } catch (error: any) {
       toast.error(error.message || 'Failed to save draft');
+    } finally {
+      setDraftActionLoading(null);
     }
   };
 
@@ -349,22 +356,24 @@ export default function SubmitApp() {
   };
 
   const handlePiPayment = async () => {
+    if (paymentLoading) return;
+
     if (!isPiReady) {
       toast.error('Pi Network not available. Please use Pi Browser.');
       return;
     }
 
-    // Ensure Pi authentication with payments scope
-    if (!isPiAuthenticated) {
-      const piUser = await authenticateWithPi();
-      if (!piUser) {
-        toast.error('Pi authentication required for payment');
-        return;
-      }
-    }
-
     setPaymentLoading(true);
     try {
+      // Ensure Pi authentication with payments scope
+      if (!isPiAuthenticated) {
+        const piUser = await authenticateWithPi();
+        if (!piUser) {
+          toast.error('Pi authentication required for payment');
+          return;
+        }
+      }
+
       await createPiPayment(
         25,
         'App listing fee - OpenApp',
@@ -514,7 +523,10 @@ export default function SubmitApp() {
       <div className="min-h-screen bg-background">
         <Header />
         <main className="mx-auto max-w-2xl px-4 py-20 text-center">
-          <div className="animate-pulse text-muted-foreground text-lg">Submitting your app...</div>
+          <div className="flex items-center justify-center gap-3 text-muted-foreground text-lg">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Submitting your app...</span>
+          </div>
         </main>
       </div>
     );
@@ -544,7 +556,14 @@ export default function SubmitApp() {
               className="w-full bg-[#7B2FF2] hover:bg-[#6B1FE2] dark:bg-[#9B59B6] dark:hover:bg-[#8E44AD] text-white font-semibold"
               size="lg"
             >
-              {paymentLoading ? 'Processing Payment...' : 'Pay 25 Pi'}
+              {paymentLoading ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Processing Payment...
+                </span>
+              ) : (
+                'Pay 25 Pi'
+              )}
             </Button>
             {!isPiReady && (
               <p className="text-xs text-muted-foreground text-center mt-3">
@@ -871,11 +890,36 @@ export default function SubmitApp() {
           </div>
 
           <div className="flex gap-3">
-            <Button type="button" variant="outline" className="flex-1" onClick={handleSaveDraft}>
-              Save Draft
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={handleSaveDraft}
+              disabled={draftActionLoading !== null || paymentLoading || isSubmitting}
+            >
+              {draftActionLoading === 'save' ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving Draft...
+                </span>
+              ) : (
+                'Save Draft'
+              )}
             </Button>
-            <Button type="submit" className="flex-1" size="lg" disabled={isSubmitting}>
-              Proceed to Payment (25 Pi)
+            <Button
+              type="submit"
+              className="flex-1"
+              size="lg"
+              disabled={draftActionLoading !== null || paymentLoading || isSubmitting}
+            >
+              {draftActionLoading === 'proceed' ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Preparing Payment...
+                </span>
+              ) : (
+                'Proceed to Payment (25 Pi)'
+              )}
             </Button>
           </div>
         </form>
