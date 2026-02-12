@@ -42,6 +42,11 @@ export default function SubmitApp() {
     whats_new: '',
     privacy_policy_url: '',
     developer_website_url: '',
+    pricing_model: 'free',
+    price_amount: '',
+    payment_type: 'free',
+    network_type: 'mainnet',
+    notes: '',
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [screenshotFiles, setScreenshotFiles] = useState<File[]>([]);
@@ -124,6 +129,11 @@ export default function SubmitApp() {
       video_ad_url: videoAdUrl,
       ad_title: adTitle || null,
       payment_status: 'pending' as const,
+      pricing_model: formData.pricing_model,
+      price_amount: formData.price_amount ? parseFloat(formData.price_amount) : 0,
+      payment_type: formData.payment_type,
+      network_type: formData.network_type,
+      notes: formData.notes || null,
     };
 
     if (draftId) {
@@ -172,6 +182,11 @@ export default function SubmitApp() {
       whats_new: draft.whats_new || '',
       privacy_policy_url: draft.privacy_policy_url || '',
       developer_website_url: draft.developer_website_url || '',
+      pricing_model: draft.pricing_model || 'free',
+      price_amount: draft.price_amount ? String(draft.price_amount) : '',
+      payment_type: draft.payment_type || 'free',
+      network_type: draft.network_type || 'mainnet',
+      notes: draft.notes || '',
     });
     setDraftId(draft.id);
     setAdTitle(draft.ad_title || '');
@@ -272,6 +287,11 @@ export default function SubmitApp() {
           status: 'pending',
           is_featured: false,
           is_popular: false,
+          pricing_model: formData.pricing_model,
+          price_amount: formData.price_amount ? parseFloat(formData.price_amount) : 0,
+          payment_type: formData.payment_type,
+          network_type: formData.network_type,
+          notes: formData.notes || null,
         })
         .select()
         .single();
@@ -331,7 +351,7 @@ export default function SubmitApp() {
             <Button variant="outline" onClick={() => {
               setStep('details');
               setDraftId(null);
-              setFormData({ name: '', tagline: '', description: '', website_url: '', category_id: '', tags: '', version: '1.0', developer_name: '', age_rating: '4+', whats_new: '', privacy_policy_url: '', developer_website_url: '' });
+              setFormData({ name: '', tagline: '', description: '', website_url: '', category_id: '', tags: '', version: '1.0', developer_name: '', age_rating: '4+', whats_new: '', privacy_policy_url: '', developer_website_url: '', pricing_model: 'free', price_amount: '', payment_type: 'free', network_type: 'mainnet', notes: '' });
               setLogoFile(null);
               setScreenshotFiles([]);
               setVideoAdFile(null);
@@ -538,6 +558,56 @@ export default function SubmitApp() {
             <div className="space-y-2">
               <Label htmlFor="whats_new">What's New</Label>
               <Textarea id="whats_new" value={formData.whats_new} onChange={(e) => setFormData({ ...formData, whats_new: e.target.value })} placeholder="Latest updates and changes..." rows={3} />
+            </div>
+          </div>
+
+          {/* Pricing & Network */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-foreground">Pricing & Network</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Pricing Model</Label>
+                <Select value={formData.pricing_model} onValueChange={(value) => setFormData({ ...formData, pricing_model: value, payment_type: value === 'free' ? 'free' : formData.payment_type === 'free' ? 'onetime' : formData.payment_type })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Network</Label>
+                <Select value={formData.network_type} onValueChange={(value) => setFormData({ ...formData, network_type: value })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mainnet">Mainnet</SelectItem>
+                    <SelectItem value="testnet">Testnet</SelectItem>
+                    <SelectItem value="beta">Beta</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {formData.pricing_model === 'paid' && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Payment Type</Label>
+                  <Select value={formData.payment_type} onValueChange={(value) => setFormData({ ...formData, payment_type: value })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="onetime">One-time</SelectItem>
+                      <SelectItem value="monthly">Monthly Subscription</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Price (Pi)</Label>
+                  <Input type="number" step="0.01" min="0" value={formData.price_amount} onChange={(e) => setFormData({ ...formData, price_amount: e.target.value })} placeholder="0.00" />
+                </div>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="notes">Developer Notes</Label>
+              <Textarea id="notes" value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Any notes about your app (changelog, instructions, etc.)" rows={3} />
             </div>
           </div>
 

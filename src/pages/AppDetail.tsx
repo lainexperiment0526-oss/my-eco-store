@@ -2,6 +2,7 @@ import { useParams, Link, useLocation } from 'react-router-dom';
 import { useApp } from '@/hooks/useApps';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
+import { usePiNetwork } from '@/hooks/usePiNetwork';
 import { useIsBookmarked, useToggleBookmark } from '@/hooks/useBookmarks';
 import { Header } from '@/components/Header';
 import { AppIcon } from '@/components/AppIcon';
@@ -26,6 +27,7 @@ export default function AppDetail() {
   const { data: app, isLoading, error, refetch } = useApp(id || '');
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { createPiPayment, isPiReady, authenticateWithPi, isPiAuthenticated } = usePiNetwork();
   const { data: isBookmarked } = useIsBookmarked(id || '', user?.id);
   const toggleBookmark = useToggleBookmark();
   const queryClient = useQueryClient();
@@ -35,6 +37,7 @@ export default function AppDetail() {
   const [isOpening, setIsOpening] = useState(false);
   const [showOpenAd, setShowOpenAd] = useState(false);
   const [pendingOpen, setPendingOpen] = useState<{ url: string; appId: string } | null>(null);
+  const [isPaying, setIsPaying] = useState(false);
 
   const normalizeUrl = useCallback((url: string) => {
     const trimmed = url.trim();
@@ -53,16 +56,50 @@ export default function AppDetail() {
     }
   }, [queryClient]);
 
-  const handleOpenApp = useCallback((url: string, appId: string) => {
+  const handleOpenApp = useCallback(async (url: string, appId: string) => {
     const normalizedUrl = normalizeUrl(url);
     if (!normalizedUrl) {
       toast.error('No app link available');
       return;
     }
+
+    // If the app is paid, require Pi payment first
+    if (app?.pricing_model === 'paid' && app.price_amount > 0) {
+      if (!isPiReady) {
+        toast.error('Pi payment requires Pi Browser');
+        return;
+      }
+      if (!isPiAuthenticated) {
+        const piUser = await authenticateWithPi();
+        if (!piUser) {
+          toast.error('Pi authentication required for payment');
+          return;
+        }
+      }
+      setIsPaying(true);
+      try {
+        await createPiPayment(
+          app.price_amount,
+          `Payment for ${app.name}`,
+          { type: 'app_purchase', app_id: appId, developer_id: app.user_id }
+        );
+        toast.success('Payment successful!');
+      } catch (err: any) {
+        if (err.message === 'Payment cancelled') {
+          toast.info('Payment cancelled');
+        } else {
+          toast.error('Payment failed');
+        }
+        setIsPaying(false);
+        return;
+      }
+      setIsPaying(false);
+    }
+
     setPendingOpen({ url: normalizedUrl, appId });
     setIsOpening(true);
     setShowOpenAd(true);
-  }, [normalizeUrl]);
+  }, [normalizeUrl, app, isPiReady, isPiAuthenticated, authenticateWithPi, createPiPayment]);
 
   const handleOpenAfterAd = useCallback(() => {
     const next = pendingOpen;
@@ -199,10 +236,10 @@ export default function AppDetail() {
               <div className="mt-3 flex items-center gap-2">
                 <button
                   onClick={() => handleOpenApp(app.website_url, app.id)}
-                  disabled={isOpening}
+                  disabled={isOpening || isPaying}
                   className="rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-70"
                 >
-                  {isOpening ? 'Opening...' : 'Open App'}
+                  {isPaying ? 'Processing Payment...' : isOpening ? 'Opening...' : app.pricing_model === 'paid' ? `Get - ${app.price_amount} π` : 'Open App'}
                 </button>
                 <Button variant="ghost" size="icon" className="rounded-full" onClick={handleShare}>
                   <Share2 className="h-5 w-5 text-primary" />
@@ -224,21 +261,29 @@ export default function AppDetail() {
             </div>
             <div className="h-8 w-px bg-border" />
             <div className="text-center">
-              <p className="text-xs text-muted-foreground uppercase">Age</p>
-              <p className="text-xl font-bold text-foreground">{app.age_rating}</p>
-              <p className="text-xs text-muted-foreground">Years Old</p>
+              <p className="text-xs text-muted-foreground uppercase">Price</p>
+              <p className="text-xl font-bold text-foreground">{app.pricing_model === 'paid' ? `${app.price_amount} π` : 'Free'}</p>
+              {app.pricing_model === 'paid' && <p className="text-xs text-muted-foreground">{app.payment_type === 'monthly' ? '/month' : 'one-time'}</p>}
+            </div>
+            <div className="h-8 w-px bg-border" />
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground uppercase">Network</p>
+              <p className="text-sm font-medium text-foreground mt-1 capitalize">{app.network_type || 'mainnet'}</p>
             </div>
             <div className="h-8 w-px bg-border" />
             <div className="text-center">
               <p className="text-xs text-muted-foreground uppercase">Category</p>
               <p className="text-sm font-medium text-foreground mt-1">{app.category?.name || 'App'}</p>
             </div>
-            <div className="h-8 w-px bg-border" />
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground uppercase">Developer</p>
-              <p className="text-sm font-medium text-foreground mt-1 truncate max-w-20">{app.developer_name || 'Unknown'}</p>
-            </div>
           </div>
+
+          {/* Notes */}
+          {app.notes && (
+            <section className="mt-4 p-3 rounded-xl bg-secondary/50">
+              <p className="text-xs font-medium text-muted-foreground mb-1">Developer Notes</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{app.notes}</p>
+            </section>
+          )}
 
           {/* What's New */}
           {app.whats_new && (
