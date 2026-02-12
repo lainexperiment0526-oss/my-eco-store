@@ -1,4 +1,4 @@
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/hooks/useApps';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
@@ -24,6 +24,7 @@ import { AdInterstitial } from '@/components/AdInterstitial';
 export default function AppDetail() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const { data: app, isLoading, error, refetch } = useApp(id || '');
   const { user } = useAuth();
   const { theme } = useTheme();
@@ -66,43 +67,100 @@ export default function AppDetail() {
       return;
     }
 
-    // If the app is paid, require Pi payment first
+    // If the app is paid, verify entitlement and only charge when needed.
     if (app?.pricing_model === 'paid' && app.price_amount > 0) {
-      if (!isPiReady) {
-        toast.error('Pi payment requires Pi Browser');
+      if (!user) {
+        toast.error('Sign in required for paid apps');
+        navigate('/auth');
         return;
       }
-      if (!isPiAuthenticated) {
-        const piUser = await authenticateWithPi();
-        if (!piUser) {
-          toast.error('Pi authentication required for payment');
+
+      const { data: purchase, error: purchaseError } = await supabase
+        .from('app_purchases')
+        .select('id, purchase_type, status, expires_at')
+        .eq('user_id', user.id)
+        .eq('app_id', appId)
+        .maybeSingle();
+
+      if (purchaseError) {
+        toast.error('Failed to verify purchase status');
+        return;
+      }
+
+      const hasOneTimeAccess = purchase?.purchase_type === 'onetime' && purchase?.status === 'active';
+      const hasMonthlyAccess = purchase?.purchase_type === 'monthly'
+        && purchase?.status === 'active'
+        && !!purchase?.expires_at
+        && new Date(purchase.expires_at).getTime() > Date.now();
+      const hasAccess = hasOneTimeAccess || hasMonthlyAccess;
+
+      if (!hasAccess) {
+        if (!isPiReady) {
+          toast.error('Pi payment requires Pi Browser');
           return;
         }
-      }
-      setIsPaying(true);
-      try {
-        await createPiPayment(
-          app.price_amount,
-          `Payment for ${app.name}`,
-          { type: 'app_purchase', app_id: appId, developer_id: app.user_id }
-        );
-        toast.success('Payment successful!');
-      } catch (err: any) {
-        if (err.message === 'Payment cancelled') {
-          toast.info('Payment cancelled');
-        } else {
-          toast.error('Payment failed');
+        if (!isPiAuthenticated) {
+          const piUser = await authenticateWithPi();
+          if (!piUser) {
+            toast.error('Pi authentication required for payment');
+            return;
+          }
+        }
+        setIsPaying(true);
+        try {
+          await createPiPayment(
+            app.price_amount,
+            `${purchase?.purchase_type === 'monthly' ? 'Subscription renewal' : 'Payment'} for ${app.name}`,
+            { type: 'app_purchase', app_id: appId, developer_id: app.user_id }
+          );
+
+          const purchaseType = app.payment_type === 'monthly' ? 'monthly' : 'onetime';
+          let expiresAt: string | null = null;
+          if (purchaseType === 'monthly') {
+            const base = purchase?.purchase_type === 'monthly'
+              && purchase?.expires_at
+              && new Date(purchase.expires_at).getTime() > Date.now()
+              ? new Date(purchase.expires_at)
+              : new Date();
+            const next = new Date(base);
+            next.setMonth(next.getMonth() + 1);
+            expiresAt = next.toISOString();
+          }
+
+          const { error: upsertError } = await supabase
+            .from('app_purchases')
+            .upsert(
+              {
+                user_id: user.id,
+                app_id: appId,
+                purchase_type: purchaseType,
+                status: 'active',
+                paid_at: new Date().toISOString(),
+                expires_at: expiresAt,
+              },
+              { onConflict: 'user_id,app_id' }
+            );
+
+          if (upsertError) throw upsertError;
+          queryClient.invalidateQueries({ queryKey: ['app-purchases', user.id] });
+          toast.success('Payment successful!');
+        } catch (err: any) {
+          if (err.message === 'Payment cancelled') {
+            toast.info('Payment cancelled');
+          } else {
+            toast.error('Payment failed');
+          }
+          setIsPaying(false);
+          return;
         }
         setIsPaying(false);
-        return;
       }
-      setIsPaying(false);
     }
 
     setPendingOpen({ url: normalizedUrl, appId });
     setIsOpening(true);
     setShowOpenAd(true);
-  }, [normalizeUrl, app, isPiReady, isPiAuthenticated, authenticateWithPi, createPiPayment]);
+  }, [normalizeUrl, app, user, isPiReady, isPiAuthenticated, authenticateWithPi, createPiPayment, navigate, queryClient]);
 
   const handleOpenAfterAd = useCallback(() => {
     const next = pendingOpen;

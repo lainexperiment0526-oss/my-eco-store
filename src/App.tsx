@@ -28,6 +28,7 @@ import Terms from "./pages/Terms";
 import License from "./pages/License";
 import Bookmarks from "./pages/Bookmarks";
 import Feedback from "./pages/Feedback";
+import AppPurchases from "./pages/AppPurchases";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ const App = () => {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/bookmarks" element={<Bookmarks />} />
                 <Route path="/feedback" element={<Feedback />} />
+                <Route path="/purchases" element={<AppPurchases />} />
                 <Route path="/about" element={<AboutOpenApp />} />
                 <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />

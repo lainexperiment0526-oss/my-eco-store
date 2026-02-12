@@ -318,6 +318,60 @@ export type Database = {
           },
         ]
       }
+      app_purchases: {
+        Row: {
+          app_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_payment_id: string | null
+          paid_at: string
+          purchase_type: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_payment_id?: string | null
+          paid_at?: string
+          purchase_type: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_payment_id?: string | null
+          paid_at?: string
+          purchase_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_purchases_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "app_purchases_last_payment_id_fkey"
+            columns: ["last_payment_id"]
+            isOneToOne: false
+            referencedRelation: "pi_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_drafts: {
         Row: {
           ad_title: string | null

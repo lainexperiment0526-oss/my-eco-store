@@ -32,6 +32,7 @@ import {
   Sparkles,
   Trophy,
   Code2,
+  Receipt,
 } from 'lucide-react';
 
 interface MenuItemProps {
@@ -90,6 +91,7 @@ export function MenuDrawer() {
           <MenuItem icon={<PlusCircle className="h-5 w-5" />} label="Submit App" href="/submit" />
           {user && <MenuItem icon={<Bookmark className="h-5 w-5" />} label="Favorites" href="/bookmarks" />}
           <MenuItem icon={<MessageSquare className="h-5 w-5" />} label="Feedback" href="/feedback" />
+          {user && <MenuItem icon={<Receipt className="h-5 w-5" />} label="Purchases" href="/purchases" />}
           {user && <MenuItem icon={<User className="h-5 w-5" />} label="Profile" href="/profile" />}
 
           <div className="border-t border-border mt-2 pt-3 space-y-1">
