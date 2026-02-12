@@ -330,8 +330,13 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
+          network_type: string
+          notes: string | null
           payment_id: string | null
           payment_status: string
+          payment_type: string | null
+          price_amount: number | null
+          pricing_model: string
           privacy_policy_url: string | null
           screenshot_urls: string[] | null
           tagline: string | null
@@ -354,8 +359,13 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
+          network_type?: string
+          notes?: string | null
           payment_id?: string | null
           payment_status?: string
+          payment_type?: string | null
+          price_amount?: number | null
+          pricing_model?: string
           privacy_policy_url?: string | null
           screenshot_urls?: string[] | null
           tagline?: string | null
@@ -378,8 +388,13 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
+          network_type?: string
+          notes?: string | null
           payment_id?: string | null
           payment_status?: string
+          payment_type?: string | null
+          price_amount?: number | null
+          pricing_model?: string
           privacy_policy_url?: string | null
           screenshot_urls?: string[] | null
           tagline?: string | null
@@ -521,6 +536,11 @@ export type Database = {
           languages: string[] | null
           logo_url: string | null
           name: string
+          network_type: string
+          notes: string | null
+          payment_type: string | null
+          price_amount: number | null
+          pricing_model: string
           privacy_policy_url: string | null
           ratings_count: number | null
           status: string | null
@@ -549,6 +569,11 @@ export type Database = {
           languages?: string[] | null
           logo_url?: string | null
           name: string
+          network_type?: string
+          notes?: string | null
+          payment_type?: string | null
+          price_amount?: number | null
+          pricing_model?: string
           privacy_policy_url?: string | null
           ratings_count?: number | null
           status?: string | null
@@ -577,6 +602,11 @@ export type Database = {
           languages?: string[] | null
           logo_url?: string | null
           name?: string
+          network_type?: string
+          notes?: string | null
+          payment_type?: string | null
+          price_amount?: number | null
+          pricing_model?: string
           privacy_policy_url?: string | null
           ratings_count?: number | null
           status?: string | null
@@ -621,6 +651,54 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      developer_earnings: {
+        Row: {
+          app_id: string
+          created_at: string
+          developer_id: string
+          developer_share: number
+          id: string
+          payment_id: string | null
+          platform_fee: number
+          total_amount: number
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          developer_id: string
+          developer_share?: number
+          id?: string
+          payment_id?: string | null
+          platform_fee?: number
+          total_amount?: number
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          developer_id?: string
+          developer_share?: number
+          id?: string
+          payment_id?: string | null
+          platform_fee?: number
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_earnings_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_earnings_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "pi_payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pi_payments: {
         Row: {
@@ -697,6 +775,42 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      withdrawal_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          developer_id: string
+          id: string
+          pi_wallet_address: string | null
+          processed_at: string | null
+          status: string
+          txid: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          developer_id: string
+          id?: string
+          pi_wallet_address?: string | null
+          processed_at?: string | null
+          status?: string
+          txid?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          developer_id?: string
+          id?: string
+          pi_wallet_address?: string | null
+          processed_at?: string | null
+          status?: string
+          txid?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

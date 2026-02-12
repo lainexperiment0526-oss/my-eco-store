@@ -28,6 +28,11 @@ export interface App {
   languages: string[];
   has_in_app_purchases: boolean;
   status: 'pending' | 'approved' | 'rejected';
+  pricing_model: 'free' | 'paid';
+  price_amount: number;
+  payment_type: 'onetime' | 'monthly' | 'free';
+  network_type: 'mainnet' | 'testnet' | 'beta';
+  notes: string | null;
 }
 
 export interface Category {

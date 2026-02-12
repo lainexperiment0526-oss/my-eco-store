@@ -16,6 +16,7 @@ import Admin from "./pages/Admin";
 import SubmitApp from "./pages/SubmitApp";
 import MyApps from "./pages/MyApps";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard";
+import DeveloperDashboard from "./pages/DeveloperDashboard";
 import AdModeration from "./pages/AdModeration";
 import Analytics from "./pages/Analytics";
 import NewApps from "./pages/NewApps";
@@ -63,6 +64,7 @@ const App = () => {
                 <Route path="/submit" element={<SubmitApp />} />
                 <Route path="/my-apps" element={<MyApps />} />
                 <Route path="/advertiser" element={<AdvertiserDashboard />} />
+                <Route path="/developer-dashboard" element={<DeveloperDashboard />} />
                 <Route path="/ad-moderation" element={<AdModeration />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/new" element={<NewApps />} />

@@ -85,6 +85,29 @@ Deno.serve(async (req) => {
           .eq("id", metadata.draft_id);
       }
 
+      // If this is an app purchase payment, record developer earnings (70/30 split)
+      if (metadata?.type === "app_purchase" && metadata?.app_id && metadata?.developer_id) {
+        const totalAmount = amount || 0;
+        const developerShare = totalAmount * 0.7;
+        const platformFee = totalAmount * 0.3;
+
+        // Get pi_payment record id
+        const { data: paymentRecord } = await supabase
+          .from("pi_payments")
+          .select("id")
+          .eq("payment_id", paymentId)
+          .maybeSingle();
+
+        await supabase.from("developer_earnings").insert({
+          developer_id: metadata.developer_id,
+          app_id: metadata.app_id,
+          payment_id: paymentRecord?.id || null,
+          total_amount: totalAmount,
+          developer_share: developerShare,
+          platform_fee: platformFee,
+        });
+      }
+
       return new Response(JSON.stringify({ success: true, data }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
