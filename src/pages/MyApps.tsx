@@ -153,7 +153,7 @@ export default function MyApps() {
           setAdTitle(data?.title || '');
         }
       })
-      .finally(() => {
+      .then(() => {
         if (isMounted) setIsAdLoading(false);
       });
     return () => {
