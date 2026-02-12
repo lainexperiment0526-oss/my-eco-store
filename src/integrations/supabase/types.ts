@@ -383,6 +383,7 @@ export type Database = {
           developer_website_url: string | null
           id: string
           logo_url: string | null
+          languages: string[] | null
           name: string
           network_type: string
           notes: string | null
@@ -412,6 +413,7 @@ export type Database = {
           developer_website_url?: string | null
           id?: string
           logo_url?: string | null
+          languages?: string[] | null
           name: string
           network_type?: string
           notes?: string | null
@@ -441,6 +443,7 @@ export type Database = {
           developer_website_url?: string | null
           id?: string
           logo_url?: string | null
+          languages?: string[] | null
           name?: string
           network_type?: string
           notes?: string | null

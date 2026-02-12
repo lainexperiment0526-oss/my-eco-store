@@ -16,6 +16,42 @@ import { Link } from 'react-router-dom';
 
 type SubmitStep = 'details' | 'payment' | 'submitting' | 'done';
 
+const LANGUAGE_OPTIONS = [
+  'English',
+  'Spanish',
+  'French',
+  'German',
+  'Portuguese',
+  'Italian',
+  'Russian',
+  'Arabic',
+  'Hindi',
+  'Chinese',
+  'Japanese',
+  'Korean',
+];
+
+const CATEGORY_SELECTION_ORDER = [
+  'Commerce',
+  'Games',
+  'NFT',
+  'Social',
+  'Education',
+  'AI',
+  'Software',
+  'Health & Fitness',
+  'Travel',
+  'Utilities',
+  'Career',
+  'Entertainment',
+  'Finance',
+  'Lifestyle',
+  'Music',
+  'Productivity',
+  'Sports',
+  'Other',
+];
+
 export default function SubmitApp() {
   const { user, loading } = useAuth();
   const { createPiPayment, isPiReady, authenticateWithPi, isPiAuthenticated } = usePiNetwork();
@@ -44,6 +80,7 @@ export default function SubmitApp() {
     price_amount: '',
     payment_type: 'free',
     network_type: 'mainnet',
+    languages: ['English'] as string[],
     notes: '',
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -72,6 +109,15 @@ export default function SubmitApp() {
       toast.error('Failed to load categories. Please refresh and try again.');
     }
   }, [categoriesError]);
+
+  const orderedCategories = (() => {
+    if (!categories || categories.length === 0) return [];
+    const byName = new Map(categories.map((c) => [c.name.toLowerCase(), c]));
+    const preferred = CATEGORY_SELECTION_ORDER
+      .map((name) => byName.get(name.toLowerCase()))
+      .filter((category): category is NonNullable<typeof category> => Boolean(category));
+    return preferred.length > 0 ? preferred : categories;
+  })();
 
   if (!loading && !user) {
     return (
@@ -137,6 +183,7 @@ export default function SubmitApp() {
       price_amount: formData.price_amount ? parseFloat(formData.price_amount) : 0,
       payment_type: formData.payment_type,
       network_type: formData.network_type,
+      languages: formData.languages,
       notes: formData.notes || null,
     };
 
@@ -159,8 +206,8 @@ export default function SubmitApp() {
   };
 
   const handleSaveDraft = async () => {
-    if (!formData.name || !formData.website_url || !formData.category_id) {
-      toast.error('Name, website URL, and category are required to save draft');
+    if (!formData.name || !formData.website_url || !formData.category_id || formData.languages.length === 0) {
+      toast.error('Name, website URL, category, and at least one language are required to save draft');
       return;
     }
     try {
@@ -190,6 +237,7 @@ export default function SubmitApp() {
       price_amount: draft.price_amount ? String(draft.price_amount) : '',
       payment_type: draft.payment_type || 'free',
       network_type: draft.network_type || 'mainnet',
+      languages: draft.languages?.length ? draft.languages : ['English'],
       notes: draft.notes || '',
     });
     setDraftId(draft.id);
@@ -201,8 +249,8 @@ export default function SubmitApp() {
   };
 
   const handleProceedToPayment = async () => {
-    if (!formData.name || !formData.website_url || !formData.category_id) {
-      toast.error('Name, website URL, and category are required');
+    if (!formData.name || !formData.website_url || !formData.category_id || formData.languages.length === 0) {
+      toast.error('Name, website URL, category, and at least one language are required');
       return;
     }
     try {
@@ -212,6 +260,18 @@ export default function SubmitApp() {
     } catch (error: any) {
       toast.error(error.message || 'Failed to save draft');
     }
+  };
+
+  const toggleLanguage = (language: string) => {
+    setFormData((prev) => {
+      const exists = prev.languages.includes(language);
+      return {
+        ...prev,
+        languages: exists
+          ? prev.languages.filter((l) => l !== language)
+          : [...prev.languages, language],
+      };
+    });
   };
 
   const handlePiPayment = async () => {
@@ -260,8 +320,8 @@ export default function SubmitApp() {
 
   const submitApp = async () => {
     if (!user) return;
-    if (!formData.category_id) {
-      toast.error('Please select a category');
+    if (!formData.category_id || formData.languages.length === 0) {
+      toast.error('Please select a category and at least one language');
       setStep('details');
       return;
     }
@@ -300,6 +360,7 @@ export default function SubmitApp() {
           price_amount: formData.price_amount ? parseFloat(formData.price_amount) : 0,
           payment_type: formData.payment_type,
           network_type: formData.network_type,
+          languages: formData.languages,
           notes: formData.notes || null,
         })
         .select()
@@ -360,7 +421,7 @@ export default function SubmitApp() {
             <Button variant="outline" onClick={() => {
               setStep('details');
               setDraftId(null);
-              setFormData({ name: '', tagline: '', description: '', website_url: '', category_id: '', tags: '', version: '1.0', developer_name: '', age_rating: '4+', whats_new: '', privacy_policy_url: '', developer_website_url: '', pricing_model: 'free', price_amount: '', payment_type: 'free', network_type: 'mainnet', notes: '' });
+              setFormData({ name: '', tagline: '', description: '', website_url: '', category_id: '', tags: '', version: '1.0', developer_name: '', age_rating: '4+', whats_new: '', privacy_policy_url: '', developer_website_url: '', pricing_model: 'free', price_amount: '', payment_type: 'free', network_type: 'mainnet', languages: ['English'], notes: '' });
               setLogoFile(null);
               setScreenshotFiles([]);
               setVideoAdFile(null);
@@ -539,10 +600,10 @@ export default function SubmitApp() {
                   <SelectContent>
                     {categoriesLoading ? (
                       <SelectItem value="loading" disabled>Loading categories...</SelectItem>
-                    ) : !categories || categories.length === 0 ? (
+                    ) : orderedCategories.length === 0 ? (
                       <SelectItem value="empty" disabled>No categories found</SelectItem>
                     ) : (
-                      categories.map((cat) => (
+                      orderedCategories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                       ))
                     )}
@@ -571,6 +632,31 @@ export default function SubmitApp() {
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
                 <Input id="tags" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} placeholder="web, tool, free" />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>App Languages</Label>
+              <div className="flex flex-wrap gap-2">
+                {LANGUAGE_OPTIONS.map((language) => {
+                  const selected = formData.languages.includes(language);
+                  return (
+                    <button
+                      key={language}
+                      type="button"
+                      onClick={() => toggleLanguage(language)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        selected
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-border bg-secondary/40 text-foreground hover:bg-secondary'
+                      }`}
+                    >
+                      {language}
+                    </button>
+                  );
+                })}
+              </div>
+              {formData.languages.length === 0 && (
+                <p className="text-xs text-muted-foreground">Select at least one language.</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="whats_new">What's New</Label>
