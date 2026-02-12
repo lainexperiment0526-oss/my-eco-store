@@ -193,24 +193,12 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
           </span>
         </div>
 
-        {/* Mute toggle */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsMuted((prev) => !prev);
-          }}
-          className="absolute bottom-28 left-4 flex items-center gap-2 rounded-full bg-black/60 backdrop-blur px-3 py-2 text-white text-xs font-medium hover:bg-black/80 transition-colors"
-          aria-label={isMuted ? 'Unmute ad' : 'Mute ad'}
-        >
-          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-          {isMuted ? 'Muted' : 'Sound On'}
-        </button>
       </div>
 
-      {/* Floating app card */}
-      <div className="absolute bottom-4 left-4 right-4 z-[110]">
+      {/* Header app card */}
+      <div className="absolute top-16 left-4 right-4 z-[110]">
         <div
-          className="rounded-2xl bg-black/90 backdrop-blur-xl border border-white/10 px-4 py-3 flex items-center gap-3"
+          className="rounded-2xl bg-black/90 backdrop-blur-xl border border-white/10 px-4 py-3 flex items-center gap-2"
           role="button"
           tabIndex={0}
           onClick={() => {
@@ -246,6 +234,17 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
             </h4>
             <p className="text-xs text-white/60 truncate">{ad.app.category?.name || 'App'}</p>
           </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMuted((prev) => !prev);
+            }}
+            className="inline-flex items-center justify-center rounded-full bg-white/10 p-2 text-white/80 hover:bg-white/15"
+            aria-label={isMuted ? 'Unmute ad' : 'Mute ad'}
+            title={isMuted ? 'Unmute' : 'Mute'}
+          >
+            {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+          </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
