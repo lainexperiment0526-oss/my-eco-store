@@ -69,9 +69,9 @@ export type Database = {
           clicks_count: number | null
           created_at: string | null
           daily_budget: number | null
-          duration_days: number
           description: string | null
           destination_url: string
+          duration_days: number
           id: string
           impressions_count: number | null
           media_type: string
@@ -92,9 +92,9 @@ export type Database = {
           clicks_count?: number | null
           created_at?: string | null
           daily_budget?: number | null
-          duration_days?: number
           description?: string | null
           destination_url: string
+          duration_days?: number
           id?: string
           impressions_count?: number | null
           media_type?: string
@@ -115,9 +115,9 @@ export type Database = {
           clicks_count?: number | null
           created_at?: string | null
           daily_budget?: number | null
-          duration_days?: number
           description?: string | null
           destination_url?: string
+          duration_days?: number
           id?: string
           impressions_count?: number | null
           media_type?: string
@@ -289,6 +289,35 @@ export type Database = {
           },
         ]
       }
+      app_downloads: {
+        Row: {
+          app_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_downloads_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_drafts: {
         Row: {
           ad_title: string | null
@@ -435,35 +464,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "app_reviews_app_id_fkey"
-            columns: ["app_id"]
-            isOneToOne: false
-            referencedRelation: "apps"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      app_downloads: {
-        Row: {
-          app_id: string
-          created_at: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          app_id: string
-          created_at?: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          app_id?: string
-          created_at?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "app_downloads_app_id_fkey"
             columns: ["app_id"]
             isOneToOne: false
             referencedRelation: "apps"
