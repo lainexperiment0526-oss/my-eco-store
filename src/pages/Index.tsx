@@ -66,11 +66,11 @@ export default function Index() {
         (app.developer_name ? app.developer_name.toLowerCase().includes(searchLower) : false) ||
         (app.developer_name ? normalize(app.developer_name).includes(searchCompact) : false) ||
         (Array.isArray(app.tags)
-          ? app.tags.some(tag =>
+          ? app.tags.some((tag: string) =>
               tag.toLowerCase().includes(searchLower) || normalize(tag).includes(searchCompact)
             )
           : typeof app.tags === 'string'
-            ? app.tags.toLowerCase().includes(searchLower) || normalize(app.tags).includes(searchCompact)
+            ? (app.tags as string).toLowerCase().includes(searchLower) || normalize(app.tags as string).includes(searchCompact)
             : false)
       );
     }
