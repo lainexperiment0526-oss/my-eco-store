@@ -382,6 +382,7 @@ export type Database = {
           developer_name: string | null
           developer_website_url: string | null
           id: string
+          launch_at: string | null
           logo_url: string | null
           languages: string[] | null
           name: string
@@ -412,6 +413,7 @@ export type Database = {
           developer_name?: string | null
           developer_website_url?: string | null
           id?: string
+          launch_at?: string | null
           logo_url?: string | null
           languages?: string[] | null
           name: string
@@ -442,6 +444,7 @@ export type Database = {
           developer_name?: string | null
           developer_website_url?: string | null
           id?: string
+          launch_at?: string | null
           logo_url?: string | null
           languages?: string[] | null
           name?: string
@@ -591,6 +594,7 @@ export type Database = {
           is_featured: boolean | null
           is_verified: boolean
           is_popular: boolean | null
+          launch_at: string | null
           languages: string[] | null
           logo_url: string | null
           name: string
@@ -626,6 +630,7 @@ export type Database = {
           is_featured?: boolean | null
           is_verified?: boolean
           is_popular?: boolean | null
+          launch_at?: string | null
           languages?: string[] | null
           logo_url?: string | null
           name: string
@@ -661,6 +666,7 @@ export type Database = {
           is_featured?: boolean | null
           is_verified?: boolean
           is_popular?: boolean | null
+          launch_at?: string | null
           languages?: string[] | null
           logo_url?: string | null
           name?: string
