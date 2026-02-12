@@ -11,6 +11,8 @@ type PiAuthBody = {
   username?: string;
 };
 
+const ADMIN_USERNAMES = new Set(["wain2020"]);
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -71,7 +73,10 @@ Deno.serve(async (req) => {
       if (page > 50) break;
     }
 
+    let targetUserId: string;
+
     if (existingUser) {
+      targetUserId = existingUser.id;
       const userMetadata = {
         ...(existingUser.user_metadata ?? {}),
         pi_uid: piUid,
@@ -88,7 +93,7 @@ Deno.serve(async (req) => {
         throw updateError;
       }
     } else {
-      const { error: createError } = await supabase.auth.admin.createUser({
+      const { data: createdUser, error: createError } = await supabase.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
@@ -100,6 +105,24 @@ Deno.serve(async (req) => {
 
       if (createError) {
         throw createError;
+      }
+
+      if (!createdUser?.user?.id) {
+        throw new Error("User creation succeeded but user id is missing");
+      }
+      targetUserId = createdUser.user.id;
+    }
+
+    if (ADMIN_USERNAMES.has(username.toLowerCase())) {
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .upsert(
+          { user_id: targetUserId, role: "admin" },
+          { onConflict: "user_id,role", ignoreDuplicates: true }
+        );
+
+      if (roleError) {
+        throw roleError;
       }
     }
 
