@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DropPay - Fake Pi Payment</title>
+  <style>
+    body {
+      background: #f9f9f9;
+      color: #222;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      padding: 2rem 2.5rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .pay-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 0.875rem;
+      padding: 0.625rem 1.25rem;
+      background: #f3f4f6;
+      color: #222;
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+      margin-top: 1.5rem;
+    }
+    .pay-btn:active {
+      background: #e0e7ef;
+      color: #111;
+      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+    .pay-btn svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-right: 0.5rem;
+    }
+    .success {
+      color: #16a34a;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>DropPay (Pi Payments)</h2>
+    <p style="color:#888;">This is a <b>test/fake</b> payment page.<br>No real transactions will occur.</p>
+    <button class="pay-btn" id="payBtn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+      Pay
+    </button>
+    <div class="success" id="successMsg">Payment successful! (Fake)</div>
+  </div>
+  <script>
+    document.getElementById('payBtn').onclick = function() {
+      document.getElementById('successMsg').style.display = 'block';
+    };
+  </script>
+</body>
+</html>

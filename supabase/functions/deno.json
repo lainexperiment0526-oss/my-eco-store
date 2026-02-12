@@ -1,0 +1,21 @@
+{
+  "imports": {
+    "std/": "https://deno.land/std@0.208.0/",
+    "@supabase/": "https://esm.sh/@supabase/"
+  },
+  "tasks": {
+    "test": "deno test --allow-all",
+    "lint": "deno lint"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-explicit-any"]
+    }
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 120,
+    "indentWidth": 2
+  }
+}

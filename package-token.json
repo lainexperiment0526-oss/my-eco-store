@@ -1,0 +1,24 @@
+{
+  "name": "pi-token-scripts",
+  "version": "1.0.0",
+  "description": "Pi Network DROP token setup and management scripts",
+  "main": "pi-token-setup.js",
+  "scripts": {
+    "setup-token": "node pi-token-setup.js setup",
+    "check-status": "node pi-token-setup.js status", 
+    "distribute": "node pi-token-setup.js distribute",
+    "install-deps": "npm install @stellar/stellar-sdk"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^12.0.0"
+  },
+  "keywords": [
+    "pi-network",
+    "stellar",
+    "token",
+    "droplink",
+    "drop-token"
+  ],
+  "author": "MRWAIN ORGANIZATION",
+  "license": "MIT"
+}

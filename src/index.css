@@ -1,0 +1,284 @@
+/* THEME TEMPLATES: Set background to primary for each theme */
+.theme-pastel-purple {
+  --primary: 270 100% 85%; /* pastel purple */
+  --background: var(--primary);
+}
+.theme-neon-gold {
+  --primary: 48 100% 60%; /* neon gold */
+  --background: var(--primary);
+}
+.theme-sunset-teal {
+  --primary: 180 80% 60%; /* sunset teal */
+  --background: var(--primary);
+}
+.theme-galaxy-purple {
+  --primary: 265 80% 40%; /* galaxy purple */
+  --background: var(--primary);
+}
+.theme-strawberry-pink {
+  --primary: 340 80% 80%; /* strawberry pink */
+  --background: var(--primary);
+}
+.theme-frosted-blue {
+  --primary: 210 100% 90%; /* frosted blue */
+  --background: var(--primary);
+}
+.theme-coral-peach {
+  --primary: 18 90% 80%; /* coral peach */
+  --background: var(--primary);
+}
+.theme-mint-green {
+  --primary: 150 80% 80%; /* mint green */
+  --background: var(--primary);
+}
+.theme-purple-gold {
+  --primary: 270 80% 60%; /* pi purple */
+  --background: var(--primary);
+}
+.theme-minimal-white {
+  /* Minimal White Cloud: airy white/cream gradient background, soft white primary */
+  --primary: 0 0% 96%; /* #f5f5f5 */
+  --background: linear-gradient(135deg, #f5f5f5 0%, #fffde4 100%);
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Prevent horizontal scroll globally */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  overscroll-behavior-y: contain; /* prevent bounce causing layout jumps on mobile */
+  height: 100%;
+  overflow-y: auto;
+}
+
+#root {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+
+    --primary: 197 92% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 197 92% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 197 92% 60%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --input-bg: 0 0% 98%;
+    --hover-bg: 0 0% 97%;
+  }
+
+  .dark {
+    --background: 0 0% 9%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 197 92% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 197 92% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 15%;
+    --ring: 197 92% 60%;
+
+    --input-bg: 0 0% 12%;
+    --hover-bg: 0 0% 18%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: hidden;
+    max-width: 100vw;
+    overflow-wrap: anywhere; /* long words don't overflow */
+    word-break: break-word;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  }
+}
+
+@layer utilities {
+  .transition-smooth {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* ============================================================================ */
+  /* SCROLLBAR STYLING FOR PHONE PREVIEW AND OVERFLOW CONTAINERS */
+  /* ============================================================================ */
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .scrollbar-thumb-white\/30 {
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+
+  .scrollbar-thumb-white\/30::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .scrollbar-track-transparent {
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* ============================================================================ */
+  /* UTILITY CLASSES */
+  /* ============================================================================ */
+
+  /* Prevent horizontal scroll */
+  .no-scrollbar-x {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  /* Constrain container width */
+  .container-safe {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* ============================================================================ */
+  /* MOBILE-SPECIFIC ADJUSTMENTS */
+  /* ============================================================================ */
+
+  @media (max-width: 768px) {
+    /* Safe area helpers for iOS */
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .safe-area-top {
+      padding-top: env(safe-area-inset-top);
+    }
+    /* Prevent media overflow without breaking explicit h-full/object-cover layouts */
+    img, video {
+      max-width: 100% !important;
+    }
+    /* Prevent grids from squeezing too tight */
+    .grid-auto-fill-min {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+  }
+}
+
+/* ===== REUSABLE CLASSES ===== */
+
+/* Animation Delays */
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Additional utilities for mobile robustness */
+.break-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Mobile-safe page container wrapper */
+.page-wrapper {
+  @apply w-full overflow-x-hidden;
+}
+
+/* Mobile-safe main content padding */
+.main-content {
+  @apply px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 pb-24 sm:pb-28;
+}
+
+/* Responsive container for all devices */
+.safe-container {
+  @apply w-full max-w-full overflow-x-hidden;
+}
+
+/* Clamp content width with safe padding */
+.content-safe {
+  @apply mx-auto px-3 sm:px-4 md:px-6 w-full;
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <!-- Drop shape -->
+  <path d="M250 50 C300 50, 350 100, 350 150 C350 200, 350 250, 300 280 C275 295, 225 295, 200 280 C150 250, 150 200, 150 150 C150 100, 200 50, 250 50 Z" fill="#1E9BFF"/>
+  
+  <!-- Droplink text -->
+  <text x="50" y="400" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#1E9BFF">
+    Droplink
+  </text>
+</svg>

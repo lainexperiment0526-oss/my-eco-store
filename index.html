@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png" type="image/png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+      <!-- ========================= -->
+      <!-- General Meta Tags (SEO, Social, Browser) -->
+      <!-- ========================= -->
+      <title>Droplink | Join the Pi Network’s #1 Link In Bio Platform</title>
+      <meta name="title" content="Droplink | Join the Pi Network’s #1 Link In Bio Platform" />
+      <meta name="description" content="Create a powerful link-in-bio with unlimited links, clean themes, Pi monetization, and creator tools. Easy to use. Trusted by Pi creators worldwide." />
+      <meta name="keywords" content="Pi Network, Droplink, Link In Bio, Pi Monetization, Crypto, Creator Tools, Mainnet" />
+      <meta name="author" content="DropLink Team" />
+
+      <!-- ========================= -->
+      <!-- PiNet (Pi Network) Meta Tags -->
+      <!-- ========================= -->
+      <meta name="pi-app" content="true" />
+      <meta name="pi-network" content="mainnet" />
+      <meta name="pi-app-name" content="DropLink" />
+      <meta name="pi-app-version" content="1.0.0" />
+      <meta name="pi-validation-url" content="https://droplink.space/validation-key.txt" />
+      <meta name="pi-app-url" content="https://droplink.space" />
+      <meta name="pi-mainnet-ready" content="true" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://droplink.space/" />
+    <meta property="og:title" content="Droplink | Join the Pi Network’s #1 Link In Bio Platform" />
+    <meta property="og:description" content="Create a powerful link-in-bio with unlimited links, clean themes, Pi monetization, and creator tools. Easy to use. Trusted by Pi creators worldwide." />
+    <meta property="og:image" content="https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png" />
+    <meta property="og:site_name" content="Droplink" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://droplink.space/" />
+    <meta name="twitter:title" content="Droplink | Join the Pi Network’s #1 Link In Bio Platform" />
+    <meta name="twitter:description" content="Create a powerful link-in-bio with unlimited links, clean themes, Pi monetization, and creator tools. Easy to use. Trusted by Pi creators worldwide." />
+    <meta name="twitter:image" content="https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png" />
+    <meta name="twitter:creator" content="@DropLinkApp" />
+
+    <!-- Browser Compatibility -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- Pi Browser Compatibility -->
+    <meta name="pi-app" content="true" />
+    <meta name="pi-network" content="mainnet" />
+    <meta name="pi-app-name" content="DropLink" />
+    <meta name="pi-app-version" content="1.0.0" />
+
+    <!-- Content Security Policy for Pi Browser - MAINNET ONLY -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.minepi.com https://api.minepi.com https://socialchain.app https://horizon.stellar.org https://jzzbmoopwnvgxxirulga.supabase.co https://*.supabase.co; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.minepi.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https://sdk.minepi.com https://api.minepi.com https://socialchain.app https://horizon.stellar.org https://jzzbmoopwnvgxxirulga.supabase.co https://*.supabase.co wss://*.supabase.co https://droplink.space; frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://www.youtube.googleapis.com;" />
+
+    <title>DropLink - Link in Bio, Digital Products & Pi Network Integration | Create Your Personal Page</title>
+    <meta name="description" content="Create your professional link-in-bio page with DropLink. Sell digital products, accept Pi Network payments, display social links, and monetize with Pi Ad Network. Free to start!" />
+    <meta name="author" content="DropLink" />
+    <meta name="keywords" content="link in bio, droplink platform, pi network, digital products, sell online, social media links, bio link, personal page, pi payments, pi cryptocurrency, creator economy, influencer tools, pi network app, monetization platform, digital marketplace" />
+    
+    <!-- SEO Meta Tags -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    <link rel="canonical" href="https://droplink.space" />
+    
+    <!-- Additional SEO -->
+    <meta name="application-name" content="DropLink" />
+    <meta name="apple-mobile-web-app-title" content="DropLink" />
+    <meta name="theme-color" content="#4F46E5" />
+    <meta name="msapplication-TileColor" content="#4F46E5" />
+    <meta name="rating" content="general" />
+    <meta name="referrer" content="origin-when-cross-origin" />
+
+
+    <!-- Pi CORS Fix for Development -->
+    <script src="/pi-cors-fix.js"></script>
+    
+    <!-- Pi Network SDK Integration - Official Pattern -->
+    <!-- Following: https://pi-apps.github.io/community-developer-guide/docs/gettingStarted/piAppPlatform/piAppPlatformSDK/ -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+      // Initialize Pi SDK - Version 2.0 (Mainnet Production)
+      // This must be called before any other Pi SDK functions
+      Pi.init({ version: "2.0" });
+      console.log('[PI SDK] ✅ Pi SDK initialized with version 2.0');
+    </script>
+
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Additional Pi Browser Meta Tags -->
+    <meta name="pi-validation-url" content="https://droplink.space/validation-key.txt" />
+    <meta name="pi-app-url" content="https://droplink.space" />
+    <meta name="pi-mainnet-ready" content="true" />
+
+    <!-- Pi Environment Validation -->
+    <script>
+      (function() {
+        const VALIDATION_KEY = "7511661aac4538b1832d2c9ba117f6d972b26a54640598d3fbb9824013c7079203f65b02d125be3f418605cfb89ba0e4443e3ec997e3800eb464df0bc5410d2a";
+        const API_KEY = "zmdsfbedi4idcsniyy7ee1twwulq2cbruighxqgtqozyk6ph1fjswft69cddgqwk";
+        
+        console.log('[PI VALIDATION] 🔍 Validating Pi environment...');
+        
+        // Check HTTPS (more lenient for development)
+        if (window.location.protocol !== 'https:') {
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.warn('[PI VALIDATION] ⚠️ Development mode: HTTPS recommended but not enforced');
+            console.log('[PI VALIDATION] 💡 For production Pi validation, use HTTPS');
+          } else {
+            console.warn('[PI VALIDATION] ⚠️ Not on HTTPS - Pi Browser requires HTTPS for validation');
+          }
+        } else {
+          console.log('[PI VALIDATION] ✅ HTTPS detected - Pi SDK validation enabled');
+        }
+        
+        // Validate manifest.json
+        fetch('/manifest.json')
+          .then(r => {
+            if (!r.ok) throw new Error('Failed to fetch manifest');
+            return r.json();
+          })
+          .then(manifest => {
+            const mApiKey = manifest.pi_app?.api_key;
+            const mValidationKey = manifest.pi_app?.validation_key;
+            
+            if (mApiKey === API_KEY && mValidationKey === VALIDATION_KEY) {
+              console.log('[PI VALIDATION] ✅ Manifest validation keys match');
+            } else {
+              console.error('[PI VALIDATION] ❌ Manifest validation mismatch');
+              console.error('  Expected API Key:', API_KEY);
+              console.error('  Manifest API Key:', mApiKey);
+              console.error('  Expected Validation Key:', VALIDATION_KEY.substring(0, 30) + '...');
+              console.error('  Manifest Validation Key:', mValidationKey?.substring(0, 30) + '...');
+            }
+          })
+          .catch(err => {
+            console.error('[PI VALIDATION] ❌ Failed to fetch manifest.json:', err.message);
+          });
+        
+        // Validate validation-key.txt
+        fetch('/validation-key.txt')
+          .then(r => r.text())
+          .then(key => {
+            if (key.trim() === VALIDATION_KEY) {
+              console.log('[PI VALIDATION] ✅ validation-key.txt matches');
+            } else {
+              console.error('[PI VALIDATION] ❌ validation-key.txt mismatch');
+            }
+          })
+          .catch(err => {
+            console.error('[PI VALIDATION] ❌ Failed to fetch validation-key.txt:', err.message);
+          });
+      })();
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://droplink.space" />
+    <meta property="og:site_name" content="DropLink" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png">
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="DropLink - Your Link in Bio Platform" />
+    <meta property="og:title" content="DropLink - Link in Bio, Digital Products & Pi Network Integration">
+    <meta property="og:description" content="Create your professional link-in-bio page with DropLink. Sell digital products, accept Pi Network payments, display social links, and monetize with Pi Ad Network. Free to start!">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@droplink" />
+    <meta name="twitter:creator" content="@droplink" />
+    <meta name="twitter:domain" content="droplink.space" />
+    <meta name="twitter:url" content="https://droplink.space" />
+    <meta name="twitter:image" content="https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png">
+    <meta name="twitter:title" content="DropLink - Link in Bio, Digital Products & Pi Network Integration">
+    <meta name="twitter:description" content="Create your professional link-in-bio page with DropLink. Sell digital products, accept Pi Network payments, display social links, and monetize with Pi Ad Network. Free to start!">
+    
+    <!-- Structured Data / JSON-LD for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "DropLink",
+      "alternateName": "DropLink - Link in Bio Platform",
+      "url": "https://droplink.space",
+      "logo": "https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png",
+      "description": "Create your professional link-in-bio page with DropLink. Sell digital products, accept Pi Network payments, display social links, and monetize with Pi Ad Network.",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "1250"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "DropLink",
+        "url": "https://droplink.space"
+      },
+      "featureList": [
+        "Link in Bio Pages",
+        "Digital Product Sales",
+        "Pi Network Integration",
+        "Social Media Links",
+        "Pi Payments",
+        "Pi Ad Network",
+        "Custom Themes",
+        "Analytics Dashboard",
+        "QR Code Generation",
+        "Multiple Accounts",
+        "Mobile Responsive"
+      ],
+      "softwareVersion": "1.0.0",
+      "datePublished": "2024-01-01",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true,
+      "screenshot": "https://storage.googleapis.com/gpt-engineer-file-uploads/ALLayxCo2Zd0m48xGbSaAofsXYf1/social-images/social-1762075342466-Untitled design (8) (1).png"
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "DropLink",
+      "url": "https://droplink.space",
+      "logo": "https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png",
+      "sameAs": [
+        "https://twitter.com/droplink",
+        "https://github.com/playdroplink"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "support@droplink.space",
+        "contactType": "Customer Support",
+        "availableLanguage": ["English"]
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "DropLink",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web Browser, Pi Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "PI"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "1250"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    
+    <!-- Global error and warning handler for Pi SDK -->
+    <script>
+      // Catch and log any errors related to Pi SDK
+      const originalError = console.error;
+      const originalWarn = console.warn;
+      
+      console.error = function(...args) {
+        // Log to original console
+        originalError.apply(console, args);
+        
+        // Check if it's a Pi SDK related error
+        const errorStr = String(args[0] || '').toLowerCase();
+        if (errorStr.includes('pi') || errorStr.includes('sdk') || errorStr.includes('authenticate')) {
+          console.log('[PI ERROR HANDLER] 🚨 Pi SDK error caught:', args);
+        }
+      };
+      
+      console.warn = function(...args) {
+        originalWarn.apply(console, args);
+        const warnStr = String(args[0] || '').toLowerCase();
+        if (warnStr.includes('pi') || warnStr.includes('sdk')) {
+          console.log('[PI ERROR HANDLER] ⚠️ Pi SDK warning caught:', args);
+        }
+      };
+      
+      // Monitor for uncaught errors
+      window.addEventListener('error', function(event) {
+        const errorMsg = String(event.message || event.error || '').toLowerCase();
+        if (errorMsg.includes('pi') || errorMsg.includes('sdk') || errorMsg.includes('authenticate')) {
+          console.error('[PI ERROR HANDLER] 🔴 Uncaught error related to Pi:', {
+            message: event.message,
+            error: event.error,
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno
+          });
+        }
+      });
+      
+      // Monitor for unhandled promise rejections
+      window.addEventListener('unhandledrejection', function(event) {
+        const rejectStr = String(event.reason || '').toLowerCase();
+        if (rejectStr.includes('pi') || rejectStr.includes('sdk') || rejectStr.includes('authenticate')) {
+          console.error('[PI ERROR HANDLER] 🔴 Unhandled promise rejection related to Pi:', event.reason);
+        }
+      });
+      
+      console.log('[PI ERROR HANDLER] ✅ Global error handlers installed');
+    </script>
+    
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

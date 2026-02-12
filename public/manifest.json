@@ -1,0 +1,41 @@
+{
+  "name": "Droplink",
+  "short_name": "Droplink",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "description": "Create a beautiful pi link in bio page with all your social links and sell digital products in one place.",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "pi_app": {
+    "api_key": "zmdsfbedi4idcsniyy7ee1twwulq2cbruighxqgtqozyk6ph1fjswft69cddgqwk",
+    "validation_key": "7511661aac4538b1832d2c9ba117f6d972b26a54640598d3fbb9824013c7079203f65b02d125be3f418605cfb89ba0e4443e3ec997e3800eb464df0bc5410d2a",
+    "version": "2.0",
+    "name": "DropLink",
+    "domain": "droplink.space",
+    "network": "mainnet",
+    "sandbox": false,
+    "mainnet_ready": true,
+    "browser_detection": true,
+    "validation_url": "https://droplink.space/validation-key.txt"
+  }
+}

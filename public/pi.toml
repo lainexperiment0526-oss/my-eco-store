@@ -1,0 +1,15 @@
+# DROP Token Configuration for Pi Mainnet
+[[CURRENCIES]]
+code="DROP"
+issuer="GBVTV77XFMDYSSVIG6ZGSRAGZ3S7KA4275YYLOLIROOD3Y3F3TH5U3EI"
+distributor="GCTPMH43NGN7E4IXLQ27H2XWGGWWDY3I6UAPBFXYQSEUPEKNQE2BZXC2"
+home_domain="droplink.space"
+display_decimals=2
+name="DropLink Team"
+desc="Drop Ecosystem Token - earn and use DROP by creating bio pages, sharing content, and engaging with the community. Utility token for platform features including tips, premium subscriptions, and connect custom .pi domains."
+conditions="This token is issued by DropLink platform for utility purposes only. It has no intrinsic monetary value and should not be considered an investment for Pi Mainnet."
+image="https://i.ibb.co/wZgHVH1J/Gemini-Generated-Image-eqjc62eqjc62eqjc.png"
+anchor_asset_type="other"
+anchor_asset="DROP"
+redemption_instructions="DROP tokens can be used within the DropLink.DropStore,DropPay platform for tipping creators, monthly subscriptions, checkoutlink payment, and creating storefront, accessing exclusive features."
+regulated=false

@@ -1,0 +1,95 @@
+<div class="min-h-screen bg-background flex items-center justify-center p-4">
+  <div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md">
+    <div class="flex flex-col space-y-1.5 p-6 text-center">
+      <div class="flex justify-center mb-4">
+        <img src="https://i.ibb.co/67KHWdv9/Add-a-subheading-2-removebg-preview.png" alt="Droplink" class="w-16 h-16 object-contain">
+      </div>
+      <h3 class="font-semibold tracking-tight text-2xl">Welcome to Droplink</h3>
+      <p class="text-sm text-muted-foreground">Sign in with Pi Network to create your personal page, sell digital products, and accept Pi payments</p>
+    </div>
+    <div class="p-6 pt-0 space-y-4">
+        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-md px-8 w-full mb-2">Sign in with Pi Network</button>
+        <a href="https://droplink.space/droplinkofficial" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[#6C47FF] text-white hover:bg-[#4B2FCB] h-11 rounded-md px-8 w-full mb-2">Droplink Socials</a>
+        <a href="https://minepi.com/get" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[#FF8200] text-white hover:bg-[#cc6900] h-11 rounded-md px-8 w-full mb-2">Download Pi Browser</a>
+    </div>
+    <div class="space-y-2 text-sm text-muted-foreground">
+      <p class="flex items-center gap-2"><span class="text-primary">✓</span>Create your personalized link-in-bio page</p>
+      <p class="flex items-center gap-2"><span class="text-primary">✓</span>Sell digital products and accept Pi payments</p>
+      <p class="flex items-center gap-2"><span class="text-primary">✓</span>Connect all your social media in one place</p>
+      <p class="flex items-center gap-2"><span class="text-primary">✓</span>Your data persists across sessions with Pi authentication</p>
+    </div>
+    <div class="pt-4 border-t space-y-2">
+      <p class="text-xs text-center text-muted-foreground">Pi Network access is not available in this browser (Sandbox mode active).<br>Please open this app in Pi Browser to use Pi authentication, or ensure the Pi SDK is loaded in your environment.<br>Your Pi username will be used as your unique identifier.</p>
+      <div class="flex justify-center mt-2">
+        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">Download Pi Browser</button>
+      </div>
+      <div class="flex justify-center gap-4 text-xs">
+        <button class="text-primary hover:underline cursor-pointer" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r1:" data-state="closed">About</button>
+        <span class="text-muted-foreground">•</span>
+        <button class="text-primary hover:underline cursor-pointer" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r4:" data-state="closed">License</button>
+        <span class="text-muted-foreground">•</span>
+        <button class="text-primary hover:underline cursor-pointer" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-:r7:" data-state="closed">Merchant</button>
+        <span class="text-muted-foreground">•</span>
+        <a href="/terms" class="text-primary hover:underline">Terms</a>
+        <span class="text-muted-foreground">•</span>
+        <a href="/privacy" class="text-primary hover:underline">Privacy</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include Pi Network SDK -->
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script>
+  // Initialize Pi SDK
+  Pi.init({ version: "2.0" });
+
+  // Authenticate user for payments
+  const scopes = ['payments'];
+  function onIncompletePaymentFound(payment) {
+    console.log('Incomplete payment found:', payment);
+  }
+
+  Pi.authenticate(scopes, onIncompletePaymentFound)
+    .then(auth => {
+      console.log("User authenticated successfully:", auth);
+    })
+    .catch(error => {
+      console.error("Authentication failed:", error);
+    });
+
+  // Example payment request
+  function requestPayment() {
+    Pi.createPayment({
+      amount: 3.14, // Amount in Pi
+      memo: "Payment for service",
+      metadata: { orderId: 1234 },
+    }, {
+      onReadyForServerApproval: paymentId => {
+        console.log("Payment ready for server approval:", paymentId);
+      },
+      onReadyForServerCompletion: (paymentId, txid) => {
+        console.log("Payment completed successfully:", paymentId, txid);
+      },
+      onCancel: paymentId => {
+        console.log("Payment cancelled:", paymentId);
+      },
+      onError: (error, payment) => {
+        console.error("Payment error:", error, payment);
+      },
+    });
+  }
+</script>
+
+<!-- Include Pi Ad Network SDK -->
+<script>
+  // Example: Load Pi Ad Network
+  function loadPiAdNetwork() {
+    console.log("Loading Pi Ad Network...");
+    // Placeholder for Pi Ad Network integration logic
+    // Refer to Pi Ad Network documentation for implementation details
+  }
+
+  // Call the function to load ads
+  loadPiAdNetwork();
+</script>

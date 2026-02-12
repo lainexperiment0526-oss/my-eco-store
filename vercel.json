@@ -1,0 +1,124 @@
+{
+  "buildCommand": "bun run build",
+  "installCommand": "bun install",
+  "framework": "vite",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/.well-known/pi.toml",
+      "destination": "/pi.toml"
+    },
+    {
+      "source": "/u/([^/]+)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/profile/([^/]+)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/.well-known/(.*)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self' https://*.pi https://*.minepi.com https://pi://app *;"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "VITE_SUPABASE_URL": "https://jzzbmoopwnvgxxirulga.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlka2pmdWN0eXVrc3BleG1panZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0NjI0NzMsImV4cCI6MjA3OTAzODQ3M30.dIJlRYAnSgj2Ohsl6tqz_cP9Zg03HG6naYTGXoAjkDs",
+    "VITE_PI_NETWORK": "mainnet",
+    "VITE_PI_NETWORK_PASSPHRASE": "Pi Mainnet",
+    "VITE_API_URL": "https://api.minepi.com",
+    "VITE_PI_HORIZON_URL": "https://api.minepi.com",
+    "VITE_PI_SDK_URL": "https://sdk.minepi.com/pi-sdk.js",
+    "VITE_PI_API_KEY": "b00j4felp0ctc1fexe8igldsjg9u7wbqitavc15si53fr9wwra7r6oluzk4j24qz",
+    "VITE_PI_VALIDATION_KEY": "7511661aac4538b1832d2c9ba117f6d972b26a54640598d3fbb9824013c7079203f65b02d125be3f418605cfb89ba0e4443e3ec997e3800eb464df0bc5410d2a",
+    "VITE_PI_SANDBOX_MODE": "false",
+    "VITE_PI_MAINNET_MODE": "true",
+    "VITE_PI_AUTHENTICATION_ENABLED": "true",
+    "VITE_PI_PAYMENTS_ENABLED": "true",
+    "VITE_PI_AD_NETWORK_ENABLED": "true",
+    "VITE_PI_WALLET_DETECTION_ENABLED": "true",
+    "VITE_PI_TOKEN_DETECTION_ENABLED": "true",
+    "VITE_PI_REWARDED_ADS_ENABLED": "true",
+    "VITE_PI_INTERSTITIAL_ADS_ENABLED": "true",
+    "VITE_PI_AD_FREQUENCY_CAP": "3",
+    "VITE_PI_AD_COOLDOWN_MINUTES": "5",
+    "VITE_PI_AD_NETWORK_VERSION": "2.0",
+    "VITE_PI_MIN_PAYMENT_AMOUNT": "0.01",
+    "VITE_PI_MAX_PAYMENT_AMOUNT": "10000",
+    "VITE_PI_PAYMENT_CURRENCY": "PI",
+    "VITE_PI_PAYMENT_MEMO_ENABLED": "true",
+    "VITE_PI_PAYMENT_TIMEOUT": "60000",
+    "VITE_PI_SUBSCRIPTION_ENABLED": "true",
+    "VITE_PI_STELLAR_HORIZON_URL": "https://horizon.stellar.org",
+    "VITE_PI_STELLAR_NETWORK": "mainnet",
+    "VITE_DROP_ISSUER": "GBVTV77XFMDYSSVIG6ZGSRAGZ3S7KA4275YYLOLIROOD3Y3F3TH5U3EI",
+    "VITE_DROP_DISTRIBUTOR": "GCTPMH43NGN7E4IXLQ27H2XWGGWWDY3I6UAPBFXYQSEUPEKNQE2BZXC2",
+    "VITE_DROP_CODE": "DROP",
+    "VITE_DROP_HOME_DOMAIN": "droplink.space",
+    "VITE_PLATFORM_NAME": "DropLink",
+    "VITE_PLATFORM_URL": "https://droplink.space",
+    "VITE_PLATFORM_SUPPORT": "support@droplink.space",
+    "VITE_PLATFORM_DOMAIN": "droplink.space",
+    "VITE_DOMAIN": "droplink.space",
+    "VITE_ENABLE_ANALYTICS": "true",
+    "VITE_ENABLE_TELEMETRY": "false",
+    "VITE_DEBUG_MODE": "false",
+    "VITE_ENABLE_ERROR_REPORTING": "true",
+    "NODE_ENV": "production",
+    "VITE_ENVIRONMENT": "production"
+  }
+}

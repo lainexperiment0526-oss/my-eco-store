@@ -1,0 +1,67 @@
+-- User Profile Table (already exists, shown for reference)
+CREATE TABLE IF NOT EXISTS profiles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  username text,
+  pi_user_id text,
+  business_name text,
+  description text,
+  first_name text,
+  last_name text,
+  profile_photo text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  CONSTRAINT unique_username UNIQUE (username),
+  CONSTRAINT unique_pi_user_id UNIQUE (pi_user_id)
+);
+
+-- Activity Log Table
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id text REFERENCES profiles(pi_user_id),
+  action text NOT NULL,
+  details jsonb,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Profile Change History Table
+CREATE TABLE IF NOT EXISTS profile_changes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id text REFERENCES profiles(pi_user_id),
+  changed_fields jsonb,
+  old_values jsonb,
+  new_values jsonb,
+  changed_at timestamptz DEFAULT now()
+);
+
+-- User Links Table
+CREATE TABLE IF NOT EXISTS user_links (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id text REFERENCES profiles(pi_user_id),
+  url text NOT NULL,
+  title text,
+  description text,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Payments Table
+CREATE TABLE IF NOT EXISTS payments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id text REFERENCES profiles(pi_user_id),
+  amount numeric,
+  currency text,
+  status text,
+  payment_data jsonb,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Subscriptions Table
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id text REFERENCES profiles(pi_user_id),
+  plan text NOT NULL, -- e.g. 'free', 'pro', 'premium'
+  status text NOT NULL, -- e.g. 'active', 'expired', 'cancelled', 'pending'
+  start_date timestamptz DEFAULT now(),
+  end_date timestamptz,
+  payment_id uuid REFERENCES payments(id),
+  created_at timestamptz DEFAULT now()
+);

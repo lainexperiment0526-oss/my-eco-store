@@ -1,0 +1,79 @@
+# DropLink Robots.txt - Optimized for Search Engine Discovery
+# Last Updated: December 5, 2025
+
+# Google
+User-agent: Googlebot
+Allow: /
+Allow: /@*
+Allow: /public/*
+Crawl-delay: 0
+
+User-agent: Googlebot-Image
+Allow: /
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Allow: /@*
+Crawl-delay: 0
+
+# Social Media Crawlers
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+# Pi Network Crawlers
+User-agent: PiBot
+Allow: /
+
+User-agent: Pi-Browser
+Allow: /
+
+# Other Search Engines
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Allow all other bots
+User-agent: *
+Allow: /
+Allow: /@*
+Allow: /public/*
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /admin
+Disallow: /api/private/
+Crawl-delay: 1
+
+# Sitemaps
+Sitemap: https://droplink.space/sitemap.xml
+Sitemap: https://droplink.space/sitemap-profiles.xml
+Sitemap: https://droplink.space/sitemap-products.xml
+
+# Host
+Host: https://droplink.space
+
