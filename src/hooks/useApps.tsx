@@ -126,9 +126,11 @@ export function useCreateApp() {
         .from('apps')
         .insert(app)
         .select()
-        .single();
+        .limit(1)
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) throw new Error('App created but no row returned');
       return data;
     },
     onSuccess: () => {
@@ -146,10 +148,15 @@ export function useUpdateApp() {
         .from('apps')
         .update(app)
         .eq('id', id)
-        .select()
-        .single();
+        .select('id')
+        .limit(1)
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) {
+        // Avoid hard failure when PostgREST cannot coerce single-object responses.
+        return { id };
+      }
       return data;
     },
     onSuccess: () => {
@@ -185,9 +192,11 @@ export function useAddScreenshot() {
         .from('app_screenshots')
         .insert(screenshot)
         .select()
-        .single();
+        .limit(1)
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) throw new Error('Screenshot inserted but no row returned');
       return data;
     },
     onSuccess: () => {
