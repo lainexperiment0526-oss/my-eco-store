@@ -9,6 +9,9 @@ interface CategoryPillProps {
 }
 
 export function CategoryPill({ category, isActive }: CategoryPillProps) {
+  const iconName = category.icon || 'Grid3x3';
+  const IconComponent = (Icons[iconName as keyof typeof Icons] as LucideIcon) || Icons.Grid3x3;
+
   return (
     <Link
       to={`/?category=${category.id}`}
@@ -18,7 +21,7 @@ export function CategoryPill({ category, isActive }: CategoryPillProps) {
           : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
       }`}
     >
-      {category.icon && <span>{category.icon}</span>}
+      <IconComponent className="h-4 w-4" />
       <span>{category.name}</span>
     </Link>
   );
