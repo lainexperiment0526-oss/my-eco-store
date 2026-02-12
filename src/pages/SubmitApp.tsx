@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePiNetwork } from '@/hooks/usePiNetwork';
 import { Header } from '@/components/Header';
@@ -18,10 +17,9 @@ import { Link } from 'react-router-dom';
 type SubmitStep = 'details' | 'payment' | 'submitting' | 'done';
 
 export default function SubmitApp() {
-  const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { createPiPayment, isPiReady, authenticateWithPi, isPiAuthenticated } = usePiNetwork();
-  const { data: categories } = useCategories();
+  const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
   const addScreenshot = useAddScreenshot();
   const createAd = useCreateAd();
 
@@ -68,6 +66,12 @@ export default function SubmitApp() {
         });
     }
   }, [user]);
+
+  useEffect(() => {
+    if (categoriesError) {
+      toast.error('Failed to load categories. Please refresh and try again.');
+    }
+  }, [categoriesError]);
 
   if (!loading && !user) {
     return (
@@ -155,8 +159,8 @@ export default function SubmitApp() {
   };
 
   const handleSaveDraft = async () => {
-    if (!formData.name || !formData.website_url) {
-      toast.error('Name and website URL are required to save draft');
+    if (!formData.name || !formData.website_url || !formData.category_id) {
+      toast.error('Name, website URL, and category are required to save draft');
       return;
     }
     try {
@@ -197,8 +201,8 @@ export default function SubmitApp() {
   };
 
   const handleProceedToPayment = async () => {
-    if (!formData.name || !formData.website_url) {
-      toast.error('Name and website URL are required');
+    if (!formData.name || !formData.website_url || !formData.category_id) {
+      toast.error('Name, website URL, and category are required');
       return;
     }
     try {
@@ -256,6 +260,11 @@ export default function SubmitApp() {
 
   const submitApp = async () => {
     if (!user) return;
+    if (!formData.category_id) {
+      toast.error('Please select a category');
+      setStep('details');
+      return;
+    }
     setStep('submitting');
     setIsSubmitting(true);
 
@@ -522,13 +531,21 @@ export default function SubmitApp() {
             <h3 className="font-semibold text-foreground">App Details</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: String(value) })}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                <Label htmlFor="category">Category *</Label>
+                <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
+                  <SelectTrigger disabled={categoriesLoading || !!categoriesError}>
+                    <SelectValue placeholder={categoriesLoading ? "Loading categories..." : "Select category"} />
+                  </SelectTrigger>
                   <SelectContent>
-                    {categories?.map((cat) => (
-                      <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
-                    ))}
+                    {categoriesLoading ? (
+                      <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                    ) : !categories || categories.length === 0 ? (
+                      <SelectItem value="empty" disabled>No categories found</SelectItem>
+                    ) : (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>

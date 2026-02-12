@@ -14,7 +14,19 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const { theme } = useTheme();
   const appKey = app.name.toLowerCase();
   const badgeMap: Record<string, { light: string; dark: string }> = {
+    'openapp': {
+      light: 'https://i.ibb.co/BVQYVbyb/verified.png',
+      dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
+    },
     'flappy pi': {
+      light: 'https://i.ibb.co/BVQYVbyb/verified.png',
+      dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
+    },
+    'dropshare': {
+      light: 'https://i.ibb.co/BVQYVbyb/verified.png',
+      dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
+    },
+    'drop share': {
       light: 'https://i.ibb.co/BVQYVbyb/verified.png',
       dark: 'https://i.ibb.co/BVQYVbyb/verified.png',
     },

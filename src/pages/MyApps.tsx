@@ -52,6 +52,11 @@ export default function MyApps() {
     compatibility: '',
     languages: '',
     has_in_app_purchases: false,
+    pricing_model: 'free' as 'free' | 'paid',
+    price_amount: '',
+    payment_type: 'free' as 'free' | 'onetime' | 'monthly',
+    network_type: 'mainnet' as 'mainnet' | 'testnet' | 'beta',
+    notes: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -72,14 +77,24 @@ export default function MyApps() {
     enabled: !!user,
   });
 
-  const { data: categories } = useQuery({
+  const {
+    data: categories,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+  } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('categories').select('*');
+      const { data, error } = await supabase.from('categories').select('*').order('name');
       if (error) throw error;
       return data as Category[];
     },
   });
+
+  useEffect(() => {
+    if (categoriesError) {
+      toast.error('Failed to load categories. Please refresh and try again.');
+    }
+  }, [categoriesError]);
 
   if (!loading && !user) {
     return (
@@ -125,6 +140,11 @@ export default function MyApps() {
       compatibility: app.compatibility || '',
       languages: app.languages?.join(', ') || '',
       has_in_app_purchases: !!app.has_in_app_purchases,
+      pricing_model: app.pricing_model || 'free',
+      price_amount: app.price_amount ? String(app.price_amount) : '',
+      payment_type: app.payment_type || 'free',
+      network_type: app.network_type || 'mainnet',
+      notes: app.notes || '',
     });
     setLogoFile(null);
     setScreenshotFiles([]);
@@ -167,6 +187,11 @@ export default function MyApps() {
 
     setIsSubmitting(true);
     try {
+      if (formData.pricing_model === 'paid' && !formData.price_amount) {
+        toast.error('Price is required for paid apps');
+        return;
+      }
+
       // Require 5 Pi payment for every edit
       let activePiUser = piUser;
       if (!activePiUser) {
@@ -206,6 +231,11 @@ export default function MyApps() {
         compatibility: formData.compatibility || null,
         languages: formData.languages ? formData.languages.split(',').map(l => l.trim()).filter(Boolean) : [],
         has_in_app_purchases: !!formData.has_in_app_purchases,
+        pricing_model: formData.pricing_model,
+        price_amount: formData.price_amount ? parseFloat(formData.price_amount) : 0,
+        payment_type: formData.pricing_model === 'free' ? 'free' : formData.payment_type,
+        network_type: formData.network_type,
+        notes: formData.notes || null,
       });
 
       // Upload new screenshots
@@ -435,17 +465,23 @@ export default function MyApps() {
                 <Label htmlFor="category">Category</Label>
                 <Select
                   value={formData.category_id}
-                  onValueChange={(value) => setFormData({ ...formData, category_id: String(value) })}
+                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                  <SelectTrigger disabled={categoriesLoading || !!categoriesError}>
+                    <SelectValue placeholder={categoriesLoading ? 'Loading categories...' : 'Select category'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories?.map((cat) => (
-                      <SelectItem key={cat.id} value={String(cat.id)}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
+                    {categoriesLoading ? (
+                      <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                    ) : !categories || categories.length === 0 ? (
+                      <SelectItem value="empty" disabled>No categories found</SelectItem>
+                    ) : (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -557,6 +593,91 @@ export default function MyApps() {
                 onChange={(e) => setFormData({ ...formData, has_in_app_purchases: e.target.checked })}
               />
               <Label htmlFor="has_in_app_purchases">Has In-App Purchases</Label>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold text-foreground">Pricing & Network</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Pricing Model</Label>
+                  <Select
+                    value={formData.pricing_model}
+                    onValueChange={(value: 'free' | 'paid') =>
+                      setFormData({
+                        ...formData,
+                        pricing_model: value,
+                        payment_type: value === 'free' ? 'free' : (formData.payment_type === 'free' ? 'onetime' : formData.payment_type),
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="free">Free</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Network</Label>
+                  <Select
+                    value={formData.network_type}
+                    onValueChange={(value: 'mainnet' | 'testnet' | 'beta') => setFormData({ ...formData, network_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mainnet">Mainnet</SelectItem>
+                      <SelectItem value="testnet">Testnet</SelectItem>
+                      <SelectItem value="beta">Beta</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {formData.pricing_model === 'paid' && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Payment Type</Label>
+                    <Select
+                      value={formData.payment_type}
+                      onValueChange={(value: 'onetime' | 'monthly') => setFormData({ ...formData, payment_type: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="onetime">One-time</SelectItem>
+                        <SelectItem value="monthly">Monthly Subscription</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Price (Pi)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.price_amount}
+                      onChange={(e) => setFormData({ ...formData, price_amount: e.target.value })}
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="notes">Developer Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  rows={3}
+                  placeholder="Any notes about your app (changelog, instructions, etc.)"
+                />
+              </div>
             </div>
 
             {/* Screenshots */}
