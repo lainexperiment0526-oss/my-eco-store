@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
 import { AdInterstitial } from '@/components/AdInterstitial';
+import { PageLoader } from '@/components/PageLoader';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -111,11 +112,7 @@ export default function Auth() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (

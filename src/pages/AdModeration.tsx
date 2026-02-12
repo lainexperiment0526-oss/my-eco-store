@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { CheckCircle, XCircle, Eye } from 'lucide-react';
+import { PageLoader } from '@/components/PageLoader';
 
 export default function AdModeration() {
   const { user, isAdmin, loading } = useAuth();
@@ -42,7 +43,7 @@ export default function AdModeration() {
   const pendingCount = campaigns?.filter(c => c.status === 'pending').length || 0;
 
   if (loading || !isAdmin) {
-    return <div className="flex min-h-screen items-center justify-center bg-background"><p className="text-muted-foreground">Loading...</p></div>;
+    return <PageLoader />;
   }
 
   return (
@@ -70,7 +71,7 @@ export default function AdModeration() {
         </div>
 
         {isLoading ? (
-          <p className="text-muted-foreground py-8 text-center">Loading...</p>
+          <PageLoader label="Loading ads..." fullscreen={false} />
         ) : filtered.length > 0 ? (
           <div className="space-y-3">
             {filtered.map(c => (

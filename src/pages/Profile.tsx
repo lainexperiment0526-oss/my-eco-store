@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { useAuth } from '@/hooks/useAuth';
 import { usePiNetwork } from '@/hooks/usePiNetwork';
 import { Button } from '@/components/ui/button';
+import { PageLoader } from '@/components/PageLoader';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -24,11 +25,7 @@ export default function Profile() {
   }, [piUser, user]);
 
   if (loading || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { ArrowLeft, Wallet, TrendingUp, DollarSign, ArrowDownToLine } from 'lucide-react';
+import { PageLoader } from '@/components/PageLoader';
 
 interface EarningsSummary {
   app_id: string;
@@ -209,7 +210,7 @@ export default function DeveloperDashboard() {
         <div className="rounded-2xl bg-card p-6 border border-border mb-8">
           <h2 className="text-lg font-semibold text-foreground mb-4">Earnings by App</h2>
           {loadingData ? (
-            <p className="text-muted-foreground">Loading...</p>
+            <PageLoader label="Loading dashboard..." fullscreen={false} />
           ) : earnings.length === 0 ? (
             <p className="text-muted-foreground text-sm">No earnings yet. Submit an app and start earning!</p>
           ) : (

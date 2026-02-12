@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, X, Clock, CheckCircle, XCircle, ArrowLeft, Upload, Image, Video } from 'lucide-react';
 import { AppIcon } from '@/components/AppIcon';
+import { PageLoader } from '@/components/PageLoader';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function MyApps() {
@@ -384,7 +385,7 @@ export default function MyApps() {
         </div>
 
         {appsLoading ? (
-          <div className="py-8 text-center text-muted-foreground">Loading...</div>
+          <PageLoader label="Loading apps..." fullscreen={false} />
         ) : myApps && myApps.length > 0 ? (
           <div className="space-y-4">
             {myApps.map((app) => (

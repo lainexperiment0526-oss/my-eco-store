@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
+import { PageLoader } from '@/components/PageLoader';
 
 type PurchaseRow = {
   id: string;
@@ -149,7 +150,7 @@ export default function AppPurchases() {
         </div>
 
         {isLoading ? (
-          <div className="py-8 text-center text-muted-foreground">Loading...</div>
+          <PageLoader label="Loading purchases..." fullscreen={false} />
         ) : items.length === 0 ? (
           <div className="py-12 text-center rounded-2xl bg-card border border-border">
             <p className="text-foreground font-medium">No purchases yet</p>
@@ -199,4 +200,3 @@ export default function AppPurchases() {
     </div>
   );
 }
-

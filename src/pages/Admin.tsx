@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Pencil, Trash2, X, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { AppIcon } from '@/components/AppIcon';
+import { PageLoader } from '@/components/PageLoader';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -174,11 +175,7 @@ export default function Admin() {
   const pendingCount = apps?.filter(a => a.status === 'pending').length || 0;
 
   if (loading || !isAdmin) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (
@@ -234,7 +231,7 @@ export default function Admin() {
 
         {/* Apps List */}
         {appsLoading ? (
-          <div className="py-8 text-center text-muted-foreground">Loading...</div>
+          <PageLoader label="Loading apps..." fullscreen={false} />
         ) : filteredApps.length > 0 ? (
           <div className="space-y-4">
             {filteredApps.map((app) => (
