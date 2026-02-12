@@ -42,7 +42,10 @@ export default function AppDetail() {
   const normalizeUrl = useCallback((url: string) => {
     const trimmed = url.trim();
     if (!trimmed) return '';
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    // Keep exact links when a scheme is provided (https, pi, tg, etc).
+    if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith('//')) return `https:${trimmed}`;
+    if (/^[\w.-]+\.[a-z]{2,}([/:?#]|$)/i.test(trimmed)) return `https://${trimmed}`;
     return `https://${trimmed}`;
   }, []);
 
@@ -113,7 +116,8 @@ export default function AppDetail() {
       recordDownload(next.appId, user.id).catch(() => {});
     }
     setTimeout(() => setIsOpening(false), 1500);
-    window.location.assign(next.url);
+    // Force full navigation to the exact app link after ad completion.
+    window.location.replace(next.url);
   }, [pendingOpen, recordDownload, user?.id]);
 
   const handleShare = async () => {
