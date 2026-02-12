@@ -17,16 +17,76 @@ import { Link } from 'react-router-dom';
 type SubmitStep = 'details' | 'payment' | 'submitting' | 'done';
 
 const LANGUAGE_OPTIONS = [
+  'Afrikaans',
+  'Albanian',
+  'Amharic',
+  'Arabic',
+  'Armenian',
+  'Azerbaijani',
+  'Basque',
+  'Bengali',
+  'Bosnian',
+  'Bulgarian',
+  'Burmese',
+  'Catalan',
+  'Chinese (Simplified)',
+  'Chinese (Traditional)',
+  'Croatian',
+  'Czech',
+  'Danish',
+  'Dutch',
   'English',
+  'Estonian',
+  'Filipino',
+  'Finnish',
   'Spanish',
   'French',
   'German',
+  'Greek',
+  'Gujarati',
+  'Hebrew',
+  'Hindi',
+  'Hungarian',
+  'Icelandic',
+  'Indonesian',
   'Portuguese',
   'Italian',
+  'Kannada',
+  'Kazakh',
+  'Khmer',
+  'Kinyarwanda',
+  'Kyrgyz',
+  'Lao',
+  'Latvian',
+  'Lithuanian',
+  'Macedonian',
+  'Malay',
+  'Malayalam',
+  'Marathi',
+  'Mongolian',
+  'Nepali',
+  'Norwegian',
+  'Persian',
+  'Polish',
+  'Punjabi',
+  'Romanian',
   'Russian',
-  'Arabic',
-  'Hindi',
-  'Chinese',
+  'Serbian',
+  'Sinhala',
+  'Slovak',
+  'Slovenian',
+  'Swahili',
+  'Swedish',
+  'Tamil',
+  'Telugu',
+  'Thai',
+  'Turkish',
+  'Ukrainian',
+  'Urdu',
+  'Uzbek',
+  'Vietnamese',
+  'Welsh',
+  'Zulu',
   'Japanese',
   'Korean',
 ];
@@ -71,10 +131,12 @@ export default function SubmitApp() {
     category_id: '',
     tags: '',
     version: '1.0',
+    launch_at: '',
     developer_name: '',
     age_rating: '4+',
     whats_new: '',
     privacy_policy_url: '',
+    terms_of_service_url: '',
     developer_website_url: '',
     pricing_model: 'free',
     price_amount: '',
@@ -141,6 +203,14 @@ export default function SubmitApp() {
     return publicUrl;
   };
 
+  const toDateTimeLocal = (iso?: string | null) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const saveDraft = async (): Promise<string> => {
     if (!user) throw new Error('Not authenticated');
 
@@ -169,11 +239,13 @@ export default function SubmitApp() {
       category_id: formData.category_id || null,
       tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
       version: formData.version,
+      launch_at: formData.launch_at ? new Date(formData.launch_at).toISOString() : null,
       logo_url,
       developer_name: formData.developer_name || null,
       age_rating: formData.age_rating,
       whats_new: formData.whats_new || null,
       privacy_policy_url: formData.privacy_policy_url || null,
+      terms_of_service_url: formData.terms_of_service_url || null,
       developer_website_url: formData.developer_website_url || null,
       screenshot_urls: screenshotUrls,
       video_ad_url: videoAdUrl,
@@ -228,10 +300,12 @@ export default function SubmitApp() {
       category_id: draft.category_id ? String(draft.category_id) : '',
       tags: draft.tags?.join(', ') || '',
       version: draft.version || '1.0',
+      launch_at: toDateTimeLocal(draft.launch_at),
       developer_name: draft.developer_name || '',
       age_rating: draft.age_rating || '4+',
       whats_new: draft.whats_new || '',
       privacy_policy_url: draft.privacy_policy_url || '',
+      terms_of_service_url: draft.terms_of_service_url || '',
       developer_website_url: draft.developer_website_url || '',
       pricing_model: draft.pricing_model || 'free',
       price_amount: draft.price_amount ? String(draft.price_amount) : '',
@@ -346,12 +420,14 @@ export default function SubmitApp() {
           category_id: formData.category_id || null,
           tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
           version: formData.version,
+          launch_at: formData.launch_at ? new Date(formData.launch_at).toISOString() : null,
           logo_url: logoUrl,
           user_id: user.id,
           developer_name: formData.developer_name || null,
           age_rating: formData.age_rating,
           whats_new: formData.whats_new || null,
           privacy_policy_url: formData.privacy_policy_url || null,
+          terms_of_service_url: formData.terms_of_service_url || null,
           developer_website_url: formData.developer_website_url || null,
           status: 'pending',
           is_featured: false,
@@ -421,7 +497,7 @@ export default function SubmitApp() {
             <Button variant="outline" onClick={() => {
               setStep('details');
               setDraftId(null);
-              setFormData({ name: '', tagline: '', description: '', website_url: '', category_id: '', tags: '', version: '1.0', developer_name: '', age_rating: '4+', whats_new: '', privacy_policy_url: '', developer_website_url: '', pricing_model: 'free', price_amount: '', payment_type: 'free', network_type: 'mainnet', languages: ['English'], notes: '' });
+              setFormData({ name: '', tagline: '', description: '', website_url: '', category_id: '', tags: '', version: '1.0', launch_at: '', developer_name: '', age_rating: '4+', whats_new: '', privacy_policy_url: '', terms_of_service_url: '', developer_website_url: '', pricing_model: 'free', price_amount: '', payment_type: 'free', network_type: 'mainnet', languages: ['English'], notes: '' });
               setLogoFile(null);
               setScreenshotFiles([]);
               setVideoAdFile(null);
@@ -585,6 +661,10 @@ export default function SubmitApp() {
               <Label htmlFor="privacy_policy_url">Privacy Policy URL</Label>
               <Input id="privacy_policy_url" type="url" value={formData.privacy_policy_url} onChange={(e) => setFormData({ ...formData, privacy_policy_url: e.target.value })} placeholder="https://example.com/privacy" />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="terms_of_service_url">Terms of Service URL</Label>
+              <Input id="terms_of_service_url" type="url" value={formData.terms_of_service_url} onChange={(e) => setFormData({ ...formData, terms_of_service_url: e.target.value })} placeholder="https://example.com/terms" />
+            </div>
           </div>
 
           {/* App Details */}
@@ -628,6 +708,17 @@ export default function SubmitApp() {
                 <Label htmlFor="version">Version</Label>
                 <Input id="version" value={formData.version} onChange={(e) => setFormData({ ...formData, version: e.target.value })} placeholder="1.0" />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="launch_at">Launch Schedule (Optional)</Label>
+                <Input
+                  id="launch_at"
+                  type="datetime-local"
+                  value={formData.launch_at}
+                  onChange={(e) => setFormData({ ...formData, launch_at: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
                 <Input id="tags" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} placeholder="web, tool, free" />

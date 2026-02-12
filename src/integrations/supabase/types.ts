@@ -394,6 +394,7 @@ export type Database = {
           price_amount: number | null
           pricing_model: string
           privacy_policy_url: string | null
+          terms_of_service_url: string | null
           screenshot_urls: string[] | null
           tagline: string | null
           tags: string[] | null
@@ -425,6 +426,7 @@ export type Database = {
           price_amount?: number | null
           pricing_model?: string
           privacy_policy_url?: string | null
+          terms_of_service_url?: string | null
           screenshot_urls?: string[] | null
           tagline?: string | null
           tags?: string[] | null
@@ -456,6 +458,7 @@ export type Database = {
           price_amount?: number | null
           pricing_model?: string
           privacy_policy_url?: string | null
+          terms_of_service_url?: string | null
           screenshot_urls?: string[] | null
           tagline?: string | null
           tags?: string[] | null
@@ -604,6 +607,7 @@ export type Database = {
           price_amount: number | null
           pricing_model: string
           privacy_policy_url: string | null
+          terms_of_service_url: string | null
           ratings_count: number | null
           status: string | null
           tagline: string | null
@@ -640,6 +644,7 @@ export type Database = {
           price_amount?: number | null
           pricing_model?: string
           privacy_policy_url?: string | null
+          terms_of_service_url?: string | null
           ratings_count?: number | null
           status?: string | null
           tagline?: string | null
@@ -676,6 +681,7 @@ export type Database = {
           price_amount?: number | null
           pricing_model?: string
           privacy_policy_url?: string | null
+          terms_of_service_url?: string | null
           ratings_count?: number | null
           status?: string | null
           tagline?: string | null

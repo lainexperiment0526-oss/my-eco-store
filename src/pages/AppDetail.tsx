@@ -39,6 +39,7 @@ export default function AppDetail() {
   const [showOpenAd, setShowOpenAd] = useState(false);
   const [pendingOpen, setPendingOpen] = useState<{ url: string; appId: string } | null>(null);
   const [isPaying, setIsPaying] = useState(false);
+  const [nowMs, setNowMs] = useState(Date.now());
 
   const normalizeUrl = useCallback((url: string) => {
     const trimmed = url.trim();
@@ -212,6 +213,11 @@ export default function AppDetail() {
     }
   }, [location.search, refetch]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -246,6 +252,13 @@ export default function AppDetail() {
   }
 
   const sortedScreenshots = app.screenshots?.sort((a, b) => a.display_order - b.display_order) || [];
+  const launchMs = app.launch_at ? new Date(app.launch_at).getTime() : null;
+  const hasLaunchCountdown = !!launchMs && launchMs > nowMs;
+  const countdownMs = hasLaunchCountdown ? launchMs - nowMs : 0;
+  const countdownDays = Math.floor(countdownMs / (1000 * 60 * 60 * 24));
+  const countdownHours = Math.floor((countdownMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const countdownMinutes = Math.floor((countdownMs % (1000 * 60 * 60)) / (1000 * 60));
+  const countdownSeconds = Math.floor((countdownMs % (1000 * 60)) / 1000);
   const appKey = app.name.toLowerCase();
   const badgeMap: Record<string, { light: string; dark: string }> = {
     'openapp': {
@@ -308,6 +321,11 @@ export default function AppDetail() {
                 )}
               </h1>
               <p className="text-sm text-muted-foreground">{app.tagline}</p>
+              {hasLaunchCountdown && (
+                <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-foreground">
+                  Launches in {countdownDays}d {countdownHours}h {countdownMinutes}m {countdownSeconds}s
+                </div>
+              )}
               <div className="mt-3 flex items-center gap-2">
                 <button
                   onClick={() => handleOpenApp(app.website_url, app.id)}
@@ -453,6 +471,14 @@ export default function AppDetail() {
                 <a href={app.privacy_policy_url} target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-between py-3 border-b border-border">
                   <span className="text-primary">Privacy Policy</span>
+                  <ExternalLink className="h-4 w-4 text-primary" />
+                </a>
+              )}
+
+              {app.terms_of_service_url && (
+                <a href={app.terms_of_service_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-between py-3 border-b border-border">
+                  <span className="text-primary">Terms of Service</span>
                   <ExternalLink className="h-4 w-4 text-primary" />
                 </a>
               )}

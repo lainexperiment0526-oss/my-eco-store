@@ -23,6 +23,7 @@ export interface App {
   downloads_count: number;
   whats_new: string | null;
   privacy_policy_url: string | null;
+  terms_of_service_url: string | null;
   developer_website_url: string | null;
   compatibility: string;
   languages: string[];
