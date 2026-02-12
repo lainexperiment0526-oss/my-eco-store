@@ -57,6 +57,29 @@ import type { ProfileData, SocialEmbedItem, SocialLink } from "@/types/profile";
 import { BioTemplate, DEFAULT_TEMPLATE } from "@/config/bioTemplates";
 
 const PREFERENCES_STORAGE_KEY = 'droplink_user_preferences';
+const AFFILIATE_SHARE_IMAGE_PATH = "/affiliate-share.jpg";
+
+const upsertMetaTag = (attribute: "name" | "property", key: string, content: string) => {
+  if (typeof document === "undefined") return;
+  let tag = document.querySelector(`meta[${attribute}="${key}"]`) as HTMLMetaElement | null;
+  if (!tag) {
+    tag = document.createElement("meta");
+    tag.setAttribute(attribute, key);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute("content", content);
+};
+
+const upsertCanonicalLink = (href: string) => {
+  if (typeof document === "undefined") return;
+  let linkTag = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+  if (!linkTag) {
+    linkTag = document.createElement("link");
+    linkTag.setAttribute("rel", "canonical");
+    document.head.appendChild(linkTag);
+  }
+  linkTag.setAttribute("href", href);
+};
 
 const PublicBio = () => {
   // Pi Payment Dialog state
@@ -248,6 +271,35 @@ const PublicBio = () => {
       navigate("/");
     }
   }, [profile, currentUserProfileId, profileId, navigate]);
+
+  useEffect(() => {
+    if (!profile || typeof window === "undefined") return;
+    const baseUrl = window.location.origin;
+    const canonicalUrl = `${baseUrl}/u/${profile.username}`;
+    const shareImage = `${baseUrl}${AFFILIATE_SHARE_IMAGE_PATH}`;
+    const usernameTag = `@${profile.username}`;
+    const profileDescription = (profile.description || profile.appDescription || "Claim 1 Pi on Droplink Affiliate")
+      .replace(/\s+/g, " ")
+      .trim();
+    const shareTitle = `${usernameTag} | Droplink Affiliate`;
+    const shareDescription = `${profileDescription} | ${usernameTag} on Droplink Affiliate`;
+
+    document.title = shareTitle;
+    upsertCanonicalLink(canonicalUrl);
+    upsertMetaTag("name", "title", shareTitle);
+    upsertMetaTag("name", "description", shareDescription);
+    upsertMetaTag("property", "og:type", "profile");
+    upsertMetaTag("property", "og:url", canonicalUrl);
+    upsertMetaTag("property", "og:title", shareTitle);
+    upsertMetaTag("property", "og:description", shareDescription);
+    upsertMetaTag("property", "og:image", shareImage);
+    upsertMetaTag("property", "og:image:alt", `${usernameTag} Droplink Affiliate`);
+    upsertMetaTag("name", "twitter:card", "summary_large_image");
+    upsertMetaTag("name", "twitter:url", canonicalUrl);
+    upsertMetaTag("name", "twitter:title", shareTitle);
+    upsertMetaTag("name", "twitter:description", shareDescription);
+    upsertMetaTag("name", "twitter:image", shareImage);
+  }, [profile]);
 
   const loadCurrentUserProfile = async () => {
     try {

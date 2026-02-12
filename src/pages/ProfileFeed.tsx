@@ -14,6 +14,29 @@ import { isVerifiedUser, getVerifiedBadgeUrl } from "@/utils/verifiedUsers";
 import ReactPlayer from "react-player";
 
 const getSocialIcon = (platform?: string) => getSocialIconBase(platform);
+const AFFILIATE_SHARE_IMAGE_PATH = "/affiliate-share.jpg";
+
+const upsertMetaTag = (attribute: "name" | "property", key: string, content: string) => {
+  if (typeof document === "undefined") return;
+  let tag = document.querySelector(`meta[${attribute}="${key}"]`) as HTMLMetaElement | null;
+  if (!tag) {
+    tag = document.createElement("meta");
+    tag.setAttribute(attribute, key);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute("content", content);
+};
+
+const upsertCanonicalLink = (href: string) => {
+  if (typeof document === "undefined") return;
+  let linkTag = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+  if (!linkTag) {
+    linkTag = document.createElement("link");
+    linkTag.setAttribute("rel", "canonical");
+    document.head.appendChild(linkTag);
+  }
+  linkTag.setAttribute("href", href);
+};
 
 const normalizeSocialFeed = (feed: any): SocialEmbedItem[] => {
   if (!Array.isArray(feed)) return [];
@@ -308,6 +331,35 @@ const ProfileFeed = () => {
     videoRef.current.muted = isVideoMuted;
     videoRef.current.volume = isVideoMuted ? 0 : 0.6;
   }, [isVideoMuted]);
+
+  useEffect(() => {
+    if (!profile || typeof window === "undefined") return;
+    const baseUrl = window.location.origin;
+    const feedUrl = `${baseUrl}/@${profile.username}/feed`;
+    const shareImage = `${baseUrl}${AFFILIATE_SHARE_IMAGE_PATH}`;
+    const usernameTag = `@${profile.username}`;
+    const profileDescription = (profile.description || profile.appDescription || "Affiliate feed on Droplink")
+      .replace(/\s+/g, " ")
+      .trim();
+    const shareTitle = `${usernameTag} Feed | Droplink Affiliate`;
+    const shareDescription = `${profileDescription} | Feed by ${usernameTag} on Droplink`;
+
+    document.title = shareTitle;
+    upsertCanonicalLink(feedUrl);
+    upsertMetaTag("name", "title", shareTitle);
+    upsertMetaTag("name", "description", shareDescription);
+    upsertMetaTag("property", "og:type", "website");
+    upsertMetaTag("property", "og:url", feedUrl);
+    upsertMetaTag("property", "og:title", shareTitle);
+    upsertMetaTag("property", "og:description", shareDescription);
+    upsertMetaTag("property", "og:image", shareImage);
+    upsertMetaTag("property", "og:image:alt", `${usernameTag} Droplink Affiliate Feed`);
+    upsertMetaTag("name", "twitter:card", "summary_large_image");
+    upsertMetaTag("name", "twitter:url", feedUrl);
+    upsertMetaTag("name", "twitter:title", shareTitle);
+    upsertMetaTag("name", "twitter:description", shareDescription);
+    upsertMetaTag("name", "twitter:image", shareImage);
+  }, [profile]);
 
   const videoVolume = isVideoMuted ? 0 : 0.5;
 
