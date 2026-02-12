@@ -151,6 +151,7 @@ export default function SubmitApp() {
   const [videoAdFile, setVideoAdFile] = useState<File | null>(null);
   const [adTitle, setAdTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [draftLoadInProgress, setDraftLoadInProgress] = useState(false);
 
   // Load existing drafts
   const [drafts, setDrafts] = useState<any[]>([]);
@@ -215,21 +216,41 @@ export default function SubmitApp() {
   const saveDraft = async (): Promise<string> => {
     if (!user) throw new Error('Not authenticated');
 
-    let logo_url: string | null = null;
+    let existingDraft: any = null;
+    if (draftId) {
+      const { data, error } = await supabase
+        .from('app_drafts')
+        .select('logo_url, screenshot_urls, video_ad_url')
+        .eq('id', draftId)
+        .single();
+      if (error) throw error;
+      existingDraft = data;
+    }
+
+    let logo_url: string | null = existingDraft?.logo_url || null;
     if (logoFile) {
       logo_url = await uploadFile(logoFile, 'logos');
     }
 
-    const screenshotUrls: string[] = [];
+    const screenshotUrls: string[] = Array.isArray(existingDraft?.screenshot_urls)
+      ? [...existingDraft.screenshot_urls]
+      : [];
     for (const file of screenshotFiles) {
       const url = await uploadFile(file, 'screenshots');
       screenshotUrls.push(url);
     }
 
-    let videoAdUrl: string | null = null;
+    let videoAdUrl: string | null = existingDraft?.video_ad_url || null;
     if (videoAdFile) {
       videoAdUrl = await uploadFile(videoAdFile, 'ads');
     }
+
+    const isPaid = formData.pricing_model === 'paid';
+    const parsedPrice = Number.parseFloat(formData.price_amount || '0');
+    const priceAmount = isPaid && Number.isFinite(parsedPrice) ? parsedPrice : 0;
+    const paymentType = isPaid
+      ? (formData.payment_type === 'monthly' ? 'monthly' : 'onetime')
+      : 'free';
 
     const draftData = {
       user_id: user.id,
@@ -253,8 +274,8 @@ export default function SubmitApp() {
       ad_title: adTitle || null,
       payment_status: 'pending' as const,
       pricing_model: formData.pricing_model,
-      price_amount: formData.price_amount ? parseFloat(formData.price_amount) : 0,
-      payment_type: formData.payment_type,
+      price_amount: priceAmount,
+      payment_type: paymentType,
       network_type: formData.network_type,
       languages: formData.languages,
       notes: formData.notes || null,
@@ -266,6 +287,9 @@ export default function SubmitApp() {
         .update(draftData)
         .eq('id', draftId);
       if (error) throw error;
+      setLogoFile(null);
+      setScreenshotFiles([]);
+      setVideoAdFile(null);
       return draftId;
     } else {
       const { data, error } = await supabase
@@ -274,6 +298,9 @@ export default function SubmitApp() {
         .select('id')
         .single();
       if (error) throw error;
+      setLogoFile(null);
+      setScreenshotFiles([]);
+      setVideoAdFile(null);
       return data.id;
     }
   };
@@ -296,6 +323,7 @@ export default function SubmitApp() {
   };
 
   const loadDraft = (draft: any) => {
+    setDraftLoadInProgress(true);
     setFormData({
       name: draft.name || '',
       tagline: draft.tagline || '',
@@ -320,15 +348,33 @@ export default function SubmitApp() {
     });
     setDraftId(draft.id);
     setAdTitle(draft.ad_title || '');
+    setLogoFile(null);
+    setScreenshotFiles([]);
+    setVideoAdFile(null);
     if (draft.payment_status === 'paid') {
       setStep('details');
     }
     toast.success('Draft loaded');
+    setDraftLoadInProgress(false);
+  };
+
+  const validateBeforePayment = () => {
+    if (!formData.name || !formData.website_url || !formData.category_id || formData.languages.length === 0) {
+      toast.error('Name, website URL, category, and at least one language are required');
+      return false;
+    }
+    if (formData.pricing_model === 'paid') {
+      const parsedPrice = Number.parseFloat(formData.price_amount || '');
+      if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+        toast.error('Price must be greater than 0 for paid apps');
+        return false;
+      }
+    }
+    return true;
   };
 
   const handleProceedToPayment = async () => {
-    if (!formData.name || !formData.website_url || !formData.category_id || formData.languages.length === 0) {
-      toast.error('Name, website URL, category, and at least one language are required');
+    if (!validateBeforePayment()) {
       return;
     }
     setDraftActionLoading('proceed');
@@ -408,6 +454,14 @@ export default function SubmitApp() {
       setStep('details');
       return;
     }
+    if (formData.pricing_model === 'paid') {
+      const parsedPrice = Number.parseFloat(formData.price_amount || '');
+      if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+        toast.error('Price must be greater than 0 for paid apps');
+        setStep('details');
+        return;
+      }
+    }
     setStep('submitting');
     setIsSubmitting(true);
 
@@ -418,6 +472,12 @@ export default function SubmitApp() {
         : { data: null };
 
       const logoUrl = draft?.logo_url || null;
+      const isPaid = formData.pricing_model === 'paid';
+      const parsedPrice = Number.parseFloat(formData.price_amount || '0');
+      const priceAmount = isPaid && Number.isFinite(parsedPrice) ? parsedPrice : 0;
+      const paymentType = isPaid
+        ? (formData.payment_type === 'monthly' ? 'monthly' : 'onetime')
+        : 'free';
 
       const { data: newApp, error: appError } = await supabase
         .from('apps')
@@ -442,8 +502,8 @@ export default function SubmitApp() {
           is_featured: false,
           is_popular: false,
           pricing_model: formData.pricing_model,
-          price_amount: formData.price_amount ? parseFloat(formData.price_amount) : 0,
-          payment_type: formData.payment_type,
+          price_amount: priceAmount,
+          payment_type: paymentType,
           network_type: formData.network_type,
           languages: formData.languages,
           notes: formData.notes || null,
@@ -485,7 +545,7 @@ export default function SubmitApp() {
     } catch (error: any) {
       console.error('Submit error:', error);
       toast.error(error.message || 'Failed to submit app');
-      setStep('payment');
+      setStep(draftId ? 'payment' : 'details');
     } finally {
       setIsSubmitting(false);
     }
@@ -588,16 +648,16 @@ export default function SubmitApp() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-12">
+    <div className="min-h-screen bg-background pb-12 overflow-x-hidden">
       <Header />
-      <main className="mx-auto max-w-2xl px-4 py-6">
+      <main className="mx-auto max-w-2xl px-4 py-6 overflow-x-hidden">
         <Link to="/" className="inline-flex items-center gap-2 text-primary hover:underline mb-6">
           <ArrowLeft className="h-4 w-4" /> Back
         </Link>
 
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground">Submit Your App</h1>
-          <p className="text-muted-foreground">Share your app with the community • Listing fee: 25 Pi</p>
+          <p className="text-muted-foreground">Share your app with the community - Listing fee: 25 Pi</p>
         </div>
 
         {/* Drafts */}
@@ -616,7 +676,7 @@ export default function SubmitApp() {
                   <div>
                     <p className="font-medium text-foreground">{draft.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {draft.payment_status === 'paid' ? '✅ Paid' : '⏳ Payment pending'} •
+                      {draft.payment_status === 'paid' ? 'Paid' : 'Payment pending'} -
                       Updated {new Date(draft.updated_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -747,7 +807,7 @@ export default function SubmitApp() {
             </div>
             <div className="space-y-2">
               <Label>App Languages</Label>
-              <div className="flex flex-wrap gap-2">
+              <div className="max-h-40 overflow-y-auto overflow-x-hidden pr-1 flex flex-wrap gap-2">
                 {LANGUAGE_OPTIONS.map((language) => {
                   const selected = formData.languages.includes(language);
                   return (
@@ -895,7 +955,7 @@ export default function SubmitApp() {
               variant="outline"
               className="flex-1"
               onClick={handleSaveDraft}
-              disabled={draftActionLoading !== null || paymentLoading || isSubmitting}
+              disabled={draftActionLoading !== null || paymentLoading || isSubmitting || draftLoadInProgress}
             >
               {draftActionLoading === 'save' ? (
                 <span className="inline-flex items-center gap-2">
@@ -910,7 +970,7 @@ export default function SubmitApp() {
               type="submit"
               className="flex-1"
               size="lg"
-              disabled={draftActionLoading !== null || paymentLoading || isSubmitting}
+              disabled={draftActionLoading !== null || paymentLoading || isSubmitting || draftLoadInProgress}
             >
               {draftActionLoading === 'proceed' ? (
                 <span className="inline-flex items-center gap-2">
@@ -927,3 +987,4 @@ export default function SubmitApp() {
     </div>
   );
 }
+
