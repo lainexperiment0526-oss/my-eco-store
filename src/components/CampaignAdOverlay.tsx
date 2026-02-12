@@ -33,7 +33,7 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
       return;
     }
     const timer = setInterval(() => {
-      setCountdown(prev => {
+      setCountdown((prev) => {
         if (prev <= 1) {
           setCanSkip(true);
           clearInterval(timer);
@@ -104,38 +104,39 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
             Ad
           </span>
         </div>
-
-        {ad.media_type === 'video' && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMuted((prev) => !prev);
-            }}
-            className="absolute bottom-28 left-4 flex items-center gap-2 rounded-full bg-black/60 backdrop-blur px-3 py-2 text-white text-xs font-medium hover:bg-black/80 transition-colors"
-            aria-label={isMuted ? 'Unmute ad' : 'Mute ad'}
-          >
-            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-            {isMuted ? 'Muted' : 'Sound On'}
-          </button>
-        )}
       </div>
 
-      <div className="absolute bottom-4 left-4 right-4 z-[110]">
-        <div className="rounded-2xl bg-black/90 backdrop-blur-xl border border-white/10 px-4 py-3 flex items-center gap-3">
+      <div className="absolute top-16 left-4 right-4 z-[110]">
+        <div className="rounded-2xl bg-black/90 backdrop-blur-xl border border-white/10 px-3 py-3 flex items-start gap-3">
           <span className="flex-1 min-w-0">
-            <p className="text-xs text-white/60">OpenApp · Sponsored</p>
+            <p className="text-xs text-white/60">OpenApp &middot; Sponsored</p>
             <h4 className="text-white font-medium text-sm truncate">{ad.title || ad.name}</h4>
             <p className="text-xs text-white/60 truncate">{ad.description || ad.destination_url}</p>
           </span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              openDestination();
-            }}
-            className="flex-shrink-0 rounded-full bg-blue-500 px-5 py-1.5 text-sm font-semibold text-white hover:bg-blue-600 transition-colors"
-          >
-            Get
-          </button>
+          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                openDestination();
+              }}
+              className="rounded-full bg-blue-500 px-5 py-1.5 text-sm font-semibold text-white hover:bg-blue-600 transition-colors whitespace-nowrap"
+            >
+              Get
+            </button>
+            {ad.media_type === 'video' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMuted((prev) => !prev);
+                }}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/80 hover:bg-white/15"
+                aria-label={isMuted ? 'Unmute ad' : 'Mute ad'}
+                title={isMuted ? 'Unmute' : 'Mute'}
+              >
+                {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
