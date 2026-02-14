@@ -29,6 +29,9 @@ import License from "./pages/License";
 import Bookmarks from "./pages/Bookmarks";
 import Feedback from "./pages/Feedback";
 import AppPurchases from "./pages/AppPurchases";
+import Blog from "./pages/Blog";
+import BlogPostPage from "./pages/BlogPost";
+import AdminBlog from "./pages/AdminBlog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -78,6 +81,9 @@ const App = () => {
                 <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/license" element={<License />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogPostPage />} />
+                  <Route path="/admin/blog" element={<AdminBlog />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <Footer />

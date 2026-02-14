@@ -6,6 +6,8 @@ export function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-center text-xs text-muted-foreground sm:flex-row sm:text-left">
         <span>© 2026 OpenApp by Mrwain Organization</span>
         <div className="flex items-center gap-3">
+          <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
+          <Link to="/blog" className="hover:text-foreground transition-colors">Blog</Link>
           <Link to="/terms" className="hover:text-foreground transition-colors">Legal</Link>
           <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link to="/license" className="hover:text-foreground transition-colors">License</Link>

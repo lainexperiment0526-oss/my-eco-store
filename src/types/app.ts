@@ -20,7 +20,7 @@ export interface App {
   age_rating: string;
   ratings_count: number;
   average_rating: number;
-  downloads_count: number;
+  views_count: number;
   whats_new: string | null;
   privacy_policy_url: string | null;
   terms_of_service_url: string | null;
