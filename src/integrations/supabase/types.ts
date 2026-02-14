@@ -581,6 +581,35 @@ export type Database = {
           },
         ]
       }
+      app_views: {
+        Row: {
+          app_id: string
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_views_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apps: {
         Row: {
           age_rating: string | null
@@ -591,7 +620,6 @@ export type Database = {
           description: string | null
           developer_name: string | null
           developer_website_url: string | null
-          downloads_count: number | null
           has_in_app_purchases: boolean | null
           id: string
           is_featured: boolean | null
@@ -616,6 +644,7 @@ export type Database = {
           user_id: string | null
           verified_until: string | null
           version: string | null
+          views_count: number | null
           website_url: string
           whats_new: string | null
         }
@@ -628,7 +657,6 @@ export type Database = {
           description?: string | null
           developer_name?: string | null
           developer_website_url?: string | null
-          downloads_count?: number | null
           has_in_app_purchases?: boolean | null
           id?: string
           is_featured?: boolean | null
@@ -653,6 +681,7 @@ export type Database = {
           user_id?: string | null
           verified_until?: string | null
           version?: string | null
+          views_count?: number | null
           website_url: string
           whats_new?: string | null
         }
@@ -665,7 +694,6 @@ export type Database = {
           description?: string | null
           developer_name?: string | null
           developer_website_url?: string | null
-          downloads_count?: number | null
           has_in_app_purchases?: boolean | null
           id?: string
           is_featured?: boolean | null
@@ -690,6 +718,7 @@ export type Database = {
           user_id?: string | null
           verified_until?: string | null
           version?: string | null
+          views_count?: number | null
           website_url?: string
           whats_new?: string | null
         }
@@ -699,6 +728,56 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          app_id: string | null
+          author_id: string
+          content: string
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          is_published: boolean
+          published_at: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          app_id?: string | null
+          author_id: string
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          app_id?: string | null
+          author_id?: string
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
             referencedColumns: ["id"]
           },
         ]
