@@ -318,6 +318,145 @@ export type Database = {
           },
         ]
       }
+      app_drafts: {
+        Row: {
+          ad_title: string | null
+          age_rating: string | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          developer_name: string | null
+          developer_website_url: string | null
+          id: string
+          languages: string[] | null
+          launch_at: string | null
+          logo_url: string | null
+          name: string
+          network_type: string
+          notes: string | null
+          payment_id: string | null
+          payment_status: string
+          payment_type: string | null
+          price_amount: number | null
+          pricing_model: string
+          privacy_policy_url: string | null
+          screenshot_urls: string[] | null
+          tagline: string | null
+          tags: string[] | null
+          terms_of_service_url: string | null
+          updated_at: string
+          user_id: string
+          version: string | null
+          video_ad_url: string | null
+          website_url: string
+          whats_new: string | null
+        }
+        Insert: {
+          ad_title?: string | null
+          age_rating?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          developer_name?: string | null
+          developer_website_url?: string | null
+          id?: string
+          languages?: string[] | null
+          launch_at?: string | null
+          logo_url?: string | null
+          name: string
+          network_type?: string
+          notes?: string | null
+          payment_id?: string | null
+          payment_status?: string
+          payment_type?: string | null
+          price_amount?: number | null
+          pricing_model?: string
+          privacy_policy_url?: string | null
+          screenshot_urls?: string[] | null
+          tagline?: string | null
+          tags?: string[] | null
+          terms_of_service_url?: string | null
+          updated_at?: string
+          user_id: string
+          version?: string | null
+          video_ad_url?: string | null
+          website_url: string
+          whats_new?: string | null
+        }
+        Update: {
+          ad_title?: string | null
+          age_rating?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          developer_name?: string | null
+          developer_website_url?: string | null
+          id?: string
+          languages?: string[] | null
+          launch_at?: string | null
+          logo_url?: string | null
+          name?: string
+          network_type?: string
+          notes?: string | null
+          payment_id?: string | null
+          payment_status?: string
+          payment_type?: string | null
+          price_amount?: number | null
+          pricing_model?: string
+          privacy_policy_url?: string | null
+          screenshot_urls?: string[] | null
+          tagline?: string | null
+          tags?: string[] | null
+          terms_of_service_url?: string | null
+          updated_at?: string
+          user_id?: string
+          version?: string | null
+          video_ad_url?: string | null
+          website_url?: string
+          whats_new?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_drafts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      app_feedback: {
+        Row: {
+          app_id: string
+          created_at: string
+          feedback_text: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          feedback_text: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          feedback_text?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_feedback_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_purchases: {
         Row: {
           app_id: string
@@ -368,145 +507,6 @@ export type Database = {
             columns: ["last_payment_id"]
             isOneToOne: false
             referencedRelation: "pi_payments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      app_drafts: {
-        Row: {
-          ad_title: string | null
-          age_rating: string | null
-          category_id: string | null
-          created_at: string
-          description: string | null
-          developer_name: string | null
-          developer_website_url: string | null
-          id: string
-          launch_at: string | null
-          logo_url: string | null
-          languages: string[] | null
-          name: string
-          network_type: string
-          notes: string | null
-          payment_id: string | null
-          payment_status: string
-          payment_type: string | null
-          price_amount: number | null
-          pricing_model: string
-          privacy_policy_url: string | null
-          terms_of_service_url: string | null
-          screenshot_urls: string[] | null
-          tagline: string | null
-          tags: string[] | null
-          updated_at: string
-          user_id: string
-          version: string | null
-          video_ad_url: string | null
-          website_url: string
-          whats_new: string | null
-        }
-        Insert: {
-          ad_title?: string | null
-          age_rating?: string | null
-          category_id?: string | null
-          created_at?: string
-          description?: string | null
-          developer_name?: string | null
-          developer_website_url?: string | null
-          id?: string
-          launch_at?: string | null
-          logo_url?: string | null
-          languages?: string[] | null
-          name: string
-          network_type?: string
-          notes?: string | null
-          payment_id?: string | null
-          payment_status?: string
-          payment_type?: string | null
-          price_amount?: number | null
-          pricing_model?: string
-          privacy_policy_url?: string | null
-          terms_of_service_url?: string | null
-          screenshot_urls?: string[] | null
-          tagline?: string | null
-          tags?: string[] | null
-          updated_at?: string
-          user_id: string
-          version?: string | null
-          video_ad_url?: string | null
-          website_url: string
-          whats_new?: string | null
-        }
-        Update: {
-          ad_title?: string | null
-          age_rating?: string | null
-          category_id?: string | null
-          created_at?: string
-          description?: string | null
-          developer_name?: string | null
-          developer_website_url?: string | null
-          id?: string
-          launch_at?: string | null
-          logo_url?: string | null
-          languages?: string[] | null
-          name?: string
-          network_type?: string
-          notes?: string | null
-          payment_id?: string | null
-          payment_status?: string
-          payment_type?: string | null
-          price_amount?: number | null
-          pricing_model?: string
-          privacy_policy_url?: string | null
-          terms_of_service_url?: string | null
-          screenshot_urls?: string[] | null
-          tagline?: string | null
-          tags?: string[] | null
-          updated_at?: string
-          user_id?: string
-          version?: string | null
-          video_ad_url?: string | null
-          website_url?: string
-          whats_new?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "app_drafts_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      app_feedback: {
-        Row: {
-          app_id: string
-          created_at: string
-          feedback_text: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          app_id: string
-          created_at?: string
-          feedback_text: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          app_id?: string
-          created_at?: string
-          feedback_text?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "app_feedback_app_id_fkey"
-            columns: ["app_id"]
-            isOneToOne: false
-            referencedRelation: "apps"
             referencedColumns: ["id"]
           },
         ]
@@ -595,10 +595,10 @@ export type Database = {
           has_in_app_purchases: boolean | null
           id: string
           is_featured: boolean | null
-          is_verified: boolean
           is_popular: boolean | null
-          launch_at: string | null
+          is_verified: boolean
           languages: string[] | null
+          launch_at: string | null
           logo_url: string | null
           name: string
           network_type: string
@@ -607,15 +607,15 @@ export type Database = {
           price_amount: number | null
           pricing_model: string
           privacy_policy_url: string | null
-          terms_of_service_url: string | null
           ratings_count: number | null
           status: string | null
           tagline: string | null
           tags: string[] | null
+          terms_of_service_url: string | null
           updated_at: string
           user_id: string | null
-          version: string | null
           verified_until: string | null
+          version: string | null
           website_url: string
           whats_new: string | null
         }
@@ -632,10 +632,10 @@ export type Database = {
           has_in_app_purchases?: boolean | null
           id?: string
           is_featured?: boolean | null
-          is_verified?: boolean
           is_popular?: boolean | null
-          launch_at?: string | null
+          is_verified?: boolean
           languages?: string[] | null
+          launch_at?: string | null
           logo_url?: string | null
           name: string
           network_type?: string
@@ -644,15 +644,15 @@ export type Database = {
           price_amount?: number | null
           pricing_model?: string
           privacy_policy_url?: string | null
-          terms_of_service_url?: string | null
           ratings_count?: number | null
           status?: string | null
           tagline?: string | null
           tags?: string[] | null
+          terms_of_service_url?: string | null
           updated_at?: string
           user_id?: string | null
-          version?: string | null
           verified_until?: string | null
+          version?: string | null
           website_url: string
           whats_new?: string | null
         }
@@ -669,10 +669,10 @@ export type Database = {
           has_in_app_purchases?: boolean | null
           id?: string
           is_featured?: boolean | null
-          is_verified?: boolean
           is_popular?: boolean | null
-          launch_at?: string | null
+          is_verified?: boolean
           languages?: string[] | null
+          launch_at?: string | null
           logo_url?: string | null
           name?: string
           network_type?: string
@@ -681,15 +681,15 @@ export type Database = {
           price_amount?: number | null
           pricing_model?: string
           privacy_policy_url?: string | null
-          terms_of_service_url?: string | null
           ratings_count?: number | null
           status?: string | null
           tagline?: string | null
           tags?: string[] | null
+          terms_of_service_url?: string | null
           updated_at?: string
           user_id?: string | null
-          version?: string | null
           verified_until?: string | null
+          version?: string | null
           website_url?: string
           whats_new?: string | null
         }
