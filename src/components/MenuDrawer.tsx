@@ -33,6 +33,7 @@ import {
   Trophy,
   Code2,
   Receipt,
+  BookOpen,
 } from 'lucide-react';
 
 interface MenuItemProps {
@@ -91,6 +92,7 @@ export function MenuDrawer() {
           <MenuItem icon={<PlusCircle className="h-5 w-5" />} label="Submit App" href="/submit" />
           {user && <MenuItem icon={<Bookmark className="h-5 w-5" />} label="Favorites" href="/bookmarks" />}
           <MenuItem icon={<MessageSquare className="h-5 w-5" />} label="Feedback" href="/feedback" />
+          <MenuItem icon={<BookOpen className="h-5 w-5" />} label="Blog" href="/blog" />
           {user && <MenuItem icon={<Receipt className="h-5 w-5" />} label="Purchases" href="/purchases" />}
           {user && <MenuItem icon={<User className="h-5 w-5" />} label="Profile" href="/profile" />}
 
@@ -111,6 +113,7 @@ export function MenuDrawer() {
               <p className="px-3 text-xs font-semibold text-muted-foreground uppercase mb-2">Admin</p>
               <MenuItem icon={<Shield className="h-5 w-5" />} label="App Moderation" href="/admin" />
               <MenuItem icon={<Shield className="h-5 w-5" />} label="Ad Moderation" href="/ad-moderation" />
+              <MenuItem icon={<BookOpen className="h-5 w-5" />} label="Blog Manager" href="/admin/blog" />
             </div>
           )}
 

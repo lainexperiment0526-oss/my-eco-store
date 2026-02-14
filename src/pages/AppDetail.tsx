@@ -11,7 +11,8 @@ import { ReviewSection } from '@/components/ReviewSection';
 import { FeedbackDialog } from '@/components/FeedbackDialog';
 import { RecommendedApps } from '@/components/RecommendedApps';
 import { ImagePreviewDialog } from '@/components/ImagePreviewDialog';
-import { ArrowLeft, ExternalLink, Share2, ChevronRight, ChevronDown, Bookmark, BookmarkCheck } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Share2, ChevronRight, ChevronDown, Bookmark, BookmarkCheck, BookOpen } from 'lucide-react';
+import { useBlogPostsByApp } from '@/hooks/useBlog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
@@ -32,6 +33,7 @@ export default function AppDetail() {
   const { createPiPayment, isPiReady, authenticateWithPi, isPiAuthenticated } = usePiNetwork();
   const { data: isBookmarked } = useIsBookmarked(id || '', user?.id);
   const toggleBookmark = useToggleBookmark();
+  const { data: blogPosts } = useBlogPostsByApp(id || '');
   const queryClient = useQueryClient();
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -211,6 +213,18 @@ export default function AppDetail() {
     if (!user) { setShowPiAuthModal(true); return; }
     toggleBookmark.mutate({ app_id: id!, user_id: user.id, isBookmarked: !!isBookmarked });
   };
+
+  // Record app view on every visit
+  useEffect(() => {
+    if (id) {
+      supabase
+        .from('app_views')
+        .insert({ app_id: id, user_id: user?.id || null })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['app', id] });
+        });
+    }
+  }, [id, user?.id, queryClient]);
 
   useEffect(() => {
     if (location.search.includes('refresh=')) {
@@ -458,7 +472,7 @@ export default function AppDetail() {
             <div className="space-y-4">
               {app.developer_name && <InfoRow label="Provider" value={app.developer_name} />}
               <InfoRow label="Category" value={app.category?.name || 'App'} />
-              <InfoRow label="Downloads" value={app.downloads_count?.toLocaleString() || '0'} />
+              <InfoRow label="App Views" value={app.views_count?.toLocaleString() || '0'} />
               <InfoRow label="Compatibility" value={app.compatibility} expandable />
               <InfoRow label="Languages" value={app.languages?.join(', ') || 'English'} expandable />
               <InfoRow label="Age Rating" value={app.age_rating} expandable />
@@ -490,6 +504,28 @@ export default function AppDetail() {
               )}
             </div>
           </section>
+
+          {/* Blog Posts */}
+          {blogPosts && blogPosts.length > 0 && (
+            <section className="mt-6">
+              <h2 className="text-xl font-bold text-foreground mb-3">Blog</h2>
+              <div className="space-y-2">
+                {blogPosts.map(post => (
+                  <Link
+                    key={post.id}
+                    to={`/blog/${post.slug}`}
+                    className="flex items-center gap-3 py-3 border-b border-border hover:bg-secondary/30 rounded-lg px-2 transition-colors"
+                  >
+                    <BookOpen className="h-5 w-5 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{post.title}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Tags */}
           {app.tags && app.tags.length > 0 && (

@@ -24,6 +24,9 @@ export function SplashScreen({ isHiding = false }: SplashScreenProps) {
         <div className="animate-[splash-fade_900ms_ease-out] text-3xl font-semibold tracking-tight text-foreground">
           OpenApp
         </div>
+        <div className="animate-[splash-fade_900ms_ease-out] text-sm text-muted-foreground mt-1">
+          by Mrwain Organization
+        </div>
       </div>
     </div>
   );
