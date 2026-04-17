@@ -10,6 +10,8 @@ import { StarRating } from '@/components/StarRating';
 import { ReviewSection } from '@/components/ReviewSection';
 import { FeedbackDialog } from '@/components/FeedbackDialog';
 import { RecommendedApps } from '@/components/RecommendedApps';
+import { SubscribeServiceList } from '@/components/SubscribeServiceList';
+import { SubscriptionServicesManager } from '@/components/SubscriptionServicesManager';
 import { ImagePreviewDialog } from '@/components/ImagePreviewDialog';
 import { ArrowLeft, ExternalLink, Share2, ChevronRight, ChevronDown, Bookmark, BookmarkCheck, BookOpen } from 'lucide-react';
 import { useBlogPostsByApp } from '@/hooks/useBlog';
@@ -448,6 +450,16 @@ export default function AppDetail() {
                 </button>
               )}
             </section>
+          )}
+
+          {/* Subscription Services (Pi Network subscription model) */}
+          <div className="mt-6">
+            <SubscribeServiceList appId={app.id} developerId={app.user_id} />
+          </div>
+          {user && app.user_id === user.id && (
+            <div className="mt-6">
+              <SubscriptionServicesManager appId={app.id} developerId={user.id} />
+            </div>
           )}
 
           {/* Reviews & Ratings */}
