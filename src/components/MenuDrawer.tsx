@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/hooks/useAuth';
+import { useOpenAppModal } from '@/contexts/OpenAppModalContext';
 import {
   Sheet,
   SheetContent,
@@ -34,6 +35,7 @@ import {
   Code2,
   Receipt,
   BookOpen,
+  Download,
 } from 'lucide-react';
 
 interface MenuItemProps {
@@ -71,6 +73,11 @@ function MenuItem({ icon, label, href, onClick, isActive }: MenuItemProps) {
 export function MenuDrawer() {
   const { theme, toggleTheme } = useTheme();
   const { user, isAdmin, signOut } = useAuth();
+  const { setShowOpenAppModal } = useOpenAppModal();
+
+  const handleOpenAppModal = () => {
+    setShowOpenAppModal(true);
+  };
 
   return (
     <Sheet>
@@ -95,6 +102,7 @@ export function MenuDrawer() {
           <MenuItem icon={<BookOpen className="h-5 w-5" />} label="Blog" href="/blog" />
           {user && <MenuItem icon={<Receipt className="h-5 w-5" />} label="Purchases" href="/purchases" />}
           {user && <MenuItem icon={<User className="h-5 w-5" />} label="Profile" href="/profile" />}
+          <MenuItem icon={<Download className="h-5 w-5" />} label="Download App" onClick={handleOpenAppModal} />
 
           <div className="border-t border-border mt-2 pt-3 space-y-1">
             <p className="px-3 text-xs font-semibold text-muted-foreground uppercase mb-2">Developer</p>

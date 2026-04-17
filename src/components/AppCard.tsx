@@ -52,14 +52,15 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const renderGetButton = (className: string) => {
     if (normalizedWebsite) {
       return (
-        <a
-          href={normalizedWebsite}
-          rel="noopener noreferrer"
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            window.open(normalizedWebsite, '_blank', 'noopener,noreferrer');
+          }}
           className={className}
-          onClick={(e) => e.stopPropagation()}
         >
           Get
-        </a>
+        </button>
       );
     }
     return (

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { usePiNetwork } from '@/hooks/usePiNetwork';
@@ -108,7 +108,12 @@ export function SubscribeServiceList({ appId, developerId }: Props) {
 
       <Dialog open={!!picked} onOpenChange={(o) => !o && setPicked(null)}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Confirm subscription</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Confirm subscription</DialogTitle>
+            <DialogDescription className="sr-only">
+              Confirm your subscription to this service
+            </DialogDescription>
+          </DialogHeader>
           {picked && (
             <div className="space-y-3">
               <p className="text-sm text-foreground"><strong>{picked.name}</strong> — {Number(picked.price)} Pi / {periodLabel(picked.period_secs)}</p>

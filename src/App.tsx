@@ -9,6 +9,8 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { PiProvider } from "@/hooks/usePiNetwork";
 import { SplashScreen } from "@/components/SplashScreen";
 import { Footer } from "@/components/Footer";
+import { OpenAppModal } from "@/components/OpenAppModal";
+import { OpenAppModalProvider, useOpenAppModal } from "@/contexts/OpenAppModalContext";
 import Index from "./pages/Index";
 import AppDetail from "./pages/AppDetail";
 import Auth from "./pages/Auth";
@@ -36,9 +38,9 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
-  const [hideSplash, setHideSplash] = useState(false);
+function AppContent() {
+  const { showSplash, setShowSplash, hideSplash, setHideSplash } = useSplashScreen();
+  const { showOpenAppModal, setShowOpenAppModal } = useOpenAppModal();
 
   useEffect(() => {
     const hideTimer = setTimeout(() => setHideSplash(true), 1000);
@@ -48,46 +50,63 @@ const App = () => {
       clearTimeout(hideTimer);
       clearTimeout(removeTimer);
     };
-  }, []);
+  }, [setHideSplash, setShowSplash]);
 
+  return (
+    <>
+      {showSplash && <SplashScreen isHiding={hideSplash} />}
+      <Toaster />
+      <Sonner />
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/app/:id" element={<AppDetail />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/submit" element={<SubmitApp />} />
+          <Route path="/my-apps" element={<MyApps />} />
+          <Route path="/advertiser" element={<AdvertiserDashboard />} />
+          <Route path="/developer-dashboard" element={<DeveloperDashboard />} />
+          <Route path="/ad-moderation" element={<AdModeration />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/new" element={<NewApps />} />
+          <Route path="/top" element={<TopApps />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/purchases" element={<AppPurchases />} />
+          <Route path="/about" element={<AboutOpenApp />} />
+          <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/license" element={<License />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/admin/blog" element={<AdminBlog />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Footer />
+        </BrowserRouter>
+        <OpenAppModal open={showOpenAppModal} onOpenChange={setShowOpenAppModal} />
+    </>
+  );
+}
+
+function useSplashScreen() {
+  const [showSplash, setShowSplash] = useState(true);
+  const [hideSplash, setHideSplash] = useState(false);
+  return { showSplash, setShowSplash, hideSplash, setHideSplash };
+}
+
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
           <PiProvider>
             <TooltipProvider>
-              {showSplash && <SplashScreen isHiding={hideSplash} />}
-              <Toaster />
-              <Sonner />
-              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                <Route path="/app/:id" element={<AppDetail />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/submit" element={<SubmitApp />} />
-                <Route path="/my-apps" element={<MyApps />} />
-                <Route path="/advertiser" element={<AdvertiserDashboard />} />
-                <Route path="/developer-dashboard" element={<DeveloperDashboard />} />
-                <Route path="/ad-moderation" element={<AdModeration />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/new" element={<NewApps />} />
-                <Route path="/top" element={<TopApps />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/bookmarks" element={<Bookmarks />} />
-                <Route path="/feedback" element={<Feedback />} />
-                <Route path="/purchases" element={<AppPurchases />} />
-                <Route path="/about" element={<AboutOpenApp />} />
-                <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/license" element={<License />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogPostPage />} />
-                  <Route path="/admin/blog" element={<AdminBlog />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <Footer />
-              </BrowserRouter>
+              <OpenAppModalProvider>
+                <AppContent />
+              </OpenAppModalProvider>
             </TooltipProvider>
           </PiProvider>
         </AuthProvider>

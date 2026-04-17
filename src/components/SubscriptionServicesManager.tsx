@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -89,7 +89,12 @@ export function SubscriptionServicesManager({ appId, developerId }: Props) {
             <Button size="sm"><Plus className="h-4 w-4 mr-1" /> New</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>{form.id ? 'Edit Service' : 'New Subscription Service'}</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>{form.id ? 'Edit Service' : 'New Subscription Service'}</DialogTitle>
+              <DialogDescription className="sr-only">
+                {form.id ? 'Edit existing subscription service details' : 'Create a new subscription service'}
+              </DialogDescription>
+            </DialogHeader>
             <div className="space-y-3">
               <div>
                 <Label>Service name</Label>
