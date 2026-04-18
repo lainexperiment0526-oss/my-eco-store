@@ -329,6 +329,24 @@ export default function AppDetail() {
   return (
     <>
     <PiAuthModal open={showPiAuthModal} onOpenChange={setShowPiAuthModal} />
+    <Dialog open={!!showPayMethodFor} onOpenChange={(o) => !o && setShowPayMethodFor(null)}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Choose payment method</DialogTitle>
+          <DialogDescription>
+            {app && `Pay ${app.price_amount} for ${app.name}`}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-2 pt-2">
+          <Button onClick={() => processPayment('pi')} disabled={isPaying}>
+            Pay with Pi ({app?.price_amount} π)
+          </Button>
+          <Button variant="secondary" onClick={() => processPayment('openpay')} disabled={isPaying}>
+            Pay with OpenPay ({app?.price_amount} OUSD)
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
     <div className="min-h-screen bg-background pb-20">
       {showOpenAd && <AdInterstitial trigger="app-open" onComplete={handleOpenAfterAd} />}
       <Header />
