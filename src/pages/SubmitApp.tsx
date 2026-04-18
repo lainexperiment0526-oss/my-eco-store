@@ -281,6 +281,7 @@ export default function SubmitApp() {
       network_type: formData.network_type,
       languages: formData.languages,
       notes: formData.notes || null,
+      subscription_plans: subscriptionPlans as any,
     };
 
     if (draftId) {
@@ -348,6 +349,7 @@ export default function SubmitApp() {
       languages: draft.languages?.length ? draft.languages : ['English'],
       notes: draft.notes || '',
     });
+    setSubscriptionPlans(Array.isArray(draft.subscription_plans) ? draft.subscription_plans : []);
     setDraftId(draft.id);
     setAdTitle(draft.ad_title || '');
     setLogoFile(null);
