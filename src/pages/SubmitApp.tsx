@@ -916,6 +916,9 @@ export default function SubmitApp() {
             </div>
           </div>
 
+          {/* Subscription Plans */}
+          <DraftPlansEditor plans={subscriptionPlans} onChange={setSubscriptionPlans} />
+
           {/* Screenshots */}
           <div className="space-y-2">
             <Label>Screenshots</Label>
