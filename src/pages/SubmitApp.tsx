@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Upload, X, Image, ArrowLeft, CheckCircle, Video, FileText, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { DraftPlansEditor, DraftPlan } from '@/components/DraftPlansEditor';
 
 type SubmitStep = 'details' | 'payment' | 'submitting' | 'done';
 
@@ -150,6 +151,7 @@ export default function SubmitApp() {
   const [screenshotFiles, setScreenshotFiles] = useState<File[]>([]);
   const [videoAdFile, setVideoAdFile] = useState<File | null>(null);
   const [adTitle, setAdTitle] = useState('');
+  const [subscriptionPlans, setSubscriptionPlans] = useState<DraftPlan[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [draftLoadInProgress, setDraftLoadInProgress] = useState(false);
 
