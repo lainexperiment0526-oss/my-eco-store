@@ -24,6 +24,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { AdInterstitial } from '@/components/AdInterstitial';
 import { PiAuthModal } from '@/components/PiAuthModal';
+import { useOpenPay } from '@/hooks/useOpenPay';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 export default function AppDetail() {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +35,7 @@ export default function AppDetail() {
   const { user } = useAuth();
   const { theme } = useTheme();
   const { createPiPayment, isPiReady, authenticateWithPi, isPiAuthenticated } = usePiNetwork();
+  const { createOpenPayPayment } = useOpenPay();
   const { data: isBookmarked } = useIsBookmarked(id || '', user?.id);
   const toggleBookmark = useToggleBookmark();
   const { data: blogPosts } = useBlogPostsByApp(id || '');
@@ -46,6 +49,7 @@ export default function AppDetail() {
   const [isPaying, setIsPaying] = useState(false);
   const [nowMs, setNowMs] = useState(Date.now());
   const [showPiAuthModal, setShowPiAuthModal] = useState(false);
+  const [showPayMethodFor, setShowPayMethodFor] = useState<{ purchaseType: 'onetime' | 'monthly' } | null>(null);
 
   const normalizeUrl = useCallback((url: string) => {
     const trimmed = url.trim();
