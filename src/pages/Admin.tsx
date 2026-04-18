@@ -115,7 +115,7 @@ export default function Admin() {
 
     const { data: withdrawals } = await supabase
       .from('withdrawal_requests')
-      .select('id, developer_id, amount, status, pi_wallet_address, created_at')
+      .select('id, developer_id, amount, status, pi_wallet_address, created_at, provider, openpay_username, txid')
       .order('created_at', { ascending: false });
     setWithdrawalRequests((withdrawals || []) as AdminWithdrawal[]);
   };
@@ -136,6 +136,22 @@ export default function Admin() {
       await loadFinanceData();
     } catch (error: any) {
       toast.error(error.message || 'Failed to update withdrawal');
+    } finally {
+      setProcessingWithdrawalId(null);
+    }
+  };
+
+  const payViaOpenPay = async (id: string) => {
+    setProcessingWithdrawalId(id);
+    try {
+      const { data, error } = await supabase.functions.invoke('openpay-payout', {
+        body: { withdrawalId: id },
+      });
+      if (error || !data?.success) throw new Error(data?.error || error?.message || 'OpenPay payout failed');
+      toast.success(`Paid via OpenPay (txid: ${String(data.txid || '').slice(0, 10)}…)`);
+      await loadFinanceData();
+    } catch (e: any) {
+      toast.error(e.message || 'OpenPay payout failed');
     } finally {
       setProcessingWithdrawalId(null);
     }
