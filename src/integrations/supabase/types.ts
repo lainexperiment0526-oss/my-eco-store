@@ -895,30 +895,30 @@ export type Database = {
       }
       profiles: {
         Row: {
+          auth_method: string | null
           created_at: string
           email: string | null
+          email_verified: boolean | null
           id: string
           is_admin: boolean | null
-          auth_method: string | null
-          email_verified: boolean | null
           uses_openapp: boolean | null
         }
         Insert: {
+          auth_method?: string | null
           created_at?: string
           email?: string | null
+          email_verified?: boolean | null
           id: string
           is_admin?: boolean | null
-          auth_method?: string | null
-          email_verified?: boolean | null
           uses_openapp?: boolean | null
         }
         Update: {
+          auth_method?: string | null
           created_at?: string
           email?: string | null
+          email_verified?: boolean | null
           id?: string
           is_admin?: boolean | null
-          auth_method?: string | null
-          email_verified?: boolean | null
           uses_openapp?: boolean | null
         }
         Relationships: []
