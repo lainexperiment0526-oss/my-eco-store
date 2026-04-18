@@ -899,18 +899,27 @@ export type Database = {
           email: string | null
           id: string
           is_admin: boolean | null
+          auth_method: string | null
+          email_verified: boolean | null
+          uses_openapp: boolean | null
         }
         Insert: {
           created_at?: string
           email?: string | null
           id: string
           is_admin?: boolean | null
+          auth_method?: string | null
+          email_verified?: boolean | null
+          uses_openapp?: boolean | null
         }
         Update: {
           created_at?: string
           email?: string | null
           id?: string
           is_admin?: boolean | null
+          auth_method?: string | null
+          email_verified?: boolean | null
+          uses_openapp?: boolean | null
         }
         Relationships: []
       }
