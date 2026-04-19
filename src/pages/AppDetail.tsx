@@ -391,6 +391,35 @@ export default function AppDetail() {
           <Button variant="secondary" onClick={() => processPayment('openpay')} disabled={isPaying}>
             Pay with OpenPay ({app?.price_amount} OUSD)
           </Button>
+          {(app as any)?.openpay_link && (
+            <Button variant="outline" onClick={() => processPayment('openpay_link')} disabled={isPaying}>
+              Pay via Developer's OpenPay link
+            </Button>
+          )}
+          {(app as any)?.droppay_link && (
+            <Button variant="outline" onClick={() => processPayment('droppay_link')} disabled={isPaying}>
+              Pay via Developer's DropPay link
+            </Button>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+    <Dialog open={!!proofPrompt} onOpenChange={(o) => { if (!o) { setProofPrompt(null); setProofTxid(''); } }}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Confirm your payment</DialogTitle>
+          <DialogDescription>
+            After paying via the developer's {proofPrompt?.provider === 'droppay_link' ? 'DropPay' : 'OpenPay'} link, paste your transaction ID below. The developer will verify and unlock access.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-2 pt-2">
+          <input
+            value={proofTxid}
+            onChange={(e) => setProofTxid(e.target.value)}
+            placeholder="Transaction ID / receipt reference"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+          <Button onClick={submitProof} disabled={isPaying}>Submit proof</Button>
         </div>
       </DialogContent>
     </Dialog>
