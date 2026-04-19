@@ -396,6 +396,17 @@ export default function AppDetail() {
                 </Button>
                 <FeedbackDialog appId={app.id} />
               </div>
+              {(app as any).download_url && (
+                <a
+                  href={(app as any).download_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
+                >
+                  <ExternalLink className="h-4 w-4" /> Download App (optional)
+                </a>
+              )}
             </div>
           </div>
 
