@@ -37,6 +37,7 @@ export interface App {
   launch_at: string | null;
   is_verified: boolean;
   verified_until: string | null;
+  download_url?: string | null;
 }
 
 export interface Category {
