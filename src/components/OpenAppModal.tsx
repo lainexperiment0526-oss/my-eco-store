@@ -1,7 +1,11 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, Copy, Smartphone } from 'lucide-react';
+import { Download, Copy, Smartphone, CheckCircle2, Gift } from 'lucide-react';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useAffiliate } from '@/hooks/useAffiliate';
 
 interface OpenAppModalProps {
   open: boolean;
@@ -9,6 +13,10 @@ interface OpenAppModalProps {
 }
 
 export function OpenAppModal({ open, onOpenChange }: OpenAppModalProps) {
+  const { user } = useAuth();
+  const { profile, confirmApkInstalled } = useAffiliate();
+  const [confirming, setConfirming] = useState(false);
+
   const apkLink = 'https://median.co/share/nmdkwkr#apk';
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(apkLink)}`;
 
@@ -22,6 +30,16 @@ export function OpenAppModal({ open, onOpenChange }: OpenAppModalProps) {
       toast.success('Download link copied to clipboard!');
     } catch (error) {
       toast.error('Failed to copy link');
+    }
+  };
+
+  const handleConfirmInstalled = async () => {
+    setConfirming(true);
+    const err = await confirmApkInstalled();
+    setConfirming(false);
+    if (err) toast.error(err.message);
+    else {
+      toast.success(profile?.referred_by ? 'Confirmed! Your referrer earned $1.' : 'Install confirmed.');
     }
   };
 
@@ -70,6 +88,37 @@ export function OpenAppModal({ open, onOpenChange }: OpenAppModalProps) {
               <Copy className="h-5 w-5" />
               Copy download link to clipboard
             </Button>
+          </div>
+
+          {/* APK install confirmation */}
+          {user && !profile?.apk_installed && (
+            <div className="rounded-xl border border-primary/40 bg-primary/5 p-4 space-y-2">
+              <p className="text-sm font-medium text-foreground">Already installed the APK?</p>
+              <p className="text-xs text-muted-foreground">
+                {profile?.referred_by
+                  ? 'Confirm to credit your referrer with $1.'
+                  : 'Confirm so we can track your install.'}
+              </p>
+              <Button onClick={handleConfirmInstalled} loading={confirming} size="sm" className="w-full">
+                <CheckCircle2 className="h-4 w-4" /> Yes, I installed it
+              </Button>
+            </div>
+          )}
+
+          {/* Affiliate CTA */}
+          <div className="rounded-xl border border-border bg-secondary/30 p-4 text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Gift className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-foreground">Earn $1 + $3 per invite</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Share your link: $1 for each APK install, $3 for each app a friend lists.
+            </p>
+            <Link to="/affiliate" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" size="sm" className="mt-1">
+                <Gift className="h-4 w-4" /> Get my invite link
+              </Button>
+            </Link>
           </div>
 
           {/* iOS Coming Soon Section */}

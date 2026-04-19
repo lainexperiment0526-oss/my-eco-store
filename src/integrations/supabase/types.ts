@@ -174,6 +174,47 @@ export type Database = {
           },
         ]
       }
+      affiliate_rewards: {
+        Row: {
+          amount_usd: number
+          app_id: string | null
+          created_at: string
+          id: string
+          invitee_id: string
+          referrer_id: string
+          reward_type: string
+          status: string
+        }
+        Insert: {
+          amount_usd: number
+          app_id?: string | null
+          created_at?: string
+          id?: string
+          invitee_id: string
+          referrer_id: string
+          reward_type: string
+          status?: string
+        }
+        Update: {
+          amount_usd?: number
+          app_id?: string | null
+          created_at?: string
+          id?: string
+          invitee_id?: string
+          referrer_id?: string
+          reward_type?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_rewards_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_ads: {
         Row: {
           app_id: string
@@ -901,6 +942,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          apk_installed: boolean
+          apk_installed_at: string | null
           auth_method: string | null
           created_at: string
           email: string | null
@@ -908,9 +951,13 @@ export type Database = {
           id: string
           is_admin: boolean | null
           openpay_username: string | null
+          referral_code: string | null
+          referred_by: string | null
           uses_openapp: boolean | null
         }
         Insert: {
+          apk_installed?: boolean
+          apk_installed_at?: string | null
           auth_method?: string | null
           created_at?: string
           email?: string | null
@@ -918,9 +965,13 @@ export type Database = {
           id: string
           is_admin?: boolean | null
           openpay_username?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           uses_openapp?: boolean | null
         }
         Update: {
+          apk_installed?: boolean
+          apk_installed_at?: string | null
           auth_method?: string | null
           created_at?: string
           email?: string | null
@@ -928,6 +979,8 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           openpay_username?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           uses_openapp?: boolean | null
         }
         Relationships: []
