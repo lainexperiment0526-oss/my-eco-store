@@ -82,12 +82,14 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
   useEffect(() => {
     if (countdown <= 0) {
       setCanSkip(true);
+      setShowDetails(true);
       return;
     }
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           setCanSkip(true);
+          setShowDetails(true);
           clearInterval(timer);
           return 0;
         }
