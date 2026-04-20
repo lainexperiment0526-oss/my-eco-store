@@ -15,7 +15,7 @@ import { Mail, Pi } from 'lucide-react';
 export default function Auth() {
   const navigate = useNavigate();
   const { user, signIn, signUp, loading } = useAuth();
-  const { isPiReady, authenticateWithPi, piLoading } = usePiNetwork();
+  const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [showAd, setShowAd] = useState(true);
 
   useEffect(() => {
@@ -63,6 +63,12 @@ export default function Auth() {
   };
 
   const handlePiAuth = async () => {
+    // Trigger Pi Ad Network interstitial (only runs inside Pi Browser; no-op otherwise)
+    try {
+      await showPiAd('interstitial');
+    } catch (err) {
+      console.warn('Pi Ad failed (non-blocking):', err);
+    }
     const piUser = await authenticateWithPi();
     if (piUser) {
       const ensured = await ensurePiAccountServerSide(piUser.uid, piUser.username);
