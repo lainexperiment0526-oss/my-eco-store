@@ -245,8 +245,13 @@ export default function AppDetail() {
       recordDownload(next.appId, user.id).catch(() => {});
     }
     setTimeout(() => setIsOpening(false), 1500);
-    // Force full navigation to the exact app link after ad completion.
-    window.location.replace(next.url);
+    // Force full top-level navigation to the EXACT developer-provided app link.
+    // Never keep the user on the OpenApp domain after the ad completes.
+    try {
+      window.location.href = next.url;
+    } catch {
+      window.open(next.url, '_self');
+    }
   }, [pendingOpen, recordDownload, user?.id]);
 
   const handleShare = async () => {

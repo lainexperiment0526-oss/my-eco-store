@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePiNetwork } from '@/hooks/usePiNetwork';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,15 +14,17 @@ import { Mail, Pi } from 'lucide-react';
 
 export default function Auth() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = (location.state as { from?: string } | null)?.from || '/';
   const { user, signIn, signUp, loading } = useAuth();
   const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [showAd, setShowAd] = useState(true);
 
   useEffect(() => {
     if (user && !loading) {
-      navigate('/');
+      navigate(redirectTo, { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, redirectTo]);
 
   const getStablePiPassword = (piUid: string) => `openapp_pi_auth_${piUid}`;
   const getLegacyPiPassword = (accessToken: string, piUid: string) => `${accessToken.slice(0, 20)}${piUid}`;
@@ -120,7 +122,7 @@ export default function Auth() {
         .eq('id', piUser.uid);
 
       toast.success(`Welcome, ${piUser.username}!`);
-      navigate('/');
+      navigate(redirectTo, { replace: true });
     } else {
       toast.error('Pi authentication failed. Make sure you are in Pi Browser.');
     }
@@ -160,7 +162,7 @@ export default function Auth() {
         }
         
         toast.success('Welcome back!');
-        navigate('/');
+        navigate(redirectTo, { replace: true });
       }
     } catch (error) {
       toast.error('Authentication failed. Please try again.');
