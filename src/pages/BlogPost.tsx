@@ -7,6 +7,7 @@ import { ArrowLeft, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
+import { Helmet } from 'react-helmet-async';
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -54,8 +55,29 @@ export default function BlogPost() {
     );
   }
 
+  const canonicalUrl = `https://openappspaeces.lovable.app/blog/${post.slug}`;
+  const excerpt = post.content?.replace(/<[^>]+>/g, '').slice(0, 155) || 'Read this post on OpenApp.';
   return (
     <div className="min-h-screen bg-background pb-20">
+      <Helmet>
+        <title>{`${post.title} — OpenApp Blog`}</title>
+        <meta name="description" content={excerpt} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={excerpt} />
+        <meta property="og:url" content={canonicalUrl} />
+        {post.cover_image_url && <meta property="og:image" content={post.cover_image_url} />}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: post.title,
+          datePublished: post.published_at,
+          image: post.cover_image_url || undefined,
+          description: excerpt,
+          author: { "@type": "Organization", name: "OpenApp" }
+        })}</script>
+      </Helmet>
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-6">
         <div className="flex items-center gap-2 mb-4">

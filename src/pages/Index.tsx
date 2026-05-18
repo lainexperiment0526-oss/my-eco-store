@@ -8,6 +8,7 @@ import { HomeAdBanner } from '@/components/HomeAdBanner';
 import { useApps, useFeaturedApps, usePopularApps, useNewApps, useCategories } from '@/hooks/useApps';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Logo } from '@/components/Logo';
+import { Helmet } from 'react-helmet-async';
 
 export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -95,6 +96,23 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      <Helmet>
+        <title>OpenApp — Discover Pi Network Apps</title>
+        <meta name="description" content="Browse, rate, and open the best Pi Network apps. A decentralized hub for users and developers in the Pi ecosystem." />
+        <link rel="canonical" href="https://openappspaeces.lovable.app/" />
+        <meta property="og:title" content="OpenApp — Discover Pi Network Apps" />
+        <meta property="og:description" content="Browse, rate, and open the best Pi Network apps." />
+        <meta property="og:url" content="https://openappspaeces.lovable.app/" />
+        <meta property="og:type" content="website" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "OpenApp",
+          "url": "https://openappspaeces.lovable.app/",
+          "logo": "https://openappspaeces.lovable.app/favicon.ico",
+          "description": "Decentralized network hub for Pi Network apps."
+        })}</script>
+      </Helmet>
       <Header />
       
       <main className="mx-auto max-w-6xl px-4 py-4">
