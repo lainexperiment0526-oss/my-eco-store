@@ -555,6 +555,10 @@ export default function SubmitApp() {
           download_url: formData.download_url || null,
           openpay_link: formData.openpay_link || null,
           droppay_link: formData.droppay_link || null,
+          app_file_url: (draft as any)?.app_file_url || null,
+          app_file_name: (draft as any)?.app_file_name || null,
+          app_file_size: (draft as any)?.app_file_size || null,
+          app_file_type: (draft as any)?.app_file_type || null,
         })
         .select()
         .single();
