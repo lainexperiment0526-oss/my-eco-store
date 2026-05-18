@@ -809,6 +809,50 @@ export default function SubmitApp() {
               <p className="text-xs text-muted-foreground">Direct link to APK / installer. Shown to users as an optional Download button.</p>
             </div>
             <div className="space-y-2">
+              <Label>Install File (APK / IPA / ZIP / EXE — optional)</Label>
+              {(appBinaryFile || existingAppFile) ? (
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-secondary/40 px-4 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {appBinaryFile?.name || existingAppFile?.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {((appBinaryFile?.size || existingAppFile?.size || 0) / (1024 * 1024)).toFixed(2)} MB
+                      {appBinaryFile ? ' • ready to upload' : ' • already uploaded'}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => { setAppBinaryFile(null); setExistingAppFile(null); }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-border px-6 py-4 transition-colors hover:border-primary hover:bg-secondary/50">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Upload installable app file (max 200MB)</span>
+                  <input
+                    type="file"
+                    accept=".apk,.ipa,.zip,.exe,.aab,.dmg,.msi,application/vnd.android.package-archive,application/octet-stream,application/zip"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 200 * 1024 * 1024) {
+                        toast.error('File is too large. Max 200MB.');
+                        return;
+                      }
+                      setAppBinaryFile(file);
+                    }}
+                  />
+                </label>
+              )}
+              <p className="text-xs text-muted-foreground">When uploaded, users can install/download your app directly from OpenApp — App Store / Play Store style.</p>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="openpay_link">OpenPay Payment Link (optional)</Label>
               <Input id="openpay_link" type="url" value={formData.openpay_link} onChange={(e) => setFormData({ ...formData, openpay_link: e.target.value })} placeholder="https://openpay.app/yourname" />
               <p className="text-xs text-muted-foreground">Your OpenPay link. If set, users see a "Pay with OpenPay" option and confirm with a transaction ID.</p>
