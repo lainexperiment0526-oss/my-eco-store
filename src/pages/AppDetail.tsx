@@ -477,15 +477,28 @@ export default function AppDetail() {
                 </Button>
                 <FeedbackDialog appId={app.id} />
               </div>
+              {(app as any).app_file_url && (
+                <a
+                  href={(app as any).app_file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={(app as any).app_file_name || true}
+                  onClick={() => { if (user?.id) recordDownload(app.id, user.id).catch(() => {}); }}
+                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow hover:opacity-90"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Install{(app as any).app_file_size ? ` · ${(((app as any).app_file_size as number) / (1024 * 1024)).toFixed(1)} MB` : ''}
+                </a>
+              )}
               {(app as any).download_url && (
                 <a
                   href={(app as any).download_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   download
-                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
+                  className="mt-3 ml-2 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
                 >
-                  <ExternalLink className="h-4 w-4" /> Download App (optional)
+                  <ExternalLink className="h-4 w-4" /> Download (external)
                 </a>
               )}
             </div>
