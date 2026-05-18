@@ -26,6 +26,7 @@ import { AdInterstitial } from '@/components/AdInterstitial';
 import { PiAuthModal } from '@/components/PiAuthModal';
 import { useOpenPay } from '@/hooks/useOpenPay';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Helmet } from 'react-helmet-async';
 
 export default function AppDetail() {
   const { id } = useParams<{ id: string }>();
@@ -378,8 +379,36 @@ export default function AppDetail() {
   const isVerified = !!badge || isSubscriptionVerified;
   const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : 'https://i.ibb.co/BVQYVbyb/verified.png';
 
+  const appCanonical = `https://openappspaeces.lovable.app/app/${id}`;
+  const appDesc = (app?.tagline || app?.description?.slice(0, 155)) || 'Discover this app on OpenApp.';
   return (
     <>
+    {app && (
+      <Helmet>
+        <title>{`${app.name} — OpenApp`}</title>
+        <meta name="description" content={appDesc} />
+        <link rel="canonical" href={appCanonical} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`${app.name} — OpenApp`} />
+        <meta property="og:description" content={appDesc} />
+        <meta property="og:url" content={appCanonical} />
+        {app.logo_url && <meta property="og:image" content={app.logo_url} />}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: app.name,
+          description: appDesc,
+          applicationCategory: app.category || "WebApplication",
+          operatingSystem: "Web",
+          image: app.logo_url || undefined,
+          aggregateRating: app.average_rating ? {
+            "@type": "AggregateRating",
+            ratingValue: app.average_rating,
+            ratingCount: app.ratings_count || 1
+          } : undefined
+        })}</script>
+      </Helmet>
+    )}
     <PiAuthModal open={showPiAuthModal} onOpenChange={setShowPiAuthModal} />
     <Dialog open={!!showPayMethodFor} onOpenChange={(o) => !o && setShowPayMethodFor(null)}>
       <DialogContent className="max-w-sm">
