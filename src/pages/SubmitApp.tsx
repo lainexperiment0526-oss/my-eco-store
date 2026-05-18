@@ -385,6 +385,17 @@ export default function SubmitApp() {
     setLogoFile(null);
     setScreenshotFiles([]);
     setVideoAdFile(null);
+    setAppBinaryFile(null);
+    setExistingAppFile(
+      draft.app_file_url
+        ? {
+            url: draft.app_file_url,
+            name: draft.app_file_name || 'app file',
+            size: Number(draft.app_file_size) || 0,
+            type: draft.app_file_type || '',
+          }
+        : null,
+    );
     if (draft.payment_status === 'paid') {
       setStep('details');
     }
