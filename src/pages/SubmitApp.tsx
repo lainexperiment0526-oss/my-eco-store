@@ -227,7 +227,7 @@ export default function SubmitApp() {
     if (draftId) {
       const { data, error } = await supabase
         .from('app_drafts')
-        .select('logo_url, screenshot_urls, video_ad_url')
+        .select('logo_url, screenshot_urls, video_ad_url, app_file_url, app_file_name, app_file_size, app_file_type')
         .eq('id', draftId)
         .single();
       if (error) throw error;
@@ -250,6 +250,17 @@ export default function SubmitApp() {
     let videoAdUrl: string | null = existingDraft?.video_ad_url || null;
     if (videoAdFile) {
       videoAdUrl = await uploadFile(videoAdFile, 'ads');
+    }
+
+    let appFileUrl: string | null = existingAppFile?.url ?? existingDraft?.app_file_url ?? null;
+    let appFileName: string | null = existingAppFile?.name ?? existingDraft?.app_file_name ?? null;
+    let appFileSize: number | null = existingAppFile?.size ?? existingDraft?.app_file_size ?? null;
+    let appFileType: string | null = existingAppFile?.type ?? existingDraft?.app_file_type ?? null;
+    if (appBinaryFile) {
+      appFileUrl = await uploadFile(appBinaryFile, 'binaries');
+      appFileName = appBinaryFile.name;
+      appFileSize = appBinaryFile.size;
+      appFileType = appBinaryFile.type || appBinaryFile.name.split('.').pop() || 'application/octet-stream';
     }
 
     const isPaid = formData.pricing_model === 'paid';
@@ -290,6 +301,10 @@ export default function SubmitApp() {
       openpay_link: formData.openpay_link || null,
       droppay_link: formData.droppay_link || null,
       subscription_plans: subscriptionPlans as any,
+      app_file_url: appFileUrl,
+      app_file_name: appFileName,
+      app_file_size: appFileSize,
+      app_file_type: appFileType,
     };
 
     if (draftId) {
@@ -301,6 +316,8 @@ export default function SubmitApp() {
       setLogoFile(null);
       setScreenshotFiles([]);
       setVideoAdFile(null);
+      setAppBinaryFile(null);
+      setExistingAppFile(appFileUrl ? { url: appFileUrl, name: appFileName || '', size: appFileSize || 0, type: appFileType || '' } : null);
       return draftId;
     } else {
       const { data, error } = await supabase
@@ -312,6 +329,8 @@ export default function SubmitApp() {
       setLogoFile(null);
       setScreenshotFiles([]);
       setVideoAdFile(null);
+      setAppBinaryFile(null);
+      setExistingAppFile(appFileUrl ? { url: appFileUrl, name: appFileName || '', size: appFileSize || 0, type: appFileType || '' } : null);
       return data.id;
     }
   };
