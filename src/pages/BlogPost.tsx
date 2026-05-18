@@ -56,7 +56,7 @@ export default function BlogPost() {
   }
 
   const canonicalUrl = `https://openappspaeces.lovable.app/blog/${post.slug}`;
-  const excerpt = (post.excerpt || post.content?.replace(/<[^>]+>/g, '').slice(0, 155)) || 'Read this post on OpenApp.';
+  const excerpt = post.content?.replace(/<[^>]+>/g, '').slice(0, 155) || 'Read this post on OpenApp.';
   return (
     <div className="min-h-screen bg-background pb-20">
       <Helmet>
