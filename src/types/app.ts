@@ -40,6 +40,10 @@ export interface App {
   download_url?: string | null;
   openpay_link?: string | null;
   droppay_link?: string | null;
+  app_file_url?: string | null;
+  app_file_name?: string | null;
+  app_file_size?: number | null;
+  app_file_type?: string | null;
 }
 
 export interface Category {
