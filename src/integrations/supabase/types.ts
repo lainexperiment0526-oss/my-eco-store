@@ -363,6 +363,10 @@ export type Database = {
         Row: {
           ad_title: string | null
           age_rating: string | null
+          app_file_name: string | null
+          app_file_size: number | null
+          app_file_type: string | null
+          app_file_url: string | null
           category_id: string | null
           created_at: string
           description: string | null
@@ -399,6 +403,10 @@ export type Database = {
         Insert: {
           ad_title?: string | null
           age_rating?: string | null
+          app_file_name?: string | null
+          app_file_size?: number | null
+          app_file_type?: string | null
+          app_file_url?: string | null
           category_id?: string | null
           created_at?: string
           description?: string | null
@@ -435,6 +443,10 @@ export type Database = {
         Update: {
           ad_title?: string | null
           age_rating?: string | null
+          app_file_name?: string | null
+          app_file_size?: number | null
+          app_file_type?: string | null
+          app_file_url?: string | null
           category_id?: string | null
           created_at?: string
           description?: string | null
@@ -675,6 +687,10 @@ export type Database = {
       apps: {
         Row: {
           age_rating: string | null
+          app_file_name: string | null
+          app_file_size: number | null
+          app_file_type: string | null
+          app_file_url: string | null
           average_rating: number | null
           category_id: string | null
           compatibility: string | null
@@ -715,6 +731,10 @@ export type Database = {
         }
         Insert: {
           age_rating?: string | null
+          app_file_name?: string | null
+          app_file_size?: number | null
+          app_file_type?: string | null
+          app_file_url?: string | null
           average_rating?: number | null
           category_id?: string | null
           compatibility?: string | null
@@ -755,6 +775,10 @@ export type Database = {
         }
         Update: {
           age_rating?: string | null
+          app_file_name?: string | null
+          app_file_size?: number | null
+          app_file_type?: string | null
+          app_file_url?: string | null
           average_rating?: number | null
           category_id?: string | null
           compatibility?: string | null
