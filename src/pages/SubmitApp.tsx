@@ -153,6 +153,8 @@ export default function SubmitApp() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [screenshotFiles, setScreenshotFiles] = useState<File[]>([]);
   const [videoAdFile, setVideoAdFile] = useState<File | null>(null);
+  const [appBinaryFile, setAppBinaryFile] = useState<File | null>(null);
+  const [existingAppFile, setExistingAppFile] = useState<{ url: string; name: string; size: number; type: string } | null>(null);
   const [adTitle, setAdTitle] = useState('');
   const [subscriptionPlans, setSubscriptionPlans] = useState<DraftPlan[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
