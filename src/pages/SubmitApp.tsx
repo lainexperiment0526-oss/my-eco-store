@@ -153,6 +153,8 @@ export default function SubmitApp() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [screenshotFiles, setScreenshotFiles] = useState<File[]>([]);
   const [videoAdFile, setVideoAdFile] = useState<File | null>(null);
+  const [appBinaryFile, setAppBinaryFile] = useState<File | null>(null);
+  const [existingAppFile, setExistingAppFile] = useState<{ url: string; name: string; size: number; type: string } | null>(null);
   const [adTitle, setAdTitle] = useState('');
   const [subscriptionPlans, setSubscriptionPlans] = useState<DraftPlan[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -225,7 +227,7 @@ export default function SubmitApp() {
     if (draftId) {
       const { data, error } = await supabase
         .from('app_drafts')
-        .select('logo_url, screenshot_urls, video_ad_url')
+        .select('logo_url, screenshot_urls, video_ad_url, app_file_url, app_file_name, app_file_size, app_file_type')
         .eq('id', draftId)
         .single();
       if (error) throw error;
@@ -248,6 +250,17 @@ export default function SubmitApp() {
     let videoAdUrl: string | null = existingDraft?.video_ad_url || null;
     if (videoAdFile) {
       videoAdUrl = await uploadFile(videoAdFile, 'ads');
+    }
+
+    let appFileUrl: string | null = existingAppFile?.url ?? existingDraft?.app_file_url ?? null;
+    let appFileName: string | null = existingAppFile?.name ?? existingDraft?.app_file_name ?? null;
+    let appFileSize: number | null = existingAppFile?.size ?? existingDraft?.app_file_size ?? null;
+    let appFileType: string | null = existingAppFile?.type ?? existingDraft?.app_file_type ?? null;
+    if (appBinaryFile) {
+      appFileUrl = await uploadFile(appBinaryFile, 'binaries');
+      appFileName = appBinaryFile.name;
+      appFileSize = appBinaryFile.size;
+      appFileType = appBinaryFile.type || appBinaryFile.name.split('.').pop() || 'application/octet-stream';
     }
 
     const isPaid = formData.pricing_model === 'paid';
@@ -288,6 +301,10 @@ export default function SubmitApp() {
       openpay_link: formData.openpay_link || null,
       droppay_link: formData.droppay_link || null,
       subscription_plans: subscriptionPlans as any,
+      app_file_url: appFileUrl,
+      app_file_name: appFileName,
+      app_file_size: appFileSize,
+      app_file_type: appFileType,
     };
 
     if (draftId) {
@@ -299,6 +316,8 @@ export default function SubmitApp() {
       setLogoFile(null);
       setScreenshotFiles([]);
       setVideoAdFile(null);
+      setAppBinaryFile(null);
+      setExistingAppFile(appFileUrl ? { url: appFileUrl, name: appFileName || '', size: appFileSize || 0, type: appFileType || '' } : null);
       return draftId;
     } else {
       const { data, error } = await supabase
@@ -310,6 +329,8 @@ export default function SubmitApp() {
       setLogoFile(null);
       setScreenshotFiles([]);
       setVideoAdFile(null);
+      setAppBinaryFile(null);
+      setExistingAppFile(appFileUrl ? { url: appFileUrl, name: appFileName || '', size: appFileSize || 0, type: appFileType || '' } : null);
       return data.id;
     }
   };
@@ -364,6 +385,17 @@ export default function SubmitApp() {
     setLogoFile(null);
     setScreenshotFiles([]);
     setVideoAdFile(null);
+    setAppBinaryFile(null);
+    setExistingAppFile(
+      draft.app_file_url
+        ? {
+            url: draft.app_file_url,
+            name: draft.app_file_name || 'app file',
+            size: Number(draft.app_file_size) || 0,
+            type: draft.app_file_type || '',
+          }
+        : null,
+    );
     if (draft.payment_status === 'paid') {
       setStep('details');
     }
@@ -523,6 +555,10 @@ export default function SubmitApp() {
           download_url: formData.download_url || null,
           openpay_link: formData.openpay_link || null,
           droppay_link: formData.droppay_link || null,
+          app_file_url: (draft as any)?.app_file_url || null,
+          app_file_name: (draft as any)?.app_file_name || null,
+          app_file_size: (draft as any)?.app_file_size || null,
+          app_file_type: (draft as any)?.app_file_type || null,
         })
         .select()
         .single();
@@ -611,6 +647,8 @@ export default function SubmitApp() {
               setLogoFile(null);
               setScreenshotFiles([]);
               setVideoAdFile(null);
+              setAppBinaryFile(null);
+              setExistingAppFile(null);
               setAdTitle('');
               setSubscriptionPlans([]);
             }}>Submit Another</Button>
@@ -769,6 +807,50 @@ export default function SubmitApp() {
               <Label htmlFor="download_url">Download Link (optional)</Label>
               <Input id="download_url" type="url" value={formData.download_url} onChange={(e) => setFormData({ ...formData, download_url: e.target.value })} placeholder="https://example.com/app.apk" />
               <p className="text-xs text-muted-foreground">Direct link to APK / installer. Shown to users as an optional Download button.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Install File (APK / IPA / ZIP / EXE — optional)</Label>
+              {(appBinaryFile || existingAppFile) ? (
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-secondary/40 px-4 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {appBinaryFile?.name || existingAppFile?.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {((appBinaryFile?.size || existingAppFile?.size || 0) / (1024 * 1024)).toFixed(2)} MB
+                      {appBinaryFile ? ' • ready to upload' : ' • already uploaded'}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => { setAppBinaryFile(null); setExistingAppFile(null); }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-border px-6 py-4 transition-colors hover:border-primary hover:bg-secondary/50">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Upload installable app file (max 200MB)</span>
+                  <input
+                    type="file"
+                    accept=".apk,.ipa,.zip,.exe,.aab,.dmg,.msi,application/vnd.android.package-archive,application/octet-stream,application/zip"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 200 * 1024 * 1024) {
+                        toast.error('File is too large. Max 200MB.');
+                        return;
+                      }
+                      setAppBinaryFile(file);
+                    }}
+                  />
+                </label>
+              )}
+              <p className="text-xs text-muted-foreground">When uploaded, users can install/download your app directly from OpenApp — App Store / Play Store style.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="openpay_link">OpenPay Payment Link (optional)</Label>
