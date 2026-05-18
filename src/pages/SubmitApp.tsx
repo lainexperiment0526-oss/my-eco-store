@@ -647,6 +647,8 @@ export default function SubmitApp() {
               setLogoFile(null);
               setScreenshotFiles([]);
               setVideoAdFile(null);
+              setAppBinaryFile(null);
+              setExistingAppFile(null);
               setAdTitle('');
               setSubscriptionPlans([]);
             }}>Submit Another</Button>
