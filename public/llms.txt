@@ -1,0 +1,20 @@
+# OpenApp
+
+> OpenApp is a decentralized network hub for discovering, exploring, and accessing applications in the Pi Network ecosystem.
+
+OpenApp connects Pi Network users with apps built by independent developers. Users can browse, bookmark, rate, and open apps; developers can submit apps, run ad campaigns, and earn through the integrated OpenPay system.
+
+## Pages
+
+- [Home](/): Browse featured, new, and top Pi Network apps.
+- [New Arrivals](/new): Recently submitted apps.
+- [Top Apps](/top): Highest-rated apps on the platform.
+- [Blog](/blog): News, updates, and developer stories from the OpenApp ecosystem.
+- [About](/about): What OpenApp is and how the decentralized hub works.
+
+## Optional
+
+- [Sign in](/auth): Authentication with Pi Network or email.
+- [Privacy](/privacy): Privacy policy.
+- [Terms](/terms): Terms of service.
+- [License](/license): Licensing information.
