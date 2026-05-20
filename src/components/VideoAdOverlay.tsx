@@ -82,6 +82,22 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
     });
   };
 
+  useEffect(() => {
+    if (!videoUrl) {
+      setVideoLoadFailed(true);
+      setCanSkip(true);
+      setShowDetails(true);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      const video = videoRef.current;
+      if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || video.paused) {
+        recoverPlayback();
+      }
+    }, 3500);
+    return () => window.clearTimeout(timeout);
+  }, [videoUrl]);
+
   const openAdLink = () => {
     const externalUrl = normalizeUrl(appWebsiteUrl);
     if (externalUrl) {
@@ -158,6 +174,8 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
             className="h-full w-full object-contain"
             onLoadedData={recoverPlayback}
             onCanPlay={recoverPlayback}
+            onStalled={recoverPlayback}
+            onWaiting={recoverPlayback}
             onError={() => {
               setVideoLoadFailed(true);
               setCanSkip(true);
