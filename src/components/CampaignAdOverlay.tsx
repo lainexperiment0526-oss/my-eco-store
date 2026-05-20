@@ -11,7 +11,8 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
   // Always 15 seconds skip timer
   const [countdown, setCountdown] = useState(15);
   const [canSkip, setCanSkip] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [videoLoadFailed, setVideoLoadFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const normalizeUrl = useCallback((url?: string | null) => {
@@ -27,6 +28,33 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
       window.location.assign(url);
     }
   }, [ad.destination_url, normalizeUrl]);
+
+  const recoverPlayback = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    setIsMuted(true);
+    video.play().catch(() => {
+      setVideoLoadFailed(true);
+      setCanSkip(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (ad.media_type !== 'video') return;
+    if (!normalizeUrl(ad.media_url)) {
+      setVideoLoadFailed(true);
+      setCanSkip(true);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      const video = videoRef.current;
+      if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || video.paused) {
+        recoverPlayback();
+      }
+    }, 3500);
+    return () => window.clearTimeout(timeout);
+  }, [ad.media_type, ad.media_url, normalizeUrl, recoverPlayback]);
 
   useEffect(() => {
     if (countdown <= 0) { setCanSkip(true); return; }
@@ -52,8 +80,23 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
         onClick={openDestination}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDestination(); } }}
       >
-        {ad.media_type === 'video' ? (
-          <video ref={videoRef} src={ad.media_url} autoPlay playsInline muted={isMuted} loop className="h-full w-full object-contain" onEnded={onClose} />
+        {ad.media_type === 'video' && !videoLoadFailed ? (
+          <video
+            ref={videoRef}
+            src={normalizeUrl(ad.media_url)}
+            autoPlay
+            playsInline
+            muted={isMuted}
+            loop
+            preload="auto"
+            className="h-full w-full object-contain"
+            onLoadedData={recoverPlayback}
+            onCanPlay={recoverPlayback}
+            onStalled={recoverPlayback}
+            onWaiting={recoverPlayback}
+            onError={() => { setVideoLoadFailed(true); setCanSkip(true); }}
+            onEnded={onClose}
+          />
         ) : (
           <img src={ad.media_url} alt={ad.title || ad.name} className="h-full w-full object-contain" />
         )}

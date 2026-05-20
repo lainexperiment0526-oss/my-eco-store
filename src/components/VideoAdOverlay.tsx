@@ -31,7 +31,8 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
   // Always use 15 seconds for skip timer
   const [countdown, setCountdown] = useState(15);
   const [canSkip, setCanSkip] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [videoLoadFailed, setVideoLoadFailed] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -67,6 +68,35 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
     if (/^[\w.-]+\.[a-z]{2,}([/:?#]|$)/i.test(trimmed)) return `https://${trimmed}`;
     return `https://${trimmed}`;
   };
+  const videoUrl = normalizeUrl(ad.video_url);
+
+  const recoverPlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    setIsMuted(true);
+    video.play().catch(() => {
+      setVideoLoadFailed(true);
+      setCanSkip(true);
+      setShowDetails(true);
+    });
+  };
+
+  useEffect(() => {
+    if (!videoUrl) {
+      setVideoLoadFailed(true);
+      setCanSkip(true);
+      setShowDetails(true);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      const video = videoRef.current;
+      if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || video.paused) {
+        recoverPlayback();
+      }
+    }, 3500);
+    return () => window.clearTimeout(timeout);
+  }, [videoUrl]);
 
   const openAdLink = () => {
     const externalUrl = normalizeUrl(appWebsiteUrl);
@@ -132,16 +162,28 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
           }
         }}
       >
-        <video
-          ref={videoRef}
-          src={ad.video_url}
-          autoPlay
-          playsInline
-          muted={isMuted}
-          loop
-          className="h-full w-full object-contain"
-          onEnded={onClose}
-        />
+        {!videoLoadFailed && videoUrl && (
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            autoPlay
+            playsInline
+            muted={isMuted}
+            loop
+            preload="auto"
+            className="h-full w-full object-contain"
+            onLoadedData={recoverPlayback}
+            onCanPlay={recoverPlayback}
+            onStalled={recoverPlayback}
+            onWaiting={recoverPlayback}
+            onError={() => {
+              setVideoLoadFailed(true);
+              setCanSkip(true);
+              setShowDetails(true);
+            }}
+            onEnded={onClose}
+          />
+        )}
 
         {/* Skip / Countdown - top right */}
         <div className="absolute top-4 right-4">
