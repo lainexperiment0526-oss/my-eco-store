@@ -21,9 +21,7 @@ export type Database = {
           created_at: string | null
           event_type: string
           id: string
-          ip_address: string | null
           metadata: Json | null
-          user_agent: string | null
         }
         Insert: {
           api_key_id?: string | null
@@ -31,9 +29,7 @@ export type Database = {
           created_at?: string | null
           event_type: string
           id?: string
-          ip_address?: string | null
           metadata?: Json | null
-          user_agent?: string | null
         }
         Update: {
           api_key_id?: string | null
@@ -41,9 +37,7 @@ export type Database = {
           created_at?: string | null
           event_type?: string
           id?: string
-          ip_address?: string | null
           metadata?: Json | null
-          user_agent?: string | null
         }
         Relationships: [
           {
