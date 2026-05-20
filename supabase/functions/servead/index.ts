@@ -94,8 +94,6 @@ Deno.serve(async (req) => {
           campaign_id: ad_id,
           event_type: event,
           api_key_id: apiKeyRecord?.id || null,
-          ip_address: req.headers.get("x-forwarded-for") || "unknown",
-          user_agent: req.headers.get("user-agent") || "unknown",
           metadata: body.metadata || {},
         });
 
