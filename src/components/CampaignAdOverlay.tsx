@@ -41,6 +41,22 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
   }, []);
 
   useEffect(() => {
+    if (ad.media_type !== 'video') return;
+    if (!normalizeUrl(ad.media_url)) {
+      setVideoLoadFailed(true);
+      setCanSkip(true);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      const video = videoRef.current;
+      if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || video.paused) {
+        recoverPlayback();
+      }
+    }, 3500);
+    return () => window.clearTimeout(timeout);
+  }, [ad.media_type, ad.media_url, normalizeUrl, recoverPlayback]);
+
+  useEffect(() => {
     if (countdown <= 0) { setCanSkip(true); return; }
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -76,6 +92,8 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
             className="h-full w-full object-contain"
             onLoadedData={recoverPlayback}
             onCanPlay={recoverPlayback}
+            onStalled={recoverPlayback}
+            onWaiting={recoverPlayback}
             onError={() => { setVideoLoadFailed(true); setCanSkip(true); }}
             onEnded={onClose}
           />
