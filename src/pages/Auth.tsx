@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
 import { AdInterstitial } from '@/components/AdInterstitial';
 import { PageLoader } from '@/components/PageLoader';
+import { SplashScreen } from '@/components/SplashScreen';
 import { EmailAuth } from '@/components/EmailAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mail, Pi } from 'lucide-react';
