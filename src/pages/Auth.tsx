@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
 import { AdInterstitial } from '@/components/AdInterstitial';
 import { PageLoader } from '@/components/PageLoader';
-import { SplashScreen } from '@/components/SplashScreen';
 import { EmailAuth } from '@/components/EmailAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mail, Pi } from 'lucide-react';
@@ -29,12 +28,6 @@ export default function Auth() {
   const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [showAd, setShowAd] = useState(true);
   const [inPiBrowser, setInPiBrowser] = useState(false);
-  const [showSplash, setShowSplash] = useState(false);
-
-  const triggerSplashAndNavigate = (to: string) => {
-    setShowSplash(true);
-    window.setTimeout(() => navigate(to, { replace: true }), 1200);
-  };
 
   useEffect(() => {
     setInPiBrowser(isPiBrowser());
@@ -142,7 +135,7 @@ export default function Auth() {
         .eq('id', piUser.uid);
 
       toast.success(`Welcome, ${piUser.username}!`);
-      triggerSplashAndNavigate(redirectTo);
+      navigate(redirectTo, { replace: true });
     } else {
       toast.error('Pi authentication failed. Make sure you are in Pi Browser.');
     }
@@ -182,7 +175,7 @@ export default function Auth() {
         }
         
         toast.success('Welcome back!');
-        triggerSplashAndNavigate(redirectTo);
+        navigate(redirectTo, { replace: true });
       }
     } catch (error) {
       toast.error('Authentication failed. Please try again.');
@@ -195,7 +188,6 @@ export default function Auth() {
 
   return (
     <>
-      {showSplash && <SplashScreen />}
       {showAd && <AdInterstitial trigger="auth" onComplete={() => setShowAd(false)} />}
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
