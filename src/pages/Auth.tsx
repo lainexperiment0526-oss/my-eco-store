@@ -142,7 +142,7 @@ export default function Auth() {
         .eq('id', piUser.uid);
 
       toast.success(`Welcome, ${piUser.username}!`);
-      navigate(redirectTo, { replace: true });
+      triggerSplashAndNavigate(redirectTo);
     } else {
       toast.error('Pi authentication failed. Make sure you are in Pi Browser.');
     }
@@ -182,7 +182,7 @@ export default function Auth() {
         }
         
         toast.success('Welcome back!');
-        navigate(redirectTo, { replace: true });
+        triggerSplashAndNavigate(redirectTo);
       }
     } catch (error) {
       toast.error('Authentication failed. Please try again.');
@@ -195,6 +195,7 @@ export default function Auth() {
 
   return (
     <>
+      {showSplash && <SplashScreen />}
       {showAd && <AdInterstitial trigger="auth" onComplete={() => setShowAd(false)} />}
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
