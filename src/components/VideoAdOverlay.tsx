@@ -31,7 +31,7 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
   // Always use 15 seconds for skip timer
   const [countdown, setCountdown] = useState(15);
   const [canSkip, setCanSkip] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [videoLoadFailed, setVideoLoadFailed] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -73,12 +73,19 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
   const recoverPlayback = () => {
     const video = videoRef.current;
     if (!video) return;
-    video.muted = true;
-    setIsMuted(true);
-    video.play().catch(() => {
-      setVideoLoadFailed(true);
-      setCanSkip(true);
-      setShowDetails(true);
+    // Try unmuted first so users hear sound
+    video.muted = false;
+    video.play().then(() => {
+      setIsMuted(false);
+    }).catch(() => {
+      // Browser blocked unmuted autoplay — fall back to muted
+      video.muted = true;
+      setIsMuted(true);
+      video.play().catch(() => {
+        setVideoLoadFailed(true);
+        setCanSkip(true);
+        setShowDetails(true);
+      });
     });
   };
 
