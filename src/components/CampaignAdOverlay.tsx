@@ -11,7 +11,7 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
   // Always 15 seconds skip timer
   const [countdown, setCountdown] = useState(15);
   const [canSkip, setCanSkip] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [videoLoadFailed, setVideoLoadFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -32,11 +32,16 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
   const recoverPlayback = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
-    video.muted = true;
-    setIsMuted(true);
-    video.play().catch(() => {
-      setVideoLoadFailed(true);
-      setCanSkip(true);
+    video.muted = false;
+    video.play().then(() => {
+      setIsMuted(false);
+    }).catch(() => {
+      video.muted = true;
+      setIsMuted(true);
+      video.play().catch(() => {
+        setVideoLoadFailed(true);
+        setCanSkip(true);
+      });
     });
   }, []);
 

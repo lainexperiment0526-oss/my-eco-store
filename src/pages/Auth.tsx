@@ -12,6 +12,14 @@ import { EmailAuth } from '@/components/EmailAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mail, Pi } from 'lucide-react';
 
+const isPiBrowser = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  if (/pibrowser|pi browser|minepi/i.test(ua)) return true;
+  if (typeof window !== 'undefined' && (window as any).Pi?.Ads) return true;
+  return false;
+};
+
 export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +27,11 @@ export default function Auth() {
   const { user, signIn, signUp, loading } = useAuth();
   const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [showAd, setShowAd] = useState(true);
+  const [inPiBrowser, setInPiBrowser] = useState(false);
+
+  useEffect(() => {
+    setInPiBrowser(isPiBrowser());
+  }, []);
 
   useEffect(() => {
     if (user && !loading) {
@@ -188,16 +201,18 @@ export default function Auth() {
           </div>
 
           <Tabs defaultValue="pi" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="pi" className="flex items-center gap-2">
-                <Pi className="h-4 w-4" />
-                Pi Network
-              </TabsTrigger>
-              <TabsTrigger value="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Email
-              </TabsTrigger>
-            </TabsList>
+            {!inPiBrowser && (
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="pi" className="flex items-center gap-2">
+                  <Pi className="h-4 w-4" />
+                  Pi Network
+                </TabsTrigger>
+                <TabsTrigger value="email" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email
+                </TabsTrigger>
+              </TabsList>
+            )}
 
             <TabsContent value="pi">
               <div className="rounded-2xl bg-card p-6 shadow-lg">
@@ -210,7 +225,7 @@ export default function Auth() {
                   {piLoading ? 'Connecting...' : 'Sign in with Pi Network'}
                 </Button>
 
-                {!isPiReady && (
+                {!isPiReady && !inPiBrowser && (
                   <p className="text-xs text-muted-foreground text-center mb-4">
                     Pi sign-in requires Pi Browser
                   </p>
@@ -233,19 +248,23 @@ export default function Auth() {
               </div>
             </TabsContent>
 
-            <TabsContent value="email">
-              <EmailAuth 
-                onEmailAuth={handleEmailAuth} 
-                loading={loading || piLoading}
-              />
-            </TabsContent>
+            {!inPiBrowser && (
+              <TabsContent value="email">
+                <EmailAuth 
+                  onEmailAuth={handleEmailAuth} 
+                  loading={loading || piLoading}
+                />
+              </TabsContent>
+            )}
           </Tabs>
 
-          <div className="mt-6 text-center">
-            <p className="text-xs text-muted-foreground mb-2">
-              <strong>Note:</strong> Use email authentication if you plan to use the OpenApp mobile application.
-            </p>
-          </div>
+          {!inPiBrowser && (
+            <div className="mt-6 text-center">
+              <p className="text-xs text-muted-foreground mb-2">
+                <strong>Note:</strong> Use email authentication if you plan to use the OpenApp mobile application.
+              </p>
+            </div>
+          )}
 
           <div className="mt-4 text-center text-xs text-muted-foreground space-x-3">
             <a href="/privacy" className="hover:text-foreground">Privacy</a>
