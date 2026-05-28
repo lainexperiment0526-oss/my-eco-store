@@ -29,6 +29,12 @@ export default function Auth() {
   const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [showAd, setShowAd] = useState(true);
   const [inPiBrowser, setInPiBrowser] = useState(false);
+  const [showSplash, setShowSplash] = useState(false);
+
+  const triggerSplashAndNavigate = (to: string) => {
+    setShowSplash(true);
+    window.setTimeout(() => navigate(to, { replace: true }), 1200);
+  };
 
   useEffect(() => {
     setInPiBrowser(isPiBrowser());
