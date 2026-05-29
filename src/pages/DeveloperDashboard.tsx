@@ -297,24 +297,58 @@ export default function DeveloperDashboard() {
         <p className="text-xs text-muted-foreground mb-6">Revenue split: 70% Developer / 30% Platform Fee</p>
 
         <div className="rounded-2xl bg-card p-6 border border-border mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Withdraw Earnings (OpenPay)</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Withdraw Earnings</h2>
+
+          <div className="mb-4 inline-flex rounded-lg border border-border bg-secondary/40 p-1">
+            <button
+              type="button"
+              onClick={() => setWithdrawMethod('openpay')}
+              className={`px-4 py-1.5 text-sm rounded-md transition-all ${withdrawMethod === 'openpay' ? 'bg-background shadow text-foreground' : 'text-muted-foreground'}`}
+            >
+              OpenPay
+            </button>
+            <button
+              type="button"
+              onClick={() => setWithdrawMethod('pi')}
+              className={`px-4 py-1.5 text-sm rounded-md transition-all ${withdrawMethod === 'pi' ? 'bg-background shadow text-foreground' : 'text-muted-foreground'}`}
+            >
+              Pi Wallet
+            </button>
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label>OpenPay @Username</Label>
-              <Input
-                value={openPayUsername}
-                onChange={(e) => setOpenPayUsername(e.target.value)}
-                placeholder="@yourusername"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>OpenPay Account Number</Label>
-              <Input
-                value={openPayAccount}
-                onChange={(e) => setOpenPayAccount(e.target.value)}
-                placeholder="Enter account number"
-              />
-            </div>
+            {withdrawMethod === 'openpay' ? (
+              <>
+                <div className="space-y-2">
+                  <Label>OpenPay @Username</Label>
+                  <Input
+                    value={openPayUsername}
+                    onChange={(e) => setOpenPayUsername(e.target.value)}
+                    placeholder="@yourusername"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>OpenPay Account Number</Label>
+                  <Input
+                    value={openPayAccount}
+                    onChange={(e) => setOpenPayAccount(e.target.value)}
+                    placeholder="Enter account number"
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Pi Wallet Address</Label>
+                <Input
+                  value={piWalletAddress}
+                  onChange={(e) => setPiWalletAddress(e.target.value)}
+                  placeholder="GAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Paste your Pi Network wallet address. Payout will be sent directly in Pi.
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Amount (Pi)</Label>
               <Input
