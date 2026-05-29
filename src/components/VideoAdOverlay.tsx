@@ -297,7 +297,7 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
       >
         <div className="absolute inset-0 bg-black/60" />
         <div
-          className={`absolute left-0 right-0 bottom-0 h-[85vh] rounded-t-3xl bg-background border-t border-border transition-transform ${showDetails ? 'translate-y-0' : 'translate-y-full'}`}
+          className={`absolute left-0 right-0 bottom-0 max-h-[92vh] h-[90vh] sm:h-[85vh] rounded-t-3xl bg-background border-t border-border transition-transform overflow-hidden ${showDetails ? 'translate-y-0' : 'translate-y-full'}`}
           role="dialog"
           aria-modal="true"
           onClick={(e) => e.stopPropagation()}
