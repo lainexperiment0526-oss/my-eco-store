@@ -247,11 +247,12 @@ export default function AppDetail() {
     }
     setTimeout(() => setIsOpening(false), 1500);
     // Force full top-level navigation to the EXACT developer-provided app link.
-    // Never keep the user on the OpenApp domain after the ad completes.
+    // Use replace() so the user lands directly on the app's domain (.com / .pi / .pinet / pi://)
+    // and the OpenApp page is not kept in history — no funnel/iframe behavior.
     try {
-      window.location.href = next.url;
+      window.location.replace(next.url);
     } catch {
-      window.open(next.url, '_self');
+      window.location.href = next.url;
     }
   }, [pendingOpen, recordDownload, user?.id]);
 

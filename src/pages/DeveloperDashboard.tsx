@@ -50,8 +50,10 @@ export default function DeveloperDashboard() {
   const [totalPlatformFee, setTotalPlatformFee] = useState(0);
   const [totalWithdrawn, setTotalWithdrawn] = useState(0);
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawMethod, setWithdrawMethod] = useState<'openpay' | 'pi'>('openpay');
   const [openPayAccount, setOpenPayAccount] = useState('');
   const [openPayUsername, setOpenPayUsername] = useState('');
+  const [piWalletAddress, setPiWalletAddress] = useState('');
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   
@@ -171,13 +173,25 @@ export default function DeveloperDashboard() {
       toast.error('Insufficient balance');
       return;
     }
-    if (!openPayAccount.trim()) {
-      toast.error('Enter your OpenPay account number');
-      return;
-    }
-    if (!openPayUsername.trim() || !openPayUsername.startsWith('@')) {
-      toast.error('Enter a valid OpenPay @username (e.g. @yourname)');
-      return;
+
+    let walletDescriptor = '';
+    if (withdrawMethod === 'openpay') {
+      if (!openPayAccount.trim()) {
+        toast.error('Enter your OpenPay account number');
+        return;
+      }
+      if (!openPayUsername.trim() || !openPayUsername.startsWith('@')) {
+        toast.error('Enter a valid OpenPay @username (e.g. @yourname)');
+        return;
+      }
+      walletDescriptor = `OpenPay: ${openPayUsername.trim()} | ${openPayAccount.trim()}`;
+    } else {
+      const addr = piWalletAddress.trim();
+      if (addr.length < 20) {
+        toast.error('Enter a valid Pi wallet address');
+        return;
+      }
+      walletDescriptor = `Pi Wallet: ${addr}`;
     }
 
     setIsWithdrawing(true);
@@ -188,7 +202,7 @@ export default function DeveloperDashboard() {
           developer_id: user.id,
           amount,
           status: 'pending',
-          pi_wallet_address: `${openPayUsername.trim()} | ${openPayAccount.trim()}`,
+          pi_wallet_address: walletDescriptor,
         });
 
       if (error) throw error;
@@ -197,6 +211,7 @@ export default function DeveloperDashboard() {
       setWithdrawAmount('');
       setOpenPayAccount('');
       setOpenPayUsername('');
+      setPiWalletAddress('');
       loadDashboardData();
     } catch (err: any) {
       toast.error(err.message || 'Withdrawal failed');
@@ -253,7 +268,7 @@ export default function DeveloperDashboard() {
 
         <h1 className="text-2xl font-bold text-foreground mb-2">Developer Dashboard</h1>
         <p className="text-sm text-muted-foreground mb-6">
-          Withdraw earnings via OpenPay wallet
+          Withdraw earnings via OpenPay or your Pi Wallet
         </p>
 
         <div className="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-4">
@@ -282,24 +297,58 @@ export default function DeveloperDashboard() {
         <p className="text-xs text-muted-foreground mb-6">Revenue split: 70% Developer / 30% Platform Fee</p>
 
         <div className="rounded-2xl bg-card p-6 border border-border mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Withdraw Earnings (OpenPay)</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Withdraw Earnings</h2>
+
+          <div className="mb-4 inline-flex rounded-lg border border-border bg-secondary/40 p-1">
+            <button
+              type="button"
+              onClick={() => setWithdrawMethod('openpay')}
+              className={`px-4 py-1.5 text-sm rounded-md transition-all ${withdrawMethod === 'openpay' ? 'bg-background shadow text-foreground' : 'text-muted-foreground'}`}
+            >
+              OpenPay
+            </button>
+            <button
+              type="button"
+              onClick={() => setWithdrawMethod('pi')}
+              className={`px-4 py-1.5 text-sm rounded-md transition-all ${withdrawMethod === 'pi' ? 'bg-background shadow text-foreground' : 'text-muted-foreground'}`}
+            >
+              Pi Wallet
+            </button>
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label>OpenPay @Username</Label>
-              <Input
-                value={openPayUsername}
-                onChange={(e) => setOpenPayUsername(e.target.value)}
-                placeholder="@yourusername"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>OpenPay Account Number</Label>
-              <Input
-                value={openPayAccount}
-                onChange={(e) => setOpenPayAccount(e.target.value)}
-                placeholder="Enter account number"
-              />
-            </div>
+            {withdrawMethod === 'openpay' ? (
+              <>
+                <div className="space-y-2">
+                  <Label>OpenPay @Username</Label>
+                  <Input
+                    value={openPayUsername}
+                    onChange={(e) => setOpenPayUsername(e.target.value)}
+                    placeholder="@yourusername"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>OpenPay Account Number</Label>
+                  <Input
+                    value={openPayAccount}
+                    onChange={(e) => setOpenPayAccount(e.target.value)}
+                    placeholder="Enter account number"
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Pi Wallet Address</Label>
+                <Input
+                  value={piWalletAddress}
+                  onChange={(e) => setPiWalletAddress(e.target.value)}
+                  placeholder="GAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Paste your Pi Network wallet address. Payout will be sent directly in Pi.
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Amount (Pi)</Label>
               <Input
