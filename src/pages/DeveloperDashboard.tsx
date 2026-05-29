@@ -50,8 +50,10 @@ export default function DeveloperDashboard() {
   const [totalPlatformFee, setTotalPlatformFee] = useState(0);
   const [totalWithdrawn, setTotalWithdrawn] = useState(0);
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawMethod, setWithdrawMethod] = useState<'openpay' | 'pi'>('openpay');
   const [openPayAccount, setOpenPayAccount] = useState('');
   const [openPayUsername, setOpenPayUsername] = useState('');
+  const [piWalletAddress, setPiWalletAddress] = useState('');
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   
