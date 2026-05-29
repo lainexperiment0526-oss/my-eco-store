@@ -173,13 +173,25 @@ export default function DeveloperDashboard() {
       toast.error('Insufficient balance');
       return;
     }
-    if (!openPayAccount.trim()) {
-      toast.error('Enter your OpenPay account number');
-      return;
-    }
-    if (!openPayUsername.trim() || !openPayUsername.startsWith('@')) {
-      toast.error('Enter a valid OpenPay @username (e.g. @yourname)');
-      return;
+
+    let walletDescriptor = '';
+    if (withdrawMethod === 'openpay') {
+      if (!openPayAccount.trim()) {
+        toast.error('Enter your OpenPay account number');
+        return;
+      }
+      if (!openPayUsername.trim() || !openPayUsername.startsWith('@')) {
+        toast.error('Enter a valid OpenPay @username (e.g. @yourname)');
+        return;
+      }
+      walletDescriptor = `OpenPay: ${openPayUsername.trim()} | ${openPayAccount.trim()}`;
+    } else {
+      const addr = piWalletAddress.trim();
+      if (addr.length < 20) {
+        toast.error('Enter a valid Pi wallet address');
+        return;
+      }
+      walletDescriptor = `Pi Wallet: ${addr}`;
     }
 
     setIsWithdrawing(true);
@@ -190,7 +202,7 @@ export default function DeveloperDashboard() {
           developer_id: user.id,
           amount,
           status: 'pending',
-          pi_wallet_address: `${openPayUsername.trim()} | ${openPayAccount.trim()}`,
+          pi_wallet_address: walletDescriptor,
         });
 
       if (error) throw error;
@@ -199,6 +211,7 @@ export default function DeveloperDashboard() {
       setWithdrawAmount('');
       setOpenPayAccount('');
       setOpenPayUsername('');
+      setPiWalletAddress('');
       loadDashboardData();
     } catch (err: any) {
       toast.error(err.message || 'Withdrawal failed');
