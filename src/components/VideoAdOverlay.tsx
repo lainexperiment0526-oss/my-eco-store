@@ -193,33 +193,33 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
         )}
 
         {/* Skip / Countdown - top right */}
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-[calc(env(safe-area-inset-top)+1rem)] right-[calc(env(safe-area-inset-right)+1rem)]">
           {canSkip ? (
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur px-4 py-2 text-white text-sm font-medium hover:bg-black/80 transition-colors"
+              className="flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur px-3 py-2 text-white text-xs sm:text-sm font-medium hover:bg-black/80 transition-colors"
             >
               <X className="h-4 w-4" />
               Skip Ad
             </button>
           ) : (
-            <div className="rounded-full bg-black/60 backdrop-blur px-4 py-2 text-white text-sm font-medium">
+            <div className="rounded-full bg-black/60 backdrop-blur px-3 py-2 text-white text-xs sm:text-sm font-medium">
               Skip in {countdown}s
             </div>
           )}
         </div>
 
         {/* Ad label - top left */}
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-[calc(env(safe-area-inset-top)+1rem)] left-[calc(env(safe-area-inset-left)+1rem)]">
           <span className="rounded bg-yellow-500/90 px-2 py-0.5 text-xs font-bold text-black uppercase">Ad</span>
         </div>
       </div>
 
       {/* Top app card - appears only when skip button is visible (after 15s) */}
       {canSkip && (
-        <div className="absolute top-14 left-0 right-0 z-[110] px-3 sm:px-6 md:px-8">
+        <div className="absolute top-[calc(env(safe-area-inset-top)+3.5rem)] left-0 right-0 z-[110] px-2 sm:px-6 md:px-8">
           <div
-            className="max-w-3xl mx-auto flex items-center gap-3 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/10 px-3 py-3"
+            className="max-w-3xl mx-auto rounded-2xl bg-black/85 backdrop-blur-xl border border-white/10 p-2.5 sm:p-3"
             role="button"
             tabIndex={0}
             onClick={() => {
@@ -234,54 +234,60 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
               }
             }}
           >
-            <span className="flex-shrink-0">
-              <AppIcon src={ad.app.logo_url} name={ad.app.name} size="sm" />
-            </span>
-            <span className="flex-1 min-w-0">
-              <p className="text-xs text-white/60">OpenApp &middot; Sponsored</p>
-              <h4 className="text-white font-medium text-sm truncate flex items-center gap-2">
-                {ad.app.name}
-                {getBadgeSrc(ad.app) && (
-                  <img src={getBadgeSrc(ad.app)} alt="Verified" className="h-4 w-4" />
-                )}
-              </h4>
-              <p className="text-xs text-white/60 truncate">{ad.app.category?.name || 'App'}</p>
-            </span>
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <button
-                onClick={(e) => { e.stopPropagation(); setIsMuted((prev) => !prev); }}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/80 hover:bg-white/15"
-                aria-label={isMuted ? 'Unmute ad' : 'Mute ad'}
-              >
-                {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowDisclaimer(true); }}
-                className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1.5 text-[11px] font-medium text-white/85 hover:bg-white/15 whitespace-nowrap"
-              >
-                <Info className="h-3.5 w-3.5" />
-                About
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
-                className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-1.5 text-[11px] font-medium text-white/85 hover:bg-white/15 whitespace-nowrap"
-              >
-                View
-              </button>
+            {/* Main row: icon + info + Get */}
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <span className="flex-shrink-0">
+                <AppIcon src={ad.app.logo_url} name={ad.app.name} size="sm" />
+              </span>
+              <span className="flex-1 min-w-0">
+                <p className="text-[10px] sm:text-xs text-white/60 truncate">OpenApp · Sponsored</p>
+                <h4 className="text-white font-medium text-sm truncate flex items-center gap-1.5">
+                  <span className="truncate">{ad.app.name}</span>
+                  {getBadgeSrc(ad.app) && (
+                    <img src={getBadgeSrc(ad.app)} alt="Verified" className="h-4 w-4 flex-shrink-0" />
+                  )}
+                </h4>
+                <p className="text-[10px] sm:text-xs text-white/60 truncate">{ad.app.category?.name || 'App'}</p>
+              </span>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   if (onNavigate) onNavigate(); else onClose();
                   openAdLink();
                 }}
-                className="rounded-full bg-blue-500 px-5 py-1.5 text-sm font-semibold text-white hover:bg-blue-600 transition-colors whitespace-nowrap"
+                className="flex-shrink-0 rounded-full bg-blue-500 px-4 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-blue-600 transition-colors whitespace-nowrap"
               >
                 Get
+              </button>
+            </div>
+
+            {/* Secondary action row - wraps on tiny screens */}
+            <div className="mt-2 flex items-center justify-end gap-1.5 flex-wrap">
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsMuted((prev) => !prev); }}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-white/80 hover:bg-white/15"
+                aria-label={isMuted ? 'Unmute ad' : 'Mute ad'}
+              >
+                {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowDisclaimer(true); }}
+                className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/85 hover:bg-white/15 whitespace-nowrap"
+              >
+                <Info className="h-3 w-3" />
+                About
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
+                className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/85 hover:bg-white/15 whitespace-nowrap"
+              >
+                View Details
               </button>
             </div>
           </div>
         </div>
       )}
+
 
       {/* Slide-up app details */}
       <div
