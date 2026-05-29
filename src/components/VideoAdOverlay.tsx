@@ -369,7 +369,7 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
               )}
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 border-t border-border bg-background/95 px-5 py-4 backdrop-blur">
+            <div className="absolute bottom-0 left-0 right-0 border-t border-border bg-background/95 px-4 sm:px-5 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur">
               <div className="flex items-center gap-3">
                 <button onClick={() => { setShowDetails(false); onClose(); }} className="flex-1 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground">
                   Close
