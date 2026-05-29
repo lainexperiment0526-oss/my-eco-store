@@ -318,7 +318,7 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
               </div>
             </div>
 
-            <div className="mt-4 flex-1 overflow-y-auto px-5 pb-24">
+            <div className="mt-4 flex-1 overflow-y-auto px-4 sm:px-5 pb-[calc(env(safe-area-inset-bottom)+6.5rem)]">
               <div className="space-y-4 text-sm text-foreground/90">
                 {screenshots.length > 0 && (
                   <div>
