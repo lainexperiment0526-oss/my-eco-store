@@ -268,7 +268,7 @@ export default function DeveloperDashboard() {
 
         <h1 className="text-2xl font-bold text-foreground mb-2">Developer Dashboard</h1>
         <p className="text-sm text-muted-foreground mb-6">
-          Withdraw earnings via OpenPay wallet
+          Withdraw earnings via OpenPay or your Pi Wallet
         </p>
 
         <div className="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-4">
