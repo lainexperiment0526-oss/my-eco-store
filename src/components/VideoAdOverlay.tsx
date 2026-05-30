@@ -6,6 +6,7 @@ import { RecommendedApps } from './RecommendedApps';
 import { useTheme } from '@/hooks/useTheme';
 import { App, Category } from '@/types/app';
 import { Link, useNavigate } from 'react-router-dom';
+import { normalizeExternalUrl, openExternalTopLevel } from '@/lib/utils';
 
 interface AdData {
   id: string;
@@ -60,15 +61,7 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
     return theme === 'dark' ? badge.dark : badge.light;
   };
 
-  const normalizeUrl = (url?: string | null) => {
-    const trimmed = (url || '').trim();
-    if (!trimmed) return '';
-    if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed;
-    if (trimmed.startsWith('//')) return `https:${trimmed}`;
-    if (/^[\w.-]+\.[a-z]{2,}([/:?#]|$)/i.test(trimmed)) return `https://${trimmed}`;
-    return `https://${trimmed}`;
-  };
-  const videoUrl = normalizeUrl(ad.video_url);
+  const videoUrl = normalizeExternalUrl(ad.video_url);
 
   const recoverPlayback = () => {
     const video = videoRef.current;
@@ -106,9 +99,7 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
   }, [videoUrl]);
 
   const openAdLink = () => {
-    const externalUrl = normalizeUrl(appWebsiteUrl);
-    if (externalUrl) {
-      window.location.assign(externalUrl);
+    if (openExternalTopLevel(appWebsiteUrl)) {
       return;
     }
     if (appId) {
