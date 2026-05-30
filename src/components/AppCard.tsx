@@ -4,6 +4,7 @@ import { AppIcon } from './AppIcon';
 import { useTheme } from '@/hooks/useTheme';
 import { StarRating } from './StarRating';
 import { ChevronRight } from 'lucide-react';
+import { normalizeExternalUrl, openExternalTopLevel } from '@/lib/utils';
 
 interface AppCardProps {
   app: App & { category?: Category; screenshots?: Screenshot[] };
@@ -43,19 +44,14 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const isSubscriptionVerified = !!app.is_verified && !!app.verified_until && new Date(app.verified_until).getTime() > Date.now();
   const isVerified = !!badge || isSubscriptionVerified;
   const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : 'https://i.ibb.co/BVQYVbyb/verified.png';
-  const normalizedWebsite = (() => {
-    const raw = (app.website_url || '').trim();
-    if (!raw) return '';
-    if (/^https?:\/\//i.test(raw)) return raw;
-    return `https://${raw}`;
-  })();
+  const normalizedWebsite = normalizeExternalUrl(app.website_url);
   const renderGetButton = (className: string) => {
     if (normalizedWebsite) {
       return (
         <button
           onClick={(e) => {
             e.stopPropagation();
-            window.open(normalizedWebsite, '_blank', 'noopener,noreferrer');
+            openExternalTopLevel(normalizedWebsite);
           }}
           className={className}
         >
