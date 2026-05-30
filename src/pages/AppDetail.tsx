@@ -27,6 +27,7 @@ import { PiAuthModal } from '@/components/PiAuthModal';
 import { useOpenPay } from '@/hooks/useOpenPay';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Helmet } from 'react-helmet-async';
+import { normalizeExternalUrl, openExternalTopLevel } from '@/lib/utils';
 
 export default function AppDetail() {
   const { id } = useParams<{ id: string }>();
@@ -54,16 +55,6 @@ export default function AppDetail() {
   const [proofPrompt, setProofPrompt] = useState<{ provider: 'openpay_link' | 'droppay_link'; purchaseType: 'onetime' | 'monthly' } | null>(null);
   const [proofTxid, setProofTxid] = useState('');
 
-  const normalizeUrl = useCallback((url: string) => {
-    const trimmed = url.trim();
-    if (!trimmed) return '';
-    // Keep exact links when a scheme is provided (https, pi, tg, etc).
-    if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed;
-    if (trimmed.startsWith('//')) return `https:${trimmed}`;
-    if (/^[\w.-]+\.[a-z]{2,}([/:?#]|$)/i.test(trimmed)) return `https://${trimmed}`;
-    return `https://${trimmed}`;
-  }, []);
-
   const recordDownload = useCallback(async (appId: string, userId: string) => {
     const { error: insertError } = await supabase
       .from('app_downloads')
@@ -75,7 +66,7 @@ export default function AppDetail() {
   }, [queryClient]);
 
   const handleOpenApp = useCallback(async (url: string, appId: string) => {
-    const normalizedUrl = normalizeUrl(url);
+    const normalizedUrl = normalizeExternalUrl(url);
     if (!normalizedUrl) {
       toast.error('No app link available');
       return;
@@ -123,7 +114,7 @@ export default function AppDetail() {
     setPendingOpen({ url: normalizedUrl, appId });
     setIsOpening(true);
     setShowOpenAd(true);
-  }, [normalizeUrl, app, user]);
+  }, [app, user]);
 
   const processPayment = useCallback(async (method: 'pi' | 'openpay' | 'openpay_link' | 'droppay_link') => {
     if (!app || !user || !showPayMethodFor) return;
@@ -246,25 +237,7 @@ export default function AppDetail() {
       recordDownload(next.appId, user.id).catch(() => {});
     }
     setTimeout(() => setIsOpening(false), 1500);
-    // Force full TOP-LEVEL navigation to the EXACT developer-provided app link.
-    // Breaks out of any iframe (Pi Browser, in-app webview) so the URL bar
-    // shows the real app domain (.com / .pi / .pinet / pi://), not openapp.
-    const target = next.url;
-    try {
-      if (window.top && window.top !== window.self) {
-        window.top.location.href = target;
-        return;
-      }
-    } catch {
-      // Cross-origin top — fall through to opening a new tab
-      const w = window.open(target, '_top');
-      if (w) return;
-    }
-    try {
-      window.location.replace(target);
-    } catch {
-      window.location.href = target;
-    }
+    openExternalTopLevel(next.url);
   }, [pendingOpen, recordDownload, user?.id]);
 
   const handleShare = async () => {
