@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Volume2, VolumeX } from 'lucide-react';
 import { AdCampaign } from '@/hooks/useAdCampaigns';
+import { normalizeExternalUrl, openExternalTopLevel } from '@/lib/utils';
 
 interface CampaignAdOverlayProps {
   ad: AdCampaign;
@@ -15,19 +16,9 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
   const [videoLoadFailed, setVideoLoadFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const normalizeUrl = useCallback((url?: string | null) => {
-    const trimmed = (url || '').trim();
-    if (!trimmed) return '';
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
-    return `https://${trimmed}`;
-  }, []);
-
   const openDestination = useCallback(() => {
-    const url = normalizeUrl(ad.destination_url);
-    if (url) {
-      window.location.assign(url);
-    }
-  }, [ad.destination_url, normalizeUrl]);
+    openExternalTopLevel(ad.destination_url);
+  }, [ad.destination_url]);
 
   const recoverPlayback = useCallback(() => {
     const video = videoRef.current;
@@ -47,7 +38,7 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
 
   useEffect(() => {
     if (ad.media_type !== 'video') return;
-    if (!normalizeUrl(ad.media_url)) {
+    if (!normalizeExternalUrl(ad.media_url)) {
       setVideoLoadFailed(true);
       setCanSkip(true);
       return;
@@ -59,7 +50,7 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
       }
     }, 3500);
     return () => window.clearTimeout(timeout);
-  }, [ad.media_type, ad.media_url, normalizeUrl, recoverPlayback]);
+  }, [ad.media_type, ad.media_url, recoverPlayback]);
 
   useEffect(() => {
     if (countdown <= 0) { setCanSkip(true); return; }
@@ -88,7 +79,7 @@ export function CampaignAdOverlay({ ad, onClose }: CampaignAdOverlayProps) {
         {ad.media_type === 'video' && !videoLoadFailed ? (
           <video
             ref={videoRef}
-            src={normalizeUrl(ad.media_url)}
+            src={normalizeExternalUrl(ad.media_url)}
             autoPlay
             playsInline
             muted={isMuted}
