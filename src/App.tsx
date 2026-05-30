@@ -77,7 +77,7 @@ function AppContent() {
           <Route path="/license" element={<License />} />
 
           {/* Protected routes — sign-in required */}
-          <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
+          <Route path="/" element={<Index />} />
           <Route path="/app/:id" element={<RequireAuth><AppDetail /></RequireAuth>} />
           <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
           <Route path="/submit" element={<RequireAuth><SubmitApp /></RequireAuth>} />
