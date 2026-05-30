@@ -231,6 +231,21 @@ export default function Auth() {
                   </p>
                 )}
 
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                >
+                  <a
+                    href="https://minepi.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Download Pi Browser
+                  </a>
+                </Button>
+
                 <div className="mt-4 grid gap-3 text-sm text-muted-foreground">
                   <div className="flex items-start gap-2">
                     <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
