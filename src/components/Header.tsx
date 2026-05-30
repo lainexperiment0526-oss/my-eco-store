@@ -1,14 +1,21 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Logo } from '@/components/Logo';
 import { MenuDrawer } from '@/components/MenuDrawer';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { useOpenAppModal } from '@/contexts/OpenAppModalContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
   const { setShowOpenAppModal } = useOpenAppModal();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleOpenAppModal = () => {
+    if (!user) {
+      navigate('/auth', { state: { from: '/' } });
+      return;
+    }
     setShowOpenAppModal(true);
   };
 
