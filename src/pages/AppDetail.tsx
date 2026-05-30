@@ -246,13 +246,24 @@ export default function AppDetail() {
       recordDownload(next.appId, user.id).catch(() => {});
     }
     setTimeout(() => setIsOpening(false), 1500);
-    // Force full top-level navigation to the EXACT developer-provided app link.
-    // Use replace() so the user lands directly on the app's domain (.com / .pi / .pinet / pi://)
-    // and the OpenApp page is not kept in history — no funnel/iframe behavior.
+    // Force full TOP-LEVEL navigation to the EXACT developer-provided app link.
+    // Breaks out of any iframe (Pi Browser, in-app webview) so the URL bar
+    // shows the real app domain (.com / .pi / .pinet / pi://), not openapp.
+    const target = next.url;
     try {
-      window.location.replace(next.url);
+      if (window.top && window.top !== window.self) {
+        window.top.location.href = target;
+        return;
+      }
     } catch {
-      window.location.href = next.url;
+      // Cross-origin top — fall through to opening a new tab
+      const w = window.open(target, '_top');
+      if (w) return;
+    }
+    try {
+      window.location.replace(target);
+    } catch {
+      window.location.href = target;
     }
   }, [pendingOpen, recordDownload, user?.id]);
 
