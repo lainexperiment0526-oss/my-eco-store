@@ -95,8 +95,23 @@ export default function Index() {
       .filter(group => group.apps.length > 0);
   }, [categories, approvedApps]);
 
+  // Resolve the bottom-nav tab (today/games/apps/arcade) to a category
+  const tabCategory = useMemo(() => {
+    if (!tabParam || !categories) return null;
+    const want = tabParam.toLowerCase();
+    return categories.find(c => c.name.toLowerCase() === want || c.name.toLowerCase().includes(want)) || null;
+  }, [tabParam, categories]);
+
+  const tabApps = useMemo(() => {
+    if (!tabParam) return [];
+    if (tabCategory) return approvedApps.filter(a => a.category_id === tabCategory.id);
+    // Fallback: show all approved sorted by rating
+    return [...approvedApps].sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+  }, [tabParam, tabCategory, approvedApps]);
+
   const isSearching = search || categoryFilter;
   const currentCategory = categories?.find(c => c.id === categoryFilter);
+  const tabTitle = tabParam ? tabParam.charAt(0).toUpperCase() + tabParam.slice(1) : '';
 
   return (
     <div className="min-h-screen bg-background pb-20">
