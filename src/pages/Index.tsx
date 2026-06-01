@@ -14,6 +14,7 @@ export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get('category');
   const tabParam = searchParams.get('tab');
+  const networkFilter = searchParams.get('network'); // mainnet | testnet | beta
   const queryParam = searchParams.get('q') ?? '';
   const [search, setSearch] = useState(queryParam);
 
@@ -54,6 +55,9 @@ export default function Index() {
     let filtered = search ? (apps ?? []) : approvedApps;
     if (categoryFilter) {
       filtered = filtered.filter(app => String(app.category_id ?? '') === String(categoryFilter));
+    }
+    if (networkFilter) {
+      filtered = filtered.filter(app => app.network_type === networkFilter);
     }
     if (search) {
       const searchLower = search.trim().toLowerCase();
@@ -109,9 +113,11 @@ export default function Index() {
     return [...approvedApps].sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
   }, [tabParam, tabCategory, approvedApps]);
 
-  const isSearching = search || categoryFilter;
+  const isSearching = search || categoryFilter || networkFilter;
   const currentCategory = categories?.find(c => c.id === categoryFilter);
   const tabTitle = tabParam ? tabParam.charAt(0).toUpperCase() + tabParam.slice(1) : '';
+  const networkTitle = networkFilter ? `${networkFilter.charAt(0).toUpperCase()}${networkFilter.slice(1)} Apps` : '';
+
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -176,12 +182,41 @@ export default function Index() {
           </div>
         )}
 
+        {/* Network chips (Mainnet / Testnet / Beta) */}
+        {!tabParam && (
+          <div className="mb-4 flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {(['mainnet', 'testnet', 'beta'] as const).map((net) => {
+              const active = networkFilter === net;
+              const next = new URLSearchParams(searchParams);
+              if (active) next.delete('network');
+              else next.set('network', net);
+              const tone =
+                net === 'mainnet'
+                  ? active ? 'bg-emerald-500 text-white' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30'
+                  : net === 'testnet'
+                  ? active ? 'bg-amber-500 text-white' : 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
+                  : active ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary border border-primary/30';
+              return (
+                <Link
+                  key={net}
+                  to={`/?${next.toString()}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-colors ${tone}`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${active ? 'bg-white' : net === 'mainnet' ? 'bg-emerald-500' : net === 'testnet' ? 'bg-amber-500' : 'bg-primary'}`} />
+                  {net}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
         {/* Search */}
         {!tabParam && (
           <div className="mb-6">
             <SearchBar value={search} onChange={handleSearchChange} />
           </div>
         )}
+
 
         {tabParam ? (
           <div>
@@ -199,9 +234,9 @@ export default function Index() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-2xl font-bold text-foreground">
-                {currentCategory ? currentCategory.name : 'Search Results'}
+                {networkFilter ? networkTitle : currentCategory ? currentCategory.name : 'Search Results'}
               </h1>
-              {categoryFilter && (
+              {(categoryFilter || networkFilter) && (
                 <Link to="/" className="text-primary text-sm font-medium">Clear</Link>
               )}
             </div>
@@ -258,6 +293,37 @@ export default function Index() {
                 </div>
               </section>
             )}
+
+            {/* Browse by Network (Mainnet / Testnet / Beta) */}
+            {(['mainnet', 'testnet', 'beta'] as const).map((net) => {
+              const netApps = approvedApps
+                .filter((a) => a.network_type === net)
+                .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+              if (netApps.length === 0) return null;
+              const labels: Record<typeof net, { title: string; tone: string }> = {
+                mainnet: { title: 'Mainnet Apps', tone: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' },
+                testnet: { title: 'Testnet Apps', tone: 'bg-amber-500/15 text-amber-500 border-amber-500/30' },
+                beta: { title: 'Beta Apps', tone: 'bg-primary/15 text-primary border-primary/30' },
+              };
+              return (
+                <section key={net} className="mb-8">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-bold text-foreground">{labels[net].title}</h2>
+                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${labels[net].tone}`}>
+                        {net}
+                      </span>
+                    </div>
+                    <Link to={`/?network=${net}`} className="text-sm font-medium text-primary">See All</Link>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {netApps.slice(0, 4).map((app) => (
+                      <AppCard key={app.id} app={app} variant="list" />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
 
             {/* Apps grouped by Category */}
             {appsByCategory.map(({ category, apps }) => (
