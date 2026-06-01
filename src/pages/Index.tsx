@@ -13,8 +13,12 @@ import { Helmet } from 'react-helmet-async';
 export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get('category');
+  const tabParam = searchParams.get('tab');
   const queryParam = searchParams.get('q') ?? '';
   const [search, setSearch] = useState(queryParam);
+
+  const today = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long' });
+  const weekday = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
   
   const { data: apps, isLoading: appsLoading } = useApps();
   const { data: featuredApps } = useFeaturedApps();
