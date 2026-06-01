@@ -135,8 +135,26 @@ export default function Index() {
       <Header />
       
       <main className="mx-auto max-w-6xl px-4 py-4">
+        {/* App Store-style "Today" header — only on the home Today tab */}
+        {!isSearching && !tabParam && (
+          <div className="mb-5 mt-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{weekday}</p>
+            <h1 className="flex items-baseline gap-2 text-[34px] font-extrabold leading-tight text-foreground">
+              Today
+              <span className="text-[22px] font-semibold text-muted-foreground">{today}</span>
+            </h1>
+          </div>
+        )}
+
+        {/* Tab page header (Games / Apps / Arcade) */}
+        {tabParam && (
+          <div className="mb-4 mt-1">
+            <h1 className="text-[34px] font-extrabold leading-tight text-foreground">{tabTitle}</h1>
+          </div>
+        )}
+
         {/* Categories Pills */}
-        {categories && categories.length > 0 && (
+        {categories && categories.length > 0 && !tabParam && (
           <div className="mb-4 flex gap-2 overflow-x-auto scrollbar-hide pb-2">
             <Link
               to="/"
@@ -159,11 +177,25 @@ export default function Index() {
         )}
 
         {/* Search */}
-        <div className="mb-6">
-          <SearchBar value={search} onChange={handleSearchChange} />
-        </div>
+        {!tabParam && (
+          <div className="mb-6">
+            <SearchBar value={search} onChange={handleSearchChange} />
+          </div>
+        )}
 
-        {isSearching ? (
+        {tabParam ? (
+          <div>
+            {tabApps.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground">No apps in {tabTitle} yet</div>
+            ) : (
+              <div className="divide-y divide-border">
+                {tabApps.map(app => (
+                  <AppCard key={app.id} app={app} variant="list" />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : isSearching ? (
           <div>
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-2xl font-bold text-foreground">
