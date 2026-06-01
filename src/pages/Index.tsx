@@ -182,12 +182,41 @@ export default function Index() {
           </div>
         )}
 
+        {/* Network chips (Mainnet / Testnet / Beta) */}
+        {!tabParam && (
+          <div className="mb-4 flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {(['mainnet', 'testnet', 'beta'] as const).map((net) => {
+              const active = networkFilter === net;
+              const next = new URLSearchParams(searchParams);
+              if (active) next.delete('network');
+              else next.set('network', net);
+              const tone =
+                net === 'mainnet'
+                  ? active ? 'bg-emerald-500 text-white' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30'
+                  : net === 'testnet'
+                  ? active ? 'bg-amber-500 text-white' : 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
+                  : active ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary border border-primary/30';
+              return (
+                <Link
+                  key={net}
+                  to={`/?${next.toString()}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-colors ${tone}`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${active ? 'bg-white' : net === 'mainnet' ? 'bg-emerald-500' : net === 'testnet' ? 'bg-amber-500' : 'bg-primary'}`} />
+                  {net}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
         {/* Search */}
         {!tabParam && (
           <div className="mb-6">
             <SearchBar value={search} onChange={handleSearchChange} />
           </div>
         )}
+
 
         {tabParam ? (
           <div>
@@ -205,9 +234,9 @@ export default function Index() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-2xl font-bold text-foreground">
-                {currentCategory ? currentCategory.name : 'Search Results'}
+                {networkFilter ? networkTitle : currentCategory ? currentCategory.name : 'Search Results'}
               </h1>
-              {categoryFilter && (
+              {(categoryFilter || networkFilter) && (
                 <Link to="/" className="text-primary text-sm font-medium">Clear</Link>
               )}
             </div>
