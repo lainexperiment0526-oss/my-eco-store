@@ -118,6 +118,13 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
 
   // Compact list item - like "You Might Also Like"
   if (variant === 'compact' || variant === 'list') {
+    const net = app.network_type;
+    const netTone =
+      net === 'mainnet'
+        ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30'
+        : net === 'testnet'
+        ? 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+        : 'bg-primary/15 text-primary border-primary/30';
     return (
       <div className="flex items-center gap-3 py-3 border-b border-border last:border-b-0">
         <Link to={`/app/${app.id}`} className="flex-shrink-0">
@@ -128,6 +135,11 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
             {app.name}
             {isVerified && (
               <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+            )}
+            {net && (
+              <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${netTone}`}>
+                {net}
+              </span>
             )}
           </h4>
           <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
