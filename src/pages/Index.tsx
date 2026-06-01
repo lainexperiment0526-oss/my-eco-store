@@ -259,6 +259,37 @@ export default function Index() {
               </section>
             )}
 
+            {/* Browse by Network (Mainnet / Testnet / Beta) */}
+            {(['mainnet', 'testnet', 'beta'] as const).map((net) => {
+              const netApps = approvedApps
+                .filter((a) => a.network_type === net)
+                .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+              if (netApps.length === 0) return null;
+              const labels: Record<typeof net, { title: string; tone: string }> = {
+                mainnet: { title: 'Mainnet Apps', tone: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' },
+                testnet: { title: 'Testnet Apps', tone: 'bg-amber-500/15 text-amber-500 border-amber-500/30' },
+                beta: { title: 'Beta Apps', tone: 'bg-primary/15 text-primary border-primary/30' },
+              };
+              return (
+                <section key={net} className="mb-8">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-bold text-foreground">{labels[net].title}</h2>
+                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${labels[net].tone}`}>
+                        {net}
+                      </span>
+                    </div>
+                    <Link to={`/?network=${net}`} className="text-sm font-medium text-primary">See All</Link>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {netApps.slice(0, 4).map((app) => (
+                      <AppCard key={app.id} app={app} variant="list" />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+
             {/* Apps grouped by Category */}
             {appsByCategory.map(({ category, apps }) => (
               <section key={category.id} className="mb-8">
