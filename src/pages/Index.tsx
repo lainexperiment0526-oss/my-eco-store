@@ -83,8 +83,20 @@ export default function Index() {
             : false)
       );
     }
+    // Sort: when filtering by network, sort by rating desc; otherwise group by network order
+    if (networkFilter) {
+      filtered = [...filtered].sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+    } else {
+      const order: Record<string, number> = { mainnet: 0, testnet: 1, beta: 2 };
+      filtered = [...filtered].sort((a, b) => {
+        const na = order[a.network_type ?? 'mainnet'] ?? 99;
+        const nb = order[b.network_type ?? 'mainnet'] ?? 99;
+        if (na !== nb) return na - nb;
+        return (b.average_rating || 0) - (a.average_rating || 0);
+      });
+    }
     return filtered;
-  }, [approvedApps, categoryFilter, normalize, search]);
+  }, [apps, approvedApps, categoryFilter, networkFilter, normalize, search]);
 
   // Group apps by category for the home view
   const appsByCategory = useMemo(() => {
