@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { PiProvider } from "@/hooks/usePiNetwork";
 import { SplashScreen } from "@/components/SplashScreen";
 import { Footer } from "@/components/Footer";
+import { BottomNav } from "@/components/BottomNav";
 import { OpenAppModal } from "@/components/OpenAppModal";
 import { OpenAppModalProvider, useOpenAppModal } from "@/contexts/OpenAppModalContext";
 import { captureRefCodeFromURL, useAffiliate } from "@/hooks/useAffiliate";
@@ -99,6 +100,7 @@ function AppContent() {
           <Route path="*" element={<NotFound />} />
         </Routes>
           <Footer />
+          <BottomNav />
           <OpenAppModal open={showOpenAppModal} onOpenChange={setShowOpenAppModal} />
         </BrowserRouter>
     </>
