@@ -13,8 +13,12 @@ import { Helmet } from 'react-helmet-async';
 export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get('category');
+  const tabParam = searchParams.get('tab');
   const queryParam = searchParams.get('q') ?? '';
   const [search, setSearch] = useState(queryParam);
+
+  const today = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long' });
+  const weekday = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
   
   const { data: apps, isLoading: appsLoading } = useApps();
   const { data: featuredApps } = useFeaturedApps();
@@ -91,8 +95,23 @@ export default function Index() {
       .filter(group => group.apps.length > 0);
   }, [categories, approvedApps]);
 
+  // Resolve the bottom-nav tab (today/games/apps/arcade) to a category
+  const tabCategory = useMemo(() => {
+    if (!tabParam || !categories) return null;
+    const want = tabParam.toLowerCase();
+    return categories.find(c => c.name.toLowerCase() === want || c.name.toLowerCase().includes(want)) || null;
+  }, [tabParam, categories]);
+
+  const tabApps = useMemo(() => {
+    if (!tabParam) return [];
+    if (tabCategory) return approvedApps.filter(a => a.category_id === tabCategory.id);
+    // Fallback: show all approved sorted by rating
+    return [...approvedApps].sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+  }, [tabParam, tabCategory, approvedApps]);
+
   const isSearching = search || categoryFilter;
   const currentCategory = categories?.find(c => c.id === categoryFilter);
+  const tabTitle = tabParam ? tabParam.charAt(0).toUpperCase() + tabParam.slice(1) : '';
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -116,8 +135,26 @@ export default function Index() {
       <Header />
       
       <main className="mx-auto max-w-6xl px-4 py-4">
+        {/* App Store-style "Today" header — only on the home Today tab */}
+        {!isSearching && !tabParam && (
+          <div className="mb-5 mt-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{weekday}</p>
+            <h1 className="flex items-baseline gap-2 text-[34px] font-extrabold leading-tight text-foreground">
+              Today
+              <span className="text-[22px] font-semibold text-muted-foreground">{today}</span>
+            </h1>
+          </div>
+        )}
+
+        {/* Tab page header (Games / Apps / Arcade) */}
+        {tabParam && (
+          <div className="mb-4 mt-1">
+            <h1 className="text-[34px] font-extrabold leading-tight text-foreground">{tabTitle}</h1>
+          </div>
+        )}
+
         {/* Categories Pills */}
-        {categories && categories.length > 0 && (
+        {categories && categories.length > 0 && !tabParam && (
           <div className="mb-4 flex gap-2 overflow-x-auto scrollbar-hide pb-2">
             <Link
               to="/"
@@ -140,11 +177,25 @@ export default function Index() {
         )}
 
         {/* Search */}
-        <div className="mb-6">
-          <SearchBar value={search} onChange={handleSearchChange} />
-        </div>
+        {!tabParam && (
+          <div className="mb-6">
+            <SearchBar value={search} onChange={handleSearchChange} />
+          </div>
+        )}
 
-        {isSearching ? (
+        {tabParam ? (
+          <div>
+            {tabApps.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground">No apps in {tabTitle} yet</div>
+            ) : (
+              <div className="divide-y divide-border">
+                {tabApps.map(app => (
+                  <AppCard key={app.id} app={app} variant="list" />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : isSearching ? (
           <div>
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-2xl font-bold text-foreground">
