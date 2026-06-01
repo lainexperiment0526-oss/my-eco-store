@@ -14,6 +14,7 @@ export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get('category');
   const tabParam = searchParams.get('tab');
+  const networkFilter = searchParams.get('network'); // mainnet | testnet | beta
   const queryParam = searchParams.get('q') ?? '';
   const [search, setSearch] = useState(queryParam);
 
@@ -54,6 +55,9 @@ export default function Index() {
     let filtered = search ? (apps ?? []) : approvedApps;
     if (categoryFilter) {
       filtered = filtered.filter(app => String(app.category_id ?? '') === String(categoryFilter));
+    }
+    if (networkFilter) {
+      filtered = filtered.filter(app => app.network_type === networkFilter);
     }
     if (search) {
       const searchLower = search.trim().toLowerCase();
@@ -109,9 +113,11 @@ export default function Index() {
     return [...approvedApps].sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
   }, [tabParam, tabCategory, approvedApps]);
 
-  const isSearching = search || categoryFilter;
+  const isSearching = search || categoryFilter || networkFilter;
   const currentCategory = categories?.find(c => c.id === categoryFilter);
   const tabTitle = tabParam ? tabParam.charAt(0).toUpperCase() + tabParam.slice(1) : '';
+  const networkTitle = networkFilter ? `${networkFilter.charAt(0).toUpperCase()}${networkFilter.slice(1)} Apps` : '';
+
 
   return (
     <div className="min-h-screen bg-background pb-20">
