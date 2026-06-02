@@ -6,7 +6,7 @@ const navItems = [
   { icon: Newspaper, label: 'Today', path: '/', match: (p: string, s: URLSearchParams) => p === '/' && !s.get('tab') && !s.get('search') },
   { icon: Gamepad2, label: 'Games', path: '/?tab=games', match: (p: string, s: URLSearchParams) => s.get('tab') === 'games' },
   { icon: LayoutGrid, label: 'Apps', path: '/?tab=apps', match: (p: string, s: URLSearchParams) => s.get('tab') === 'apps' },
-  { icon: Joystick, label: 'Arcade', path: '/?tab=arcade', match: (p: string, s: URLSearchParams) => s.get('tab') === 'arcade' },
+  { icon: Joystick, label: 'Arcade', path: '/?tab=games', match: (p: string, s: URLSearchParams) => s.get('tab') === 'arcade' },
   { icon: Search, label: 'Search', path: '/?search=1', match: (p: string, s: URLSearchParams) => !!s.get('search') || !!s.get('q') },
 ];
 
