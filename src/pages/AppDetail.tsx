@@ -447,10 +447,14 @@ export default function AppDetail() {
       <Header />
       
       <main className="mx-auto max-w-4xl">
-        {/* Hero Image / Banner */}
-        {sortedScreenshots[0] && (
+        {/* Hero Image / Banner — prefer cover image, fall back to first screenshot */}
+        {((app as any).cover_image_url || sortedScreenshots[0]) && (
           <div className="relative h-64 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400">
-            <img src={sortedScreenshots[0].image_url} alt="" className="h-full w-full object-cover" />
+            <img
+              src={(app as any).cover_image_url || sortedScreenshots[0].image_url}
+              alt={`${app.name} cover`}
+              className="h-full w-full object-cover"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
             <Link to="/" className="absolute top-4 left-4 h-8 w-8 rounded-full bg-background/50 backdrop-blur flex items-center justify-center">
               <ArrowLeft className="h-4 w-4 text-foreground" />
@@ -460,7 +464,7 @@ export default function AppDetail() {
 
         <div className="px-4">
           {/* App Header */}
-          <div className={`flex items-start gap-4 ${sortedScreenshots.length ? '-mt-12 relative z-10' : 'pt-6'}`}>
+          <div className={`flex items-start gap-4 ${(app as any).cover_image_url || sortedScreenshots.length ? '-mt-12 relative z-10' : 'pt-6'}`}>
             <AppIcon src={app.logo_url} name={app.name} size="lg" className="shadow-lg" />
             <div className="flex-1 min-w-0 pt-2">
               <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
@@ -563,6 +567,29 @@ export default function AppDetail() {
               <p className="text-foreground whitespace-pre-wrap">{app.whats_new}</p>
             </section>
           )}
+
+          {/* YouTube video */}
+          {(() => {
+            const yt = (app as any).youtube_url as string | null | undefined;
+            if (!yt) return null;
+            const match = yt.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/))([\w-]{6,})/);
+            const videoId = match?.[1];
+            if (!videoId) return null;
+            return (
+              <section className="mt-6">
+                <h2 className="text-xl font-bold text-foreground mb-3">Video</h2>
+                <div className="relative w-full overflow-hidden rounded-2xl bg-black" style={{ paddingBottom: '56.25%' }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoId}`}
+                    title={`${app.name} video`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full"
+                  />
+                </div>
+              </section>
+            );
+          })()}
 
           {/* Preview Screenshots */}
           {sortedScreenshots.length > 0 && (
