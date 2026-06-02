@@ -389,26 +389,27 @@ export default function MyApps() {
         ) : myApps && myApps.length > 0 ? (
           <div className="space-y-4">
             {myApps.map((app) => (
-              <div key={app.id} className="flex items-center gap-4 p-4 rounded-2xl bg-card">
-                <AppIcon src={app.logo_url} name={app.name} size="md" />
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-foreground truncate">{app.name}</h3>
-                    <StatusBadge status={app.status} />
+              <div key={app.id} className="flex flex-col gap-3 p-4 rounded-2xl bg-card sm:flex-row sm:items-center sm:gap-4">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <AppIcon src={app.logo_url} name={app.name} size="md" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-foreground truncate">{app.name}</h3>
+                      <StatusBadge status={app.status} />
+                    </div>
+                    <p className="text-sm text-muted-foreground break-words">{app.tagline}</p>
+                    <p className="text-xs text-muted-foreground break-words">
+                      {app.category?.name || 'Uncategorized'} • v{app.version}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 break-words">
+                      {isBadgeActive(app)
+                        ? `Verified badge active until ${new Date(app.verified_until as string).toLocaleDateString()}`
+                        : 'No active verified badge'}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground truncate">{app.tagline}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {app.category?.name || 'Uncategorized'} • v{app.version}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {isBadgeActive(app)
-                      ? `Verified badge active until ${new Date(app.verified_until as string).toLocaleDateString()}`
-                      : 'No active verified badge'}
-                  </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:justify-end">
                   <Button
                     size="sm"
                     variant={isBadgeActive(app) ? 'outline' : 'default'}
@@ -421,18 +422,10 @@ export default function MyApps() {
                         ? 'Renew Badge (20 Pi)'
                         : 'Apply Badge (20 Pi/mo)'}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openEditDialog(app)}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => openEditDialog(app)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleDelete(app.id)}
-                  >
+                  <Button size="sm" variant="ghost" onClick={() => handleDelete(app.id)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
