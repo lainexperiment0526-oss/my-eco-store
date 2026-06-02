@@ -59,7 +59,9 @@ export default function MyApps() {
     payment_type: 'free' as 'free' | 'onetime' | 'monthly',
     network_type: 'mainnet' as 'mainnet' | 'testnet' | 'beta',
     notes: '',
+    youtube_url: '',
   });
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch user's apps
@@ -147,8 +149,10 @@ export default function MyApps() {
       payment_type: app.payment_type || 'free',
       network_type: app.network_type || 'mainnet',
       notes: app.notes || '',
+      youtube_url: (app as any).youtube_url || '',
     });
     setLogoFile(null);
+    setCoverFile(null);
     setScreenshotFiles([]);
     setAdFile(null);
     setIsDialogOpen(true);
@@ -210,9 +214,13 @@ export default function MyApps() {
       });
 
       let logo_url = editingApp.logo_url;
-      
+      let cover_image_url = (editingApp as any).cover_image_url || null;
+
       if (logoFile) {
         logo_url = await uploadFile(logoFile, 'logos');
+      }
+      if (coverFile) {
+        cover_image_url = await uploadFile(coverFile, 'covers');
       }
 
       await updateApp.mutateAsync({
@@ -238,7 +246,9 @@ export default function MyApps() {
         payment_type: formData.pricing_model === 'free' ? 'free' : formData.payment_type,
         network_type: formData.network_type,
         notes: formData.notes || null,
-      });
+        cover_image_url,
+        youtube_url: formData.youtube_url || null,
+      } as any);
 
       // Upload new screenshots
       for (let i = 0; i < screenshotFiles.length; i++) {
@@ -479,6 +489,42 @@ export default function MyApps() {
                   />
                 </label>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Cover Image</Label>
+              <div className="flex items-center gap-4">
+                {(coverFile || (editingApp as any)?.cover_image_url) && (
+                  <div className="h-20 w-32 overflow-hidden rounded-lg bg-secondary">
+                    <img
+                      src={coverFile ? URL.createObjectURL(coverFile) : (editingApp as any).cover_image_url}
+                      alt="Cover"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-border px-4 py-2 transition-colors hover:border-primary">
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">{coverFile || (editingApp as any)?.cover_image_url ? 'Change cover' : 'Upload cover'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="youtube_url">YouTube Video URL</Label>
+              <Input
+                id="youtube_url"
+                type="url"
+                value={formData.youtube_url}
+                onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
