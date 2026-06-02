@@ -44,24 +44,39 @@ export function AdInterstitial({ onComplete, trigger }: AdInterstitialProps) {
       else setShowingCampaignAd(randomAd.ad);
     };
 
+    // Helper to play a Pi Ad Network ad (only valid in Pi Browser)
+    const playPiAd = (adType: 'interstitial' | 'rewarded' = 'interstitial') =>
+      showPiAd(adType).then((success) => {
+        if (success) onComplete();
+        else if (hasInventory) showRandomAd();
+        else onComplete();
+      });
+
     if (trigger === 'app-open') {
-      if (canUsePiAds) {
-        showPiAd('interstitial').then((success) => {
-          if (!success) showRandomAd();
-          else onComplete();
-        });
+      // In Pi Browser: randomly alternate between OpenApp ads and Pi Ad Network
+      if (canUsePiAds && hasInventory) {
+        if (Math.random() < 0.5) playPiAd('interstitial');
+        else showRandomAd();
         return;
       }
+      // Only Pi ads available
+      if (canUsePiAds) { playPiAd('interstitial'); return; }
+      // Only OpenApp inventory (or nothing) — outside Pi Browser, never call Pi ads
       showRandomAd();
       return;
     }
 
-    // Auth flow
-    if (hasInventory) {
+    // Auth flow — same alternation logic
+    if (canUsePiAds && hasInventory) {
+      if (Math.random() < 0.5) {
+        playPiAd(Math.random() > 0.5 ? 'interstitial' : 'rewarded');
+      } else {
+        showRandomAd();
+      }
+    } else if (hasInventory) {
       showRandomAd();
     } else if (canUsePiAds) {
-      const adType = Math.random() > 0.5 ? 'interstitial' : 'rewarded';
-      showPiAd(adType as 'interstitial' | 'rewarded').then(() => onComplete());
+      playPiAd(Math.random() > 0.5 ? 'interstitial' : 'rewarded');
     } else {
       onComplete();
     }
