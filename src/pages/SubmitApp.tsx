@@ -149,7 +149,10 @@ export default function SubmitApp() {
     download_url: '',
     openpay_link: '',
     droppay_link: '',
+    youtube_url: '',
   });
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [existingCoverUrl, setExistingCoverUrl] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [screenshotFiles, setScreenshotFiles] = useState<File[]>([]);
   const [videoAdFile, setVideoAdFile] = useState<File | null>(null);
@@ -227,7 +230,7 @@ export default function SubmitApp() {
     if (draftId) {
       const { data, error } = await supabase
         .from('app_drafts')
-        .select('logo_url, screenshot_urls, video_ad_url, app_file_url, app_file_name, app_file_size, app_file_type')
+        .select('logo_url, screenshot_urls, video_ad_url, app_file_url, app_file_name, app_file_size, app_file_type, cover_image_url')
         .eq('id', draftId)
         .single();
       if (error) throw error;
@@ -237,6 +240,11 @@ export default function SubmitApp() {
     let logo_url: string | null = existingDraft?.logo_url || null;
     if (logoFile) {
       logo_url = await uploadFile(logoFile, 'logos');
+    }
+
+    let cover_image_url: string | null = existingDraft?.cover_image_url || existingCoverUrl || null;
+    if (coverFile) {
+      cover_image_url = await uploadFile(coverFile, 'covers');
     }
 
     const screenshotUrls: string[] = Array.isArray(existingDraft?.screenshot_urls)
@@ -305,6 +313,8 @@ export default function SubmitApp() {
       app_file_name: appFileName,
       app_file_size: appFileSize,
       app_file_type: appFileType,
+      cover_image_url,
+      youtube_url: formData.youtube_url || null,
     };
 
     if (draftId) {
@@ -378,7 +388,10 @@ export default function SubmitApp() {
       download_url: (draft as any).download_url || '',
       openpay_link: (draft as any).openpay_link || '',
       droppay_link: (draft as any).droppay_link || '',
+      youtube_url: (draft as any).youtube_url || '',
     });
+    setExistingCoverUrl((draft as any).cover_image_url || null);
+    setCoverFile(null);
     setSubscriptionPlans(Array.isArray(draft.subscription_plans) ? draft.subscription_plans : []);
     setDraftId(draft.id);
     setAdTitle(draft.ad_title || '');
@@ -559,6 +572,8 @@ export default function SubmitApp() {
           app_file_name: (draft as any)?.app_file_name || null,
           app_file_size: (draft as any)?.app_file_size || null,
           app_file_type: (draft as any)?.app_file_type || null,
+          cover_image_url: (draft as any)?.cover_image_url || null,
+          youtube_url: formData.youtube_url || null,
         })
         .select()
         .single();
@@ -643,7 +658,9 @@ export default function SubmitApp() {
             <Button variant="outline" onClick={() => {
               setStep('details');
               setDraftId(null);
-              setFormData({ name: '', tagline: '', description: '', website_url: '', category_id: '', tags: '', version: '1.0', launch_at: '', developer_name: '', age_rating: '4+', whats_new: '', privacy_policy_url: '', terms_of_service_url: '', developer_website_url: '', pricing_model: 'free', price_amount: '', payment_type: 'free', network_type: 'mainnet', languages: ['English'], notes: '', download_url: '', openpay_link: '', droppay_link: '' });
+              setFormData({ name: '', tagline: '', description: '', website_url: '', category_id: '', tags: '', version: '1.0', launch_at: '', developer_name: '', age_rating: '4+', whats_new: '', privacy_policy_url: '', terms_of_service_url: '', developer_website_url: '', pricing_model: 'free', price_amount: '', payment_type: 'free', network_type: 'mainnet', languages: ['English'], notes: '', download_url: '', openpay_link: '', droppay_link: '', youtube_url: '' });
+              setCoverFile(null);
+              setExistingCoverUrl(null);
               setLogoFile(null);
               setScreenshotFiles([]);
               setVideoAdFile(null);
@@ -783,6 +800,41 @@ export default function SubmitApp() {
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
               </label>
             </div>
+          </div>
+
+          {/* Cover Image */}
+          <div className="space-y-2">
+            <Label>Cover Image (banner)</Label>
+            <div className="flex items-center gap-4">
+              {(coverFile || existingCoverUrl) && (
+                <div className="h-24 w-40 overflow-hidden rounded-xl bg-secondary">
+                  <img
+                    src={coverFile ? URL.createObjectURL(coverFile) : existingCoverUrl!}
+                    alt="Cover preview"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
+              <label className="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-border px-6 py-4 transition-colors hover:border-primary hover:bg-secondary/50">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{coverFile || existingCoverUrl ? 'Change cover' : 'Upload cover image (16:9 recommended)'}</span>
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground">Shown as the hero banner on your app page.</p>
+          </div>
+
+          {/* YouTube Video */}
+          <div className="space-y-2">
+            <Label htmlFor="youtube_url">YouTube Video URL (optional)</Label>
+            <Input
+              id="youtube_url"
+              type="url"
+              value={formData.youtube_url}
+              onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+            <p className="text-xs text-muted-foreground">Paste any YouTube link — we'll embed it on your app page.</p>
           </div>
 
           {/* Basic Info */}

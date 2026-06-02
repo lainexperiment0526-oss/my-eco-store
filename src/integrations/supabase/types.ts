@@ -362,6 +362,7 @@ export type Database = {
           app_file_type: string | null
           app_file_url: string | null
           category_id: string | null
+          cover_image_url: string | null
           created_at: string
           description: string | null
           developer_name: string | null
@@ -393,6 +394,7 @@ export type Database = {
           video_ad_url: string | null
           website_url: string
           whats_new: string | null
+          youtube_url: string | null
         }
         Insert: {
           ad_title?: string | null
@@ -402,6 +404,7 @@ export type Database = {
           app_file_type?: string | null
           app_file_url?: string | null
           category_id?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           developer_name?: string | null
@@ -433,6 +436,7 @@ export type Database = {
           video_ad_url?: string | null
           website_url: string
           whats_new?: string | null
+          youtube_url?: string | null
         }
         Update: {
           ad_title?: string | null
@@ -442,6 +446,7 @@ export type Database = {
           app_file_type?: string | null
           app_file_url?: string | null
           category_id?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           developer_name?: string | null
@@ -473,6 +478,7 @@ export type Database = {
           video_ad_url?: string | null
           website_url?: string
           whats_new?: string | null
+          youtube_url?: string | null
         }
         Relationships: [
           {
@@ -688,6 +694,7 @@ export type Database = {
           average_rating: number | null
           category_id: string | null
           compatibility: string | null
+          cover_image_url: string | null
           created_at: string
           description: string | null
           developer_name: string | null
@@ -722,6 +729,7 @@ export type Database = {
           views_count: number | null
           website_url: string
           whats_new: string | null
+          youtube_url: string | null
         }
         Insert: {
           age_rating?: string | null
@@ -732,6 +740,7 @@ export type Database = {
           average_rating?: number | null
           category_id?: string | null
           compatibility?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           developer_name?: string | null
@@ -766,6 +775,7 @@ export type Database = {
           views_count?: number | null
           website_url: string
           whats_new?: string | null
+          youtube_url?: string | null
         }
         Update: {
           age_rating?: string | null
@@ -776,6 +786,7 @@ export type Database = {
           average_rating?: number | null
           category_id?: string | null
           compatibility?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           developer_name?: string | null
@@ -810,6 +821,7 @@ export type Database = {
           views_count?: number | null
           website_url?: string
           whats_new?: string | null
+          youtube_url?: string | null
         }
         Relationships: [
           {

@@ -44,6 +44,8 @@ export interface App {
   app_file_name?: string | null;
   app_file_size?: number | null;
   app_file_type?: string | null;
+  cover_image_url?: string | null;
+  youtube_url?: string | null;
 }
 
 export interface Category {
