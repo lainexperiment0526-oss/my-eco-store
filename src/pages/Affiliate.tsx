@@ -106,14 +106,6 @@ export default function Affiliate() {
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
-              <Smartphone className="h-6 w-6 text-primary mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">APK Installs</p>
-              <p className="text-2xl font-bold text-foreground">{apkRewards.length}</p>
-              <p className="text-xs text-muted-foreground mt-1">$1 each</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
               <Rocket className="h-6 w-6 text-primary mx-auto mb-2" />
               <p className="text-xs text-muted-foreground">Apps Listed</p>
               <p className="text-2xl font-bold text-foreground">{listingRewards.length}</p>
@@ -130,13 +122,6 @@ export default function Affiliate() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex gap-3">
-              <Smartphone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-foreground">$1 per APK install</p>
-                <p className="text-muted-foreground">When someone signs up via your link and confirms they installed the OpenApp Android APK.</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
               <Rocket className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-foreground">$3 per app listed</p>
@@ -145,6 +130,7 @@ export default function Affiliate() {
             </div>
           </CardContent>
         </Card>
+
 
         {/* Invite link */}
         <Card>
