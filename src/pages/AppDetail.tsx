@@ -400,15 +400,15 @@ export default function AppDetail() {
         <DialogHeader>
           <DialogTitle>Choose payment method</DialogTitle>
           <DialogDescription>
-            {app && `Pay ${app.price_amount} for ${app.name}`}
+            {app && `Pay ${app.price_amount} Pi for ${app.name}`}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-2 pt-2">
           <Button onClick={() => processPayment('pi')} disabled={isPaying}>
-            Pay with Pi ({app?.price_amount} π)
+            Pay with Pi ({app?.price_amount} Pi)
           </Button>
           <Button variant="secondary" onClick={() => processPayment('openpay')} disabled={isPaying}>
-            Pay with OpenPay ({app?.price_amount} OUSD)
+            Pay with OpenPay ({app?.price_amount} Pi)
           </Button>
           {(app as any)?.openpay_link && (
             <Button variant="outline" onClick={() => processPayment('openpay_link')} disabled={isPaying}>
@@ -485,7 +485,7 @@ export default function AppDetail() {
                   disabled={isOpening || isPaying}
                   className="rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-70"
                 >
-                  {isPaying ? 'Processing Payment...' : isOpening ? 'Opening...' : app.pricing_model === 'paid' ? `Get - ${app.price_amount} π` : 'Open App'}
+                  {isPaying ? 'Processing Payment...' : isOpening ? 'Opening...' : app.pricing_model === 'paid' ? `Get - ${app.price_amount} Pi` : 'Open App'}
                 </button>
                 <Button variant="ghost" size="icon" className="rounded-full" onClick={handleShare}>
                   <Share2 className="h-5 w-5 text-primary" />
@@ -508,7 +508,7 @@ export default function AppDetail() {
             <div className="h-8 w-px bg-border" />
             <div className="text-center">
               <p className="text-xs text-muted-foreground uppercase">Price</p>
-              <p className="text-xl font-bold text-foreground">{app.pricing_model === 'paid' ? `${app.price_amount} π` : 'Free'}</p>
+              <p className="text-xl font-bold text-foreground">{app.pricing_model === 'paid' ? `${app.price_amount} Pi` : 'Free'}</p>
               {app.pricing_model === 'paid' && <p className="text-xs text-muted-foreground">{app.payment_type === 'monthly' ? '/month' : 'one-time'}</p>}
             </div>
             <div className="h-8 w-px bg-border" />
