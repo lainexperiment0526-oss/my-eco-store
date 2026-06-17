@@ -16,13 +16,11 @@ export default function Affiliate() {
   const {
     profile,
     rewards,
-    apkRewards,
     listingRewards,
     totalEarnedUsd,
     loading,
-    confirmApkInstalled,
   } = useAffiliate();
-  const [confirming, setConfirming] = useState(false);
+
 
   if (authLoading) return <PageLoader />;
 
