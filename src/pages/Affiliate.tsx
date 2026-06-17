@@ -68,13 +68,6 @@ export default function Affiliate() {
     }
   };
 
-  const handleConfirmApk = async () => {
-    setConfirming(true);
-    const err = await confirmApkInstalled();
-    setConfirming(false);
-    if (err) toast.error(err.message);
-    else toast.success('Thanks! Your referrer just earned $1.');
-  };
 
   return (
     <div className="min-h-screen bg-background pb-12">
