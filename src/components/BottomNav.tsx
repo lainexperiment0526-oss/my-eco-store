@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { Newspaper, Gamepad2, LayoutGrid, Joystick, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,9 +14,36 @@ const navItems = [
 export function BottomNav() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+
+  useEffect(() => {
+    lastY.current = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY.current;
+      // Ignore tiny jitter; always show near top
+      if (y < 80) {
+        setHidden(false);
+      } else if (delta > 6) {
+        setHidden(true);
+      } else if (delta < -6) {
+        setHidden(false);
+      }
+      lastY.current = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/85 backdrop-blur-xl safe-area-inset-bottom">
+    <nav
+      className={cn(
+        'fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/85 backdrop-blur-xl safe-area-inset-bottom',
+        'transition-transform duration-300 ease-out will-change-transform',
+        hidden ? 'translate-y-full' : 'translate-y-0'
+      )}
+    >
       <div className="mx-auto flex max-w-lg items-center justify-around px-2 pt-1.5 pb-1">
         {navItems.map(({ icon: Icon, label, path, match }) => {
           const isActive = match(location.pathname, searchParams);
