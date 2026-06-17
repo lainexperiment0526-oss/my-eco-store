@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAffiliate } from '@/hooks/useAffiliate';
 import { Header } from '@/components/Header';
@@ -8,21 +7,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Copy, Share2, Gift, Smartphone, Rocket, CheckCircle2, DollarSign } from 'lucide-react';
+import { ArrowLeft, Copy, Share2, Gift, Rocket, DollarSign } from 'lucide-react';
 import { PageLoader } from '@/components/PageLoader';
+
 
 export default function Affiliate() {
   const { user, loading: authLoading } = useAuth();
   const {
     profile,
     rewards,
-    apkRewards,
     listingRewards,
     totalEarnedUsd,
     loading,
-    confirmApkInstalled,
   } = useAffiliate();
-  const [confirming, setConfirming] = useState(false);
+
 
   if (authLoading) return <PageLoader />;
 
@@ -70,13 +68,6 @@ export default function Affiliate() {
     }
   };
 
-  const handleConfirmApk = async () => {
-    setConfirming(true);
-    const err = await confirmApkInstalled();
-    setConfirming(false);
-    if (err) toast.error(err.message);
-    else toast.success('Thanks! Your referrer just earned $1.');
-  };
 
   return (
     <div className="min-h-screen bg-background pb-12">
@@ -106,14 +97,6 @@ export default function Affiliate() {
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
-              <Smartphone className="h-6 w-6 text-primary mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">APK Installs</p>
-              <p className="text-2xl font-bold text-foreground">{apkRewards.length}</p>
-              <p className="text-xs text-muted-foreground mt-1">$1 each</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
               <Rocket className="h-6 w-6 text-primary mx-auto mb-2" />
               <p className="text-xs text-muted-foreground">Apps Listed</p>
               <p className="text-2xl font-bold text-foreground">{listingRewards.length}</p>
@@ -130,13 +113,6 @@ export default function Affiliate() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex gap-3">
-              <Smartphone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-foreground">$1 per APK install</p>
-                <p className="text-muted-foreground">When someone signs up via your link and confirms they installed the OpenApp Android APK.</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
               <Rocket className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-foreground">$3 per app listed</p>
@@ -145,6 +121,7 @@ export default function Affiliate() {
             </div>
           </CardContent>
         </Card>
+
 
         {/* Invite link */}
         <Card>
@@ -165,27 +142,6 @@ export default function Affiliate() {
           </CardContent>
         </Card>
 
-        {/* APK install confirmation (for invitees) */}
-        {profile?.referred_by && !profile.apk_installed && (
-          <Card className="border-primary/40 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="text-base">Did you install the OpenApp APK?</CardTitle>
-              <CardDescription>Confirm to give your referrer their $1 credit.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={handleConfirmApk} loading={confirming}>
-                <CheckCircle2 className="h-4 w-4" /> Yes, I installed the APK
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {profile?.apk_installed && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-primary" />
-            APK install confirmed.
-          </div>
-        )}
 
         {/* Recent rewards */}
         <Card>
@@ -204,14 +160,10 @@ export default function Affiliate() {
                 {rewards.slice(0, 20).map((r) => (
                   <div key={r.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                     <div className="flex items-center gap-2">
-                      {r.reward_type === 'apk_install' ? (
-                        <Smartphone className="h-4 w-4 text-primary" />
-                      ) : (
-                        <Rocket className="h-4 w-4 text-primary" />
-                      )}
+                      <Rocket className="h-4 w-4 text-primary" />
                       <div>
                         <p className="text-sm font-medium text-foreground">
-                          {r.reward_type === 'apk_install' ? 'APK install' : 'App listed'}
+                          {r.reward_type === 'apk_install' ? 'Install' : 'App listed'}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(r.created_at).toLocaleDateString()}
