@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
         headers,
         body: JSON.stringify({
           amount: Number(amount),
-          currency: "OUSD",
+          currency: "PI",
           memo: memo || "OpenApp purchase",
           metadata: { ...metadata, user_id: userId },
         }),

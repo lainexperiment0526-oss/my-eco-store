@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Copy, Share2, Gift, Rocket, DollarSign } from 'lucide-react';
+import { ArrowLeft, Copy, Share2, Gift, Rocket, Coins } from 'lucide-react';
 import { PageLoader } from '@/components/PageLoader';
 
 
@@ -17,7 +17,7 @@ export default function Affiliate() {
     profile,
     rewards,
     listingRewards,
-    totalEarnedUsd,
+    totalEarnedPi,
     loading,
   } = useAffiliate();
 
@@ -31,7 +31,7 @@ export default function Affiliate() {
         <main className="mx-auto max-w-2xl px-4 py-12 text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Sign in to earn</h1>
           <p className="text-muted-foreground mb-6">
-            Create an account to get your unique invite link and start earning OpenPay credits.
+            Create an account to get your unique invite link and start earning Pi credits.
           </p>
           <Link to="/auth"><Button>Sign In</Button></Link>
         </main>
@@ -82,7 +82,7 @@ export default function Affiliate() {
             <Gift className="h-7 w-7 text-primary" /> Affiliate Program
           </h1>
           <p className="text-muted-foreground mt-1">
-            Invite friends to OpenApp and earn OpenPay credits.
+            Invite friends to OpenApp and earn Pi credits.
           </p>
         </div>
 
@@ -90,9 +90,9 @@ export default function Affiliate() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6 text-center">
-              <DollarSign className="h-6 w-6 text-primary mx-auto mb-2" />
+              <Coins className="h-6 w-6 text-primary mx-auto mb-2" />
               <p className="text-xs text-muted-foreground">Total Earned</p>
-              <p className="text-2xl font-bold text-foreground">${totalEarnedUsd.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-foreground">{totalEarnedPi.toFixed(2)} Pi</p>
             </CardContent>
           </Card>
           <Card>
@@ -100,7 +100,7 @@ export default function Affiliate() {
               <Rocket className="h-6 w-6 text-primary mx-auto mb-2" />
               <p className="text-xs text-muted-foreground">Apps Listed</p>
               <p className="text-2xl font-bold text-foreground">{listingRewards.length}</p>
-              <p className="text-xs text-muted-foreground mt-1">$3 each</p>
+              <p className="text-xs text-muted-foreground mt-1">3 Pi each</p>
             </CardContent>
           </Card>
         </div>
@@ -109,13 +109,13 @@ export default function Affiliate() {
         <Card>
           <CardHeader>
             <CardTitle>How it works</CardTitle>
-            <CardDescription>Earnings credit to your developer balance, withdrawable via OpenPay.</CardDescription>
+          <CardDescription>Earnings credit to your developer balance, withdrawable in Pi.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex gap-3">
               <Rocket className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-foreground">$3 per app listed</p>
+                <p className="font-medium text-foreground">3 Pi per app listed</p>
                 <p className="text-muted-foreground">When someone you invited submits an app and it gets approved on OpenApp.</p>
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function Affiliate() {
                       </div>
                     </div>
                     <Badge variant="secondary" className="font-semibold">
-                      +${Number(r.amount_usd).toFixed(2)}
+                      +{Number(r.amount_usd).toFixed(2)} Pi
                     </Badge>
                   </div>
                 ))}

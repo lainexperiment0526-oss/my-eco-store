@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { ArrowLeft, Wallet, TrendingUp, DollarSign } from 'lucide-react';
+import { ArrowLeft, Wallet, TrendingUp, Coins } from 'lucide-react';
 import { PageLoader } from '@/components/PageLoader';
 
 interface EarningsSummary {
@@ -273,24 +273,24 @@ export default function DeveloperDashboard() {
 
         <div className="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-4">
           <div className="rounded-2xl bg-card p-4 border border-border text-center">
-            <DollarSign className="h-6 w-6 text-primary mx-auto mb-2" />
+            <Coins className="h-6 w-6 text-primary mx-auto mb-2" />
             <p className="text-xs text-muted-foreground">Total Income</p>
-            <p className="text-xl font-bold text-foreground">{totalGross.toFixed(2)} pi</p>
+            <p className="text-xl font-bold text-foreground">{totalGross.toFixed(2)} Pi</p>
           </div>
           <div className="rounded-2xl bg-card p-4 border border-border text-center">
             <TrendingUp className="h-6 w-6 text-primary mx-auto mb-2" />
             <p className="text-xs text-muted-foreground">Developer (70%)</p>
-            <p className="text-xl font-bold text-foreground">{totalEarned.toFixed(2)} pi</p>
+            <p className="text-xl font-bold text-foreground">{totalEarned.toFixed(2)} Pi</p>
           </div>
           <div className="rounded-2xl bg-card p-4 border border-border text-center">
-            <DollarSign className="h-6 w-6 text-primary mx-auto mb-2" />
+            <Coins className="h-6 w-6 text-primary mx-auto mb-2" />
             <p className="text-xs text-muted-foreground">Platform Fee (30%)</p>
-            <p className="text-xl font-bold text-foreground">{totalPlatformFee.toFixed(2)} pi</p>
+            <p className="text-xl font-bold text-foreground">{totalPlatformFee.toFixed(2)} Pi</p>
           </div>
           <div className="rounded-2xl bg-card p-4 border border-border text-center">
             <Wallet className="h-6 w-6 text-primary mx-auto mb-2" />
             <p className="text-xs text-muted-foreground">Available</p>
-            <p className="text-xl font-bold text-foreground">{availableBalance.toFixed(2)} pi</p>
+            <p className="text-xl font-bold text-foreground">{availableBalance.toFixed(2)} Pi</p>
           </div>
         </div>
 
@@ -414,7 +414,7 @@ export default function DeveloperDashboard() {
                   <div>
                     <p className="font-medium text-foreground">{e.app_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      Total: {e.total_earned.toFixed(2)} pi | Fee: {e.platform_fee.toFixed(2)} pi
+                      Total: {e.total_earned.toFixed(2)} Pi | Fee: {e.platform_fee.toFixed(2)} Pi
                     </p>
                     {e.buyers.length > 0 && (
                       <p className="text-xs text-muted-foreground">
@@ -422,7 +422,7 @@ export default function DeveloperDashboard() {
                       </p>
                     )}
                   </div>
-                  <p className="text-lg font-bold text-primary">{e.developer_share.toFixed(2)} pi</p>
+                  <p className="text-lg font-bold text-primary">{e.developer_share.toFixed(2)} Pi</p>
                 </div>
               ))}
             </div>
@@ -438,7 +438,7 @@ export default function DeveloperDashboard() {
               {withdrawals.map((w) => (
                 <div key={w.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
                   <div>
-                    <p className="font-medium text-foreground">{Number(w.amount).toFixed(2)} pi</p>
+                    <p className="font-medium text-foreground">{Number(w.amount).toFixed(2)} Pi</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(w.created_at).toLocaleDateString()} {w.pi_wallet_address ? `| ${w.pi_wallet_address}` : ''}
                     </p>

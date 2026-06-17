@@ -87,10 +87,18 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
-  }
+body {
+  @apply bg-background text-foreground antialiased;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  top: 0 !important;
+}
+
+.skiptranslate,
+.goog-te-banner-frame,
+.goog-te-gadget,
+.goog-te-balloon-frame {
+  display: none !important;
+}
 }
 
 /* iOS-style scrollbar */

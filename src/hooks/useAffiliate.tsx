@@ -132,7 +132,7 @@ export function useAffiliate() {
     return error;
   }, [user, load]);
 
-  const totalEarnedUsd = rewards.reduce((s, r) => s + Number(r.amount_usd), 0);
+  const totalEarnedPi = rewards.reduce((s, r) => s + Number(r.amount_usd), 0);
   const apkRewards = rewards.filter((r) => r.reward_type === 'apk_install');
   const listingRewards = rewards.filter((r) => r.reward_type === 'app_listing');
 
@@ -141,7 +141,7 @@ export function useAffiliate() {
     rewards,
     apkRewards,
     listingRewards,
-    totalEarnedUsd,
+    totalEarnedPi,
     loading,
     attachPendingRefCode,
     confirmApkInstalled,

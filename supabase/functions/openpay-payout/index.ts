@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         to: username.startsWith("@") ? username : `@${username}`,
         amount: Number(wr.amount),
-        currency: "OUSD",
+        currency: "PI",
         memo: `OpenApp payout #${wr.id.slice(0, 8)}`,
       }),
     });
