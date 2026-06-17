@@ -160,14 +160,10 @@ export default function Affiliate() {
                 {rewards.slice(0, 20).map((r) => (
                   <div key={r.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                     <div className="flex items-center gap-2">
-                      {r.reward_type === 'apk_install' ? (
-                        <Smartphone className="h-4 w-4 text-primary" />
-                      ) : (
-                        <Rocket className="h-4 w-4 text-primary" />
-                      )}
+                      <Rocket className="h-4 w-4 text-primary" />
                       <div>
                         <p className="text-sm font-medium text-foreground">
-                          {r.reward_type === 'apk_install' ? 'APK install' : 'App listed'}
+                          {r.reward_type === 'apk_install' ? 'Install' : 'App listed'}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(r.created_at).toLocaleDateString()}
