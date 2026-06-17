@@ -151,27 +151,6 @@ export default function Affiliate() {
           </CardContent>
         </Card>
 
-        {/* APK install confirmation (for invitees) */}
-        {profile?.referred_by && !profile.apk_installed && (
-          <Card className="border-primary/40 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="text-base">Did you install the OpenApp APK?</CardTitle>
-              <CardDescription>Confirm to give your referrer their $1 credit.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={handleConfirmApk} loading={confirming}>
-                <CheckCircle2 className="h-4 w-4" /> Yes, I installed the APK
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {profile?.apk_installed && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-primary" />
-            APK install confirmed.
-          </div>
-        )}
 
         {/* Recent rewards */}
         <Card>
