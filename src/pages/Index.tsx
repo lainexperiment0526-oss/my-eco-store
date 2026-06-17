@@ -111,19 +111,35 @@ export default function Index() {
       .filter(group => group.apps.length > 0);
   }, [categories, approvedApps]);
 
-  // Resolve the bottom-nav tab (today/games/apps/arcade) to a category
-  const tabCategory = useMemo(() => {
-    if (!tabParam || !categories) return null;
+  // Resolve the bottom-nav tab (today/games/apps/arcade) to one or more categories.
+  // "games" should aggregate every game-like category (Games, Arcade, etc.) so the tab
+  // shows ALL apps that belong in the games section.
+  const tabCategories = useMemo(() => {
+    if (!tabParam || !categories) return [] as typeof categories;
     const want = tabParam.toLowerCase();
-    return categories.find(c => c.name.toLowerCase() === want || c.name.toLowerCase().includes(want)) || null;
+    if (want === 'games' || want === 'arcade') {
+      return categories.filter(c => {
+        const n = c.name.toLowerCase();
+        return n.includes('game') || n.includes('arcade');
+      });
+    }
+    return categories.filter(c => {
+      const n = c.name.toLowerCase();
+      return n === want || n.includes(want);
+    });
   }, [tabParam, categories]);
 
   const tabApps = useMemo(() => {
     if (!tabParam) return [];
-    if (tabCategory) return approvedApps.filter(a => a.category_id === tabCategory.id);
-    // Fallback: show all approved sorted by rating
+    if (tabCategories.length) {
+      const ids = new Set(tabCategories.map(c => c.id));
+      return approvedApps
+        .filter(a => a.category_id && ids.has(a.category_id))
+        .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+    }
     return [...approvedApps].sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
-  }, [tabParam, tabCategory, approvedApps]);
+  }, [tabParam, tabCategories, approvedApps]);
+
 
   const isSearching = search || categoryFilter || networkFilter;
   const currentCategory = categories?.find(c => c.id === categoryFilter);
