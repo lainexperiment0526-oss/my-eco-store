@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/Logo';
 import { MenuDrawer } from '@/components/MenuDrawer';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 export function Header() {
   return (
@@ -12,6 +13,7 @@ export function Header() {
         </Link>
 
         <nav className="flex items-center gap-2">
+          <div className="hidden sm:block"><LanguageSelector compact /></div>
           <MenuDrawer />
         </nav>
       </div>

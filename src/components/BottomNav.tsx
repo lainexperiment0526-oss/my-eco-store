@@ -2,17 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { Newspaper, Gamepad2, LayoutGrid, Joystick, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n';
 
 const navItems = [
-  { icon: Newspaper, label: 'Today', path: '/', match: (p: string, s: URLSearchParams) => p === '/' && !s.get('tab') && !s.get('search') },
-  { icon: Gamepad2, label: 'Games', path: '/?tab=games', match: (p: string, s: URLSearchParams) => s.get('tab') === 'games' },
-  { icon: LayoutGrid, label: 'Apps', path: '/?tab=apps', match: (p: string, s: URLSearchParams) => s.get('tab') === 'apps' },
-  { icon: Joystick, label: 'Arcade', path: '/?tab=games', match: (p: string, s: URLSearchParams) => s.get('tab') === 'arcade' },
-  { icon: Search, label: 'Search', path: '/?search=1', match: (p: string, s: URLSearchParams) => !!s.get('search') || !!s.get('q') },
+  { icon: Newspaper, labelKey: 'today', path: '/', match: (p: string, s: URLSearchParams) => p === '/' && !s.get('tab') && !s.get('search') },
+  { icon: Gamepad2, labelKey: 'games', path: '/?tab=games', match: (p: string, s: URLSearchParams) => s.get('tab') === 'games' },
+  { icon: LayoutGrid, labelKey: 'apps', path: '/?tab=apps', match: (p: string, s: URLSearchParams) => s.get('tab') === 'apps' },
+  { icon: Joystick, labelKey: 'arcade', path: '/?tab=games', match: (p: string, s: URLSearchParams) => s.get('tab') === 'arcade' },
+  { icon: Search, labelKey: 'search', path: '/?search=1', match: (p: string, s: URLSearchParams) => !!s.get('search') || !!s.get('q') },
 ];
 
 export function BottomNav() {
   const location = useLocation();
+  const { t } = useI18n();
   const [searchParams] = useSearchParams();
   const [hidden, setHidden] = useState(false);
   const lastY = useRef(0);
@@ -45,11 +47,11 @@ export function BottomNav() {
       )}
     >
       <div className="mx-auto flex max-w-lg items-center justify-around px-2 pt-1.5 pb-1">
-        {navItems.map(({ icon: Icon, label, path, match }) => {
+        {navItems.map(({ icon: Icon, labelKey, path, match }) => {
           const isActive = match(location.pathname, searchParams);
           return (
             <Link
-              key={label}
+              key={labelKey}
               to={path}
               className={cn(
                 'flex flex-1 flex-col items-center gap-0.5 py-1.5 transition-colors',
@@ -57,7 +59,7 @@ export function BottomNav() {
               )}
             >
               <Icon className="h-6 w-6" strokeWidth={isActive ? 2.4 : 1.8} fill={isActive ? 'currentColor' : 'none'} fillOpacity={isActive ? 0.15 : 0} />
-              <span className={cn('text-[10px]', isActive ? 'font-semibold' : 'font-medium')}>{label}</span>
+              <span className={cn('text-[10px]', isActive ? 'font-semibold' : 'font-medium')}>{t(labelKey)}</span>
             </Link>
           );
         })}
