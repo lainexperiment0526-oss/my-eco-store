@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAffiliate } from '@/hooks/useAffiliate';
 import { Header } from '@/components/Header';
@@ -8,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Copy, Share2, Gift, Smartphone, Rocket, CheckCircle2, DollarSign } from 'lucide-react';
+import { ArrowLeft, Copy, Share2, Gift, Rocket, DollarSign } from 'lucide-react';
 import { PageLoader } from '@/components/PageLoader';
+
 
 export default function Affiliate() {
   const { user, loading: authLoading } = useAuth();
