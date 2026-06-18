@@ -26,7 +26,6 @@ export function Header() {
         </Link>
 
         <nav className="flex items-center gap-2">
-          <LanguageSelector />
           {!loading && (
             user ? (
               <Link

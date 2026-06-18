@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/hooks/useAuth';
 import { useOpenAppModal } from '@/contexts/OpenAppModalContext';
+import { LanguageSelector } from '@/components/LanguageSelector';
 import {
   Sheet,
   SheetContent,
