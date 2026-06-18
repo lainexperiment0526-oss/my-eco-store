@@ -98,11 +98,6 @@ a, button, [role="button"] {
 }
 html { scroll-behavior: smooth; }
 
-.goog-te-banner-frame,
-.goog-te-gadget,
-.goog-te-balloon-frame {
-  display: none !important;
-}
 }
 
 /* iOS-style scrollbar */
