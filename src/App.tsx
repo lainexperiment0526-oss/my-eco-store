@@ -37,6 +37,7 @@ import AppPurchases from "./pages/AppPurchases";
 import Blog from "./pages/Blog";
 import BlogPostPage from "./pages/BlogPost";
 import AdminBlog from "./pages/AdminBlog";
+import Tutorial from "./pages/Tutorial";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
