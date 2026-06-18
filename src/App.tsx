@@ -84,6 +84,7 @@ function RouteTransitions() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/license" element={<License />} />
+        <Route path="/tutorial" element={<Tutorial />} />
 
         {/* Protected routes — sign-in required */}
         <Route path="/" element={<Index />} />
