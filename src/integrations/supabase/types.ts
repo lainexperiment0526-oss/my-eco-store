@@ -1010,6 +1010,7 @@ export type Database = {
           id: string
           is_admin: boolean | null
           openpay_username: string | null
+          preferred_language: string | null
           referral_code: string | null
           referred_by: string | null
           uses_openapp: boolean | null
@@ -1026,6 +1027,7 @@ export type Database = {
           id: string
           is_admin?: boolean | null
           openpay_username?: string | null
+          preferred_language?: string | null
           referral_code?: string | null
           referred_by?: string | null
           uses_openapp?: boolean | null
@@ -1042,6 +1044,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           openpay_username?: string | null
+          preferred_language?: string | null
           referral_code?: string | null
           referred_by?: string | null
           uses_openapp?: boolean | null
