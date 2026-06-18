@@ -37,6 +37,7 @@ import AppPurchases from "./pages/AppPurchases";
 import Blog from "./pages/Blog";
 import BlogPostPage from "./pages/BlogPost";
 import AdminBlog from "./pages/AdminBlog";
+import Tutorial from "./pages/Tutorial";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ function RouteTransitions() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/license" element={<License />} />
+        <Route path="/tutorial" element={<Tutorial />} />
 
         {/* Protected routes — sign-in required */}
         <Route path="/" element={<Index />} />
