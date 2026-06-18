@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/Logo';
 import { MenuDrawer } from '@/components/MenuDrawer';
-import { LanguageSelector } from '@/components/LanguageSelector';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { User } from 'lucide-react';
