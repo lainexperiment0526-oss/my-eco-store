@@ -91,6 +91,9 @@ export function MenuDrawer() {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+          <div className="px-1 pb-2">
+            <LanguageSelector />
+          </div>
           <MenuItem icon={<Home className="h-5 w-5" />} label="Home" href="/" />
           <MenuItem icon={<Grid3X3 className="h-5 w-5" />} label="Browse Apps" href="/" />
           <MenuItem icon={<Sparkles className="h-5 w-5" />} label="New Apps" href="/new" />
