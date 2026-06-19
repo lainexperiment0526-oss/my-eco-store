@@ -1,10 +1,13 @@
 import { App, Category, Screenshot } from '@/types/app';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppIcon } from './AppIcon';
 import { useTheme } from '@/hooks/useTheme';
 import { StarRating } from './StarRating';
 import { ChevronRight } from 'lucide-react';
 import { normalizeExternalUrl, openExternalTopLevel } from '@/lib/utils';
+import { usePiNetwork } from '@/hooks/usePiNetwork';
+
+const isPiBrowser = () => typeof navigator !== 'undefined' && /pibrowser|pi browser|minepi/i.test(navigator.userAgent);
 
 interface AppCardProps {
   app: App & { category?: Category; screenshots?: Screenshot[] };
