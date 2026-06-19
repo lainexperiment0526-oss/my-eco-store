@@ -6,6 +6,8 @@ import { StarRating } from './StarRating';
 import { ChevronRight } from 'lucide-react';
 import { normalizeExternalUrl, openExternalTopLevel } from '@/lib/utils';
 import { usePiNetwork } from '@/hooks/usePiNetwork';
+import { useState, useRef } from 'react';
+import { AdInterstitial } from './AdInterstitial';
 
 const isPiBrowser = () => typeof navigator !== 'undefined' && /pibrowser|pi browser|minepi/i.test(navigator.userAgent);
 
@@ -17,7 +19,9 @@ interface AppCardProps {
 export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const { theme } = useTheme();
   const navigate = useNavigate();
-  const { showPiAd, isPiReady } = usePiNetwork();
+  const { isPiReady } = usePiNetwork();
+  const [showAd, setShowAd] = useState(false);
+  const pendingTarget = useRef<'website' | 'detail' | null>(null);
   const appKey = app.name.toLowerCase();
   const badgeMap: Record<string, { light: string; dark: string }> = {
     'openapp': {
