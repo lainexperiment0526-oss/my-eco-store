@@ -5,9 +5,9 @@ import { useTheme } from '@/hooks/useTheme';
 import { StarRating } from './StarRating';
 import { ChevronRight } from 'lucide-react';
 import { normalizeExternalUrl, openExternalTopLevel } from '@/lib/utils';
-import { usePiNetwork } from '@/hooks/usePiNetwork';
+import { useState, useRef } from 'react';
+import { AdInterstitial } from './AdInterstitial';
 
-const isPiBrowser = () => typeof navigator !== 'undefined' && /pibrowser|pi browser|minepi/i.test(navigator.userAgent);
 
 interface AppCardProps {
   app: App & { category?: Category; screenshots?: Screenshot[] };
@@ -17,7 +17,8 @@ interface AppCardProps {
 export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const { theme } = useTheme();
   const navigate = useNavigate();
-  const { showPiAd, isPiReady } = usePiNetwork();
+  const [showAd, setShowAd] = useState(false);
+  const pendingTarget = useRef<'website' | 'detail' | null>(null);
   const appKey = app.name.toLowerCase();
   const badgeMap: Record<string, { light: string; dark: string }> = {
     'openapp': {
@@ -50,19 +51,27 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const isVerified = !!badge || isSubscriptionVerified;
   const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : 'https://i.ibb.co/BVQYVbyb/verified.png';
   const normalizedWebsite = normalizeExternalUrl(app.website_url);
-  const handleGetClick = async (e: React.MouseEvent, target: 'website' | 'detail') => {
-    e.stopPropagation();
-    e.preventDefault();
-    // If in Pi Browser, trigger Pi Ad Network interstitial first
-    if (isPiBrowser() && isPiReady) {
-      try { await showPiAd('interstitial'); } catch (err) { console.warn('Pi ad failed', err); }
-    }
+  const proceed = (target: 'website' | 'detail') => {
     if (target === 'website' && normalizedWebsite) {
       openExternalTopLevel(normalizedWebsite);
     } else {
       navigate(`/app/${app.id}`);
     }
   };
+  const handleGetClick = (e: React.MouseEvent, target: 'website' | 'detail') => {
+    e.stopPropagation();
+    e.preventDefault();
+    pendingTarget.current = target;
+    // Trigger the same alternating ad flow used at sign-in (Pi Ad Network in Pi Browser, OpenApp ads otherwise)
+    setShowAd(true);
+  };
+  const handleAdComplete = () => {
+    setShowAd(false);
+    const target = pendingTarget.current;
+    pendingTarget.current = null;
+    if (target) proceed(target);
+  };
+
   const renderGetButton = (className: string) => {
     if (normalizedWebsite) {
       return (
@@ -78,10 +87,14 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
     );
   };
 
+  const adPortal = showAd ? <AdInterstitial trigger="app-open" onComplete={handleAdComplete} /> : null;
+
   // Featured story card - large hero style
   if (variant === 'featured') {
     return (
-      <Link to={`/app/${app.id}`} className="block group">
+      <>
+        {adPortal}
+        <Link to={`/app/${app.id}`} className="block group">
         <div className="relative overflow-hidden rounded-2xl">
           {/* Background image or gradient */}
           <div className="aspect-[2/1] bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400">
@@ -124,9 +137,11 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
             {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80")}
           </div>
         </div>
-      </Link>
+        </Link>
+      </>
     );
   }
+
 
   // Compact list item - like "You Might Also Like"
   if (variant === 'compact' || variant === 'list') {
@@ -138,51 +153,57 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
         ? 'bg-amber-500/15 text-amber-500 border-amber-500/30'
         : 'bg-primary/15 text-primary border-primary/30';
     return (
-      <div className="flex items-center gap-3 py-3 border-b border-border last:border-b-0">
-        <Link to={`/app/${app.id}`} className="flex-shrink-0">
-          <AppIcon src={app.logo_url} name={app.name} size="sm" />
-        </Link>
-        <Link to={`/app/${app.id}`} className="flex-1 min-w-0">
-          <h4 className="font-medium text-foreground leading-tight flex items-center gap-2">
-            {app.name}
-            {isVerified && (
-              <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
-            )}
-            {net && (
-              <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${netTone}`}>
-                {net}
-              </span>
-            )}
-          </h4>
-          <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
-        </Link>
-        {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80")}
-      </div>
+      <>
+        {adPortal}
+        <div className="flex items-center gap-3 py-3 border-b border-border last:border-b-0">
+          <Link to={`/app/${app.id}`} className="flex-shrink-0">
+            <AppIcon src={app.logo_url} name={app.name} size="sm" />
+          </Link>
+          <Link to={`/app/${app.id}`} className="flex-1 min-w-0">
+            <h4 className="font-medium text-foreground leading-tight flex items-center gap-2">
+              {app.name}
+              {isVerified && (
+                <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+              )}
+              {net && (
+                <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${netTone}`}>
+                  {net}
+                </span>
+              )}
+            </h4>
+            <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
+          </Link>
+          {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80")}
+        </div>
+      </>
     );
   }
 
   // Default grid card
   return (
-    <Link to={`/app/${app.id}`} className="block group">
-      <div className="flex items-start gap-3">
-        <AppIcon src={app.logo_url} name={app.name} size="sm" />
-        <div className="flex-1 min-w-0 py-1">
-          <h4 className="font-medium text-foreground truncate leading-tight flex items-center gap-2">
-            {app.name}
-            {isVerified && (
-              <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+    <>
+      {adPortal}
+      <Link to={`/app/${app.id}`} className="block group">
+        <div className="flex items-start gap-3">
+          <AppIcon src={app.logo_url} name={app.name} size="sm" />
+          <div className="flex-1 min-w-0 py-1">
+            <h4 className="font-medium text-foreground truncate leading-tight flex items-center gap-2">
+              {app.name}
+              {isVerified && (
+                <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+              )}
+            </h4>
+            <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
+            {app.ratings_count > 0 && (
+              <div className="mt-1">
+                <StarRating rating={app.average_rating} size="sm" />
+              </div>
             )}
-          </h4>
-          <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
-          {app.ratings_count > 0 && (
-            <div className="mt-1">
-              <StarRating rating={app.average_rating} size="sm" />
-            </div>
-          )}
+          </div>
+          {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80 mt-1")}
         </div>
-        {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80 mt-1")}
-      </div>
-    </Link>
+      </Link>
+    </>
   );
 }
 
