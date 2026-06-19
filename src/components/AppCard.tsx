@@ -156,26 +156,29 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
         ? 'bg-amber-500/15 text-amber-500 border-amber-500/30'
         : 'bg-primary/15 text-primary border-primary/30';
     return (
-      <div className="flex items-center gap-3 py-3 border-b border-border last:border-b-0">
-        <Link to={`/app/${app.id}`} className="flex-shrink-0">
-          <AppIcon src={app.logo_url} name={app.name} size="sm" />
-        </Link>
-        <Link to={`/app/${app.id}`} className="flex-1 min-w-0">
-          <h4 className="font-medium text-foreground leading-tight flex items-center gap-2">
-            {app.name}
-            {isVerified && (
-              <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
-            )}
-            {net && (
-              <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${netTone}`}>
-                {net}
-              </span>
-            )}
-          </h4>
-          <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
-        </Link>
-        {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80")}
-      </div>
+      <>
+        {adPortal}
+        <div className="flex items-center gap-3 py-3 border-b border-border last:border-b-0">
+          <Link to={`/app/${app.id}`} className="flex-shrink-0">
+            <AppIcon src={app.logo_url} name={app.name} size="sm" />
+          </Link>
+          <Link to={`/app/${app.id}`} className="flex-1 min-w-0">
+            <h4 className="font-medium text-foreground leading-tight flex items-center gap-2">
+              {app.name}
+              {isVerified && (
+                <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+              )}
+              {net && (
+                <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${netTone}`}>
+                  {net}
+                </span>
+              )}
+            </h4>
+            <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
+          </Link>
+          {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80")}
+        </div>
+      </>
     );
   }
 
