@@ -53,9 +53,15 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const handleGetClick = async (e: React.MouseEvent, target: 'website' | 'detail') => {
     e.stopPropagation();
     e.preventDefault();
-    // If in Pi Browser, trigger Pi Ad Network interstitial first
-    if (isPiBrowser() && isPiReady) {
-      try { await showPiAd('interstitial'); } catch (err) { console.warn('Pi ad failed', err); }
+    // If in Pi Browser, trigger Pi Ad Network interstitial first.
+    // Check window.Pi?.Ads directly so we don't gate on isPiReady which may lag.
+    if (isPiBrowser() && typeof window !== 'undefined' && (window as any).Pi?.Ads) {
+      try {
+        console.log('[Get] Triggering Pi Ad Network interstitial...');
+        await showPiAd('interstitial');
+      } catch (err) {
+        console.warn('Pi ad failed (non-blocking):', err);
+      }
     }
     if (target === 'website' && normalizedWebsite) {
       openExternalTopLevel(normalizedWebsite);

@@ -28,6 +28,8 @@ export default function Auth() {
   const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [showAd, setShowAd] = useState(true);
   const [inPiBrowser, setInPiBrowser] = useState(false);
+  const [signingInPi, setSigningInPi] = useState(false);
+  const [piStatus, setPiStatus] = useState<string>('');
 
   useEffect(() => {
     setInPiBrowser(isPiBrowser());
@@ -78,66 +80,71 @@ export default function Auth() {
   };
 
   const handlePiAuth = async () => {
-    // Trigger Pi Ad Network interstitial (only runs inside Pi Browser; no-op otherwise)
+    setSigningInPi(true);
     try {
-      await showPiAd('interstitial');
-    } catch (err) {
-      console.warn('Pi Ad failed (non-blocking):', err);
-    }
-    const piUser = await authenticateWithPi();
-    if (piUser) {
-      const ensured = await ensurePiAccountServerSide(piUser.uid, piUser.username);
-      const piEmail = ensured?.email ?? `${piUser.uid}@pi.user`;
-      const stablePassword = ensured?.password ?? getStablePiPassword(piUser.uid);
-      const legacyPassword = getLegacyPiPassword(piUser.accessToken, piUser.uid);
-
-      // First try stable credentials so returning users can log in consistently.
-      let { error: signInError } = await signIn(piEmail, stablePassword);
-
-      // Backward compatibility for accounts created with the older token-derived password.
-      if (signInError) {
-        const { error: legacySignInError } = await signIn(piEmail, legacyPassword);
-        if (!legacySignInError) {
-          const { error: updatePasswordError } = await supabase.auth.updateUser({ password: stablePassword });
-          if (updatePasswordError) {
-            console.warn('Pi password migration failed:', updatePasswordError.message);
-          }
-          signInError = null;
-        }
+      setPiStatus('Loading Pi Ad...');
+      try {
+        await showPiAd('interstitial');
+      } catch (err) {
+        console.warn('Pi Ad failed (non-blocking):', err);
       }
+      setPiStatus('Connecting to Pi Network...');
+      const piUser = await authenticateWithPi();
+      if (piUser) {
+        setPiStatus('Setting up your account...');
+        const ensured = await ensurePiAccountServerSide(piUser.uid, piUser.username);
+        const piEmail = ensured?.email ?? `${piUser.uid}@pi.user`;
+        const stablePassword = ensured?.password ?? getStablePiPassword(piUser.uid);
+        const legacyPassword = getLegacyPiPassword(piUser.accessToken, piUser.uid);
 
-      // If no existing account works, create one with stable credentials.
-      if (signInError) {
-        const { error: signUpError } = await signUp(piEmail, stablePassword);
-        if (signUpError && !isAlreadyRegisteredError(signUpError)) {
-          console.error('Pi sign-up failed:', signUpError.message);
-          toast.error('Failed to authenticate with Pi Network');
-          return;
+        setPiStatus('Signing in...');
+        let { error: signInError } = await signIn(piEmail, stablePassword);
+
+        if (signInError) {
+          const { error: legacySignInError } = await signIn(piEmail, legacyPassword);
+          if (!legacySignInError) {
+            const { error: updatePasswordError } = await supabase.auth.updateUser({ password: stablePassword });
+            if (updatePasswordError) {
+              console.warn('Pi password migration failed:', updatePasswordError.message);
+            }
+            signInError = null;
+          }
         }
 
-        // Account might already exist; retry sign-in with stable password once.
-        const { error: retrySignInError } = await signIn(piEmail, stablePassword);
-        if (retrySignInError) {
-          if (isEmailNotConfirmedError(retrySignInError)) {
-            toast.error('Pi account exists but is not confirmed. Deploy the pi-auth edge function and try again.');
+        if (signInError) {
+          const { error: signUpError } = await signUp(piEmail, stablePassword);
+          if (signUpError && !isAlreadyRegisteredError(signUpError)) {
+            console.error('Pi sign-up failed:', signUpError.message);
+            toast.error('Failed to authenticate with Pi Network');
             return;
           }
-          console.error('Pi retry sign-in failed:', retrySignInError.message);
-          toast.error('Failed to authenticate with Pi Network');
-          return;
+
+          const { error: retrySignInError } = await signIn(piEmail, stablePassword);
+          if (retrySignInError) {
+            if (isEmailNotConfirmedError(retrySignInError)) {
+              toast.error('Pi account exists but is not confirmed. Deploy the pi-auth edge function and try again.');
+              return;
+            }
+            console.error('Pi retry sign-in failed:', retrySignInError.message);
+            toast.error('Failed to authenticate with Pi Network');
+            return;
+          }
         }
+
+        setPiStatus('Finalizing...');
+        await supabase
+          .from('profiles')
+          .update({ uses_openapp: true })
+          .eq('id', piUser.uid);
+
+        toast.success(`Welcome, ${piUser.username}!`);
+        navigate(redirectTo, { replace: true });
+      } else {
+        toast.error('Pi authentication failed. Make sure you are in Pi Browser.');
       }
-
-      // Update user profile to mark as OpenApp user
-      await supabase
-        .from('profiles')
-        .update({ uses_openapp: true })
-        .eq('id', piUser.uid);
-
-      toast.success(`Welcome, ${piUser.username}!`);
-      navigate(redirectTo, { replace: true });
-    } else {
-      toast.error('Pi authentication failed. Make sure you are in Pi Browser.');
+    } finally {
+      setSigningInPi(false);
+      setPiStatus('');
     }
   };
 
@@ -189,6 +196,21 @@ export default function Auth() {
   return (
     <>
       {showAd && <AdInterstitial trigger="auth" onComplete={() => setShowAd(false)} />}
+      {signingInPi && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
+          <div className="flex flex-col items-center gap-4 rounded-2xl bg-card p-8 shadow-2xl border border-border">
+            <div className="relative h-16 w-16">
+              <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+              <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+              <Pi className="absolute inset-0 m-auto h-7 w-7 text-primary" />
+            </div>
+            <div className="text-center">
+              <p className="font-semibold text-foreground">Signing in with Pi</p>
+              <p className="text-sm text-muted-foreground mt-1">{piStatus || 'Please wait...'}</p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
@@ -218,11 +240,16 @@ export default function Auth() {
               <div className="rounded-2xl bg-card p-6 shadow-lg">
                 <Button
                   onClick={handlePiAuth}
-                  disabled={!isPiReady || piLoading}
+                  disabled={!isPiReady || piLoading || signingInPi}
                   className="w-full mb-4 bg-[#0A84FF] hover:bg-[#0074E8] dark:bg-[#0A84FF] dark:hover:bg-[#0074E8] text-white font-semibold"
                   size="lg"
                 >
-                  {piLoading ? 'Connecting...' : 'Sign in with Pi Network'}
+                  {signingInPi ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                      {piStatus || 'Connecting...'}
+                    </span>
+                  ) : piLoading ? 'Connecting...' : 'Sign in with Pi Network'}
                 </Button>
 
                 {!isPiReady && !inPiBrowser && (
