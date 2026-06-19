@@ -28,6 +28,8 @@ export default function Auth() {
   const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [showAd, setShowAd] = useState(true);
   const [inPiBrowser, setInPiBrowser] = useState(false);
+  const [signingInPi, setSigningInPi] = useState(false);
+  const [piStatus, setPiStatus] = useState<string>('');
 
   useEffect(() => {
     setInPiBrowser(isPiBrowser());
