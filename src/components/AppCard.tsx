@@ -90,10 +90,14 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
     );
   };
 
+  const adPortal = showAd ? <AdInterstitial trigger="app-open" onComplete={handleAdComplete} /> : null;
+
   // Featured story card - large hero style
   if (variant === 'featured') {
     return (
-      <Link to={`/app/${app.id}`} className="block group">
+      <>
+        {adPortal}
+        <Link to={`/app/${app.id}`} className="block group">
         <div className="relative overflow-hidden rounded-2xl">
           {/* Background image or gradient */}
           <div className="aspect-[2/1] bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400">
@@ -136,9 +140,11 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
             {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80")}
           </div>
         </div>
-      </Link>
+        </Link>
+      </>
     );
   }
+
 
   // Compact list item - like "You Might Also Like"
   if (variant === 'compact' || variant === 'list') {
