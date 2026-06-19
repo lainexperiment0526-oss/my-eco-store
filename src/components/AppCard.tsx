@@ -16,6 +16,8 @@ interface AppCardProps {
 
 export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const { theme } = useTheme();
+  const navigate = useNavigate();
+  const { showPiAd, isPiReady } = usePiNetwork();
   const appKey = app.name.toLowerCase();
   const badgeMap: Record<string, { light: string; dark: string }> = {
     'openapp': {
