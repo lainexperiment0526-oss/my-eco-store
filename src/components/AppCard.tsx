@@ -5,11 +5,9 @@ import { useTheme } from '@/hooks/useTheme';
 import { StarRating } from './StarRating';
 import { ChevronRight } from 'lucide-react';
 import { normalizeExternalUrl, openExternalTopLevel } from '@/lib/utils';
-import { usePiNetwork } from '@/hooks/usePiNetwork';
 import { useState, useRef } from 'react';
 import { AdInterstitial } from './AdInterstitial';
 
-const isPiBrowser = () => typeof navigator !== 'undefined' && /pibrowser|pi browser|minepi/i.test(navigator.userAgent);
 
 interface AppCardProps {
   app: App & { category?: Category; screenshots?: Screenshot[] };
