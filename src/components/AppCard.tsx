@@ -184,26 +184,29 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
 
   // Default grid card
   return (
-    <Link to={`/app/${app.id}`} className="block group">
-      <div className="flex items-start gap-3">
-        <AppIcon src={app.logo_url} name={app.name} size="sm" />
-        <div className="flex-1 min-w-0 py-1">
-          <h4 className="font-medium text-foreground truncate leading-tight flex items-center gap-2">
-            {app.name}
-            {isVerified && (
-              <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+    <>
+      {adPortal}
+      <Link to={`/app/${app.id}`} className="block group">
+        <div className="flex items-start gap-3">
+          <AppIcon src={app.logo_url} name={app.name} size="sm" />
+          <div className="flex-1 min-w-0 py-1">
+            <h4 className="font-medium text-foreground truncate leading-tight flex items-center gap-2">
+              {app.name}
+              {isVerified && (
+                <img src={badgeSrc} alt="Verified" className="h-4 w-4" />
+              )}
+            </h4>
+            <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
+            {app.ratings_count > 0 && (
+              <div className="mt-1">
+                <StarRating rating={app.average_rating} size="sm" />
+              </div>
             )}
-          </h4>
-          <p className="text-sm text-muted-foreground truncate">{app.tagline || app.category?.name}</p>
-          {app.ratings_count > 0 && (
-            <div className="mt-1">
-              <StarRating rating={app.average_rating} size="sm" />
-            </div>
-          )}
+          </div>
+          {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80 mt-1")}
         </div>
-        {renderGetButton("flex-shrink-0 rounded-full bg-secondary px-5 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary/80 mt-1")}
-      </div>
-    </Link>
+      </Link>
+    </>
   );
 }
 
