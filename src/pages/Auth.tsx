@@ -240,11 +240,16 @@ export default function Auth() {
               <div className="rounded-2xl bg-card p-6 shadow-lg">
                 <Button
                   onClick={handlePiAuth}
-                  disabled={!isPiReady || piLoading}
+                  disabled={!isPiReady || piLoading || signingInPi}
                   className="w-full mb-4 bg-[#0A84FF] hover:bg-[#0074E8] dark:bg-[#0A84FF] dark:hover:bg-[#0074E8] text-white font-semibold"
                   size="lg"
                 >
-                  {piLoading ? 'Connecting...' : 'Sign in with Pi Network'}
+                  {signingInPi ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                      {piStatus || 'Connecting...'}
+                    </span>
+                  ) : piLoading ? 'Connecting...' : 'Sign in with Pi Network'}
                 </Button>
 
                 {!isPiReady && !inPiBrowser && (
