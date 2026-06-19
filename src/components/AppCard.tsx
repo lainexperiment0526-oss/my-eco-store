@@ -1,10 +1,13 @@
 import { App, Category, Screenshot } from '@/types/app';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppIcon } from './AppIcon';
 import { useTheme } from '@/hooks/useTheme';
 import { StarRating } from './StarRating';
 import { ChevronRight } from 'lucide-react';
 import { normalizeExternalUrl, openExternalTopLevel } from '@/lib/utils';
+import { usePiNetwork } from '@/hooks/usePiNetwork';
+
+const isPiBrowser = () => typeof navigator !== 'undefined' && /pibrowser|pi browser|minepi/i.test(navigator.userAgent);
 
 interface AppCardProps {
   app: App & { category?: Category; screenshots?: Screenshot[] };
@@ -13,6 +16,8 @@ interface AppCardProps {
 
 export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const { theme } = useTheme();
+  const navigate = useNavigate();
+  const { showPiAd, isPiReady } = usePiNetwork();
   const appKey = app.name.toLowerCase();
   const badgeMap: Record<string, { light: string; dark: string }> = {
     'openapp': {
@@ -45,24 +50,31 @@ export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const isVerified = !!badge || isSubscriptionVerified;
   const badgeSrc = badge ? (theme === 'dark' ? badge.dark : badge.light) : 'https://i.ibb.co/BVQYVbyb/verified.png';
   const normalizedWebsite = normalizeExternalUrl(app.website_url);
+  const handleGetClick = async (e: React.MouseEvent, target: 'website' | 'detail') => {
+    e.stopPropagation();
+    e.preventDefault();
+    // If in Pi Browser, trigger Pi Ad Network interstitial first
+    if (isPiBrowser() && isPiReady) {
+      try { await showPiAd('interstitial'); } catch (err) { console.warn('Pi ad failed', err); }
+    }
+    if (target === 'website' && normalizedWebsite) {
+      openExternalTopLevel(normalizedWebsite);
+    } else {
+      navigate(`/app/${app.id}`);
+    }
+  };
   const renderGetButton = (className: string) => {
     if (normalizedWebsite) {
       return (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            openExternalTopLevel(normalizedWebsite);
-          }}
-          className={className}
-        >
+        <button onClick={(e) => handleGetClick(e, 'website')} className={className}>
           Get
         </button>
       );
     }
     return (
-      <Link to={`/app/${app.id}`} className={className} onClick={(e) => e.stopPropagation()}>
+      <button onClick={(e) => handleGetClick(e, 'detail')} className={className}>
         Get
-      </Link>
+      </button>
     );
   };
 
