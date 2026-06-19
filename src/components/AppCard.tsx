@@ -17,7 +17,6 @@ interface AppCardProps {
 export function AppCard({ app, variant = 'default' }: AppCardProps) {
   const { theme } = useTheme();
   const navigate = useNavigate();
-  const { isPiReady } = usePiNetwork();
   const [showAd, setShowAd] = useState(false);
   const pendingTarget = useRef<'website' | 'detail' | null>(null);
   const appKey = app.name.toLowerCase();
