@@ -196,6 +196,21 @@ export default function Auth() {
   return (
     <>
       {showAd && <AdInterstitial trigger="auth" onComplete={() => setShowAd(false)} />}
+      {signingInPi && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
+          <div className="flex flex-col items-center gap-4 rounded-2xl bg-card p-8 shadow-2xl border border-border">
+            <div className="relative h-16 w-16">
+              <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+              <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+              <Pi className="absolute inset-0 m-auto h-7 w-7 text-primary" />
+            </div>
+            <div className="text-center">
+              <p className="font-semibold text-foreground">Signing in with Pi</p>
+              <p className="text-sm text-muted-foreground mt-1">{piStatus || 'Please wait...'}</p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
