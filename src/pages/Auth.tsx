@@ -226,10 +226,20 @@ export default function Auth() {
                   {piLoading ? 'Connecting...' : 'Sign in with Pi Network'}
                 </Button>
 
-                {!isPiReady && !inPiBrowser && (
-                  <p className="text-xs text-muted-foreground text-center mb-4">
-                    Pi sign-in requires Pi Browser
-                  </p>
+                {!inPiBrowser && (
+                  <>
+                    <Button
+                      onClick={() => { window.location.href = buildPiOAuthUrl(); }}
+                      variant="outline"
+                      className="w-full mb-4 font-semibold"
+                      size="lg"
+                    >
+                      Sign in with Pi (Web OAuth)
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center mb-4">
+                      Use "Web OAuth" outside Pi Browser. Inside Pi Browser, use the button above.
+                    </p>
+                  </>
                 )}
 
                 <a
