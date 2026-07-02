@@ -38,6 +38,7 @@ import Blog from "./pages/Blog";
 import BlogPostPage from "./pages/BlogPost";
 import AdminBlog from "./pages/AdminBlog";
 import Tutorial from "./pages/Tutorial";
+import PiCallback from "./pages/PiCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
