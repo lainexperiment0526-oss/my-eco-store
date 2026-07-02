@@ -81,6 +81,7 @@ function RouteTransitions() {
       <Routes location={location}>
         {/* Public routes */}
         <Route path="/auth" element={<Auth />} />
+        <Route path="/auth/pi/callback" element={<PiCallback />} />
         <Route path="/about" element={<AboutOpenApp />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
