@@ -9,6 +9,7 @@ const corsHeaders = {
 type PiAuthBody = {
   piUid?: string;
   username?: string;
+  accessToken?: string;
 };
 
 const ADMIN_USERNAMES = new Set(["wain2020"]);
@@ -18,6 +19,21 @@ function jsonResponse(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+async function verifyPiAccessToken(accessToken: string) {
+  const res = await fetch("https://api.minepi.com/v2/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Pi /v2/me failed (${res.status}): ${text}`);
+  }
+  const data = await res.json();
+  const uid = data?.uid ?? data?.user?.uid;
+  const username = data?.username ?? data?.user?.username;
+  if (!uid || !username) throw new Error("Pi /v2/me returned incomplete user");
+  return { uid: String(uid), username: String(username) };
 }
 
 Deno.serve(async (req) => {
@@ -42,8 +58,16 @@ Deno.serve(async (req) => {
 
   try {
     const body = (await req.json()) as PiAuthBody;
-    const piUid = body.piUid?.trim();
-    const username = body.username?.trim();
+    let piUid = body.piUid?.trim();
+    let username = body.username?.trim();
+
+    // If an accessToken is supplied (OAuth implicit-flow callback),
+    // validate with Pi and derive uid/username server-side.
+    if (body.accessToken?.trim()) {
+      const verified = await verifyPiAccessToken(body.accessToken.trim());
+      piUid = verified.uid;
+      username = verified.username;
+    }
 
     if (!piUid || !username) {
       return jsonResponse({ error: "Missing piUid or username" }, 400);
@@ -130,6 +154,8 @@ Deno.serve(async (req) => {
       success: true,
       email,
       password,
+      piUid,
+      username,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
