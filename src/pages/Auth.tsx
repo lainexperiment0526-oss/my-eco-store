@@ -11,6 +11,7 @@ import { PageLoader } from '@/components/PageLoader';
 import { EmailAuth } from '@/components/EmailAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mail, Pi } from 'lucide-react';
+import { buildPiOAuthUrl } from '@/lib/piOAuth';
 
 const isPiBrowser = () => {
   if (typeof navigator === 'undefined') return false;
