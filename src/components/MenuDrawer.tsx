@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   Info,
   LogOut,
+  LogIn,
   PlusCircle,
   AppWindow,
   User,
@@ -141,6 +142,7 @@ export function MenuDrawer() {
               label={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
               onClick={toggleTheme}
             />
+            {!user && <MenuItem icon={<LogIn className="h-5 w-5" />} label="Sign In / Sign Up" href="/signin" />}
             {user && <MenuItem icon={<LogOut className="h-5 w-5" />} label="Sign Out" onClick={signOut} />}
           </div>
         </div>
