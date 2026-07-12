@@ -39,6 +39,7 @@ import BlogPostPage from "./pages/BlogPost";
 import AdminBlog from "./pages/AdminBlog";
 import Tutorial from "./pages/Tutorial";
 import PiCallback from "./pages/PiCallback";
+import SignIn from "./pages/SignIn";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -81,6 +82,8 @@ function RouteTransitions() {
       <Routes location={location}>
         {/* Public routes */}
         <Route path="/auth" element={<Auth />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignIn />} />
         <Route path="/auth/pi/callback" element={<PiCallback />} />
         <Route path="/about" element={<AboutOpenApp />} />
         <Route path="/privacy" element={<Privacy />} />
