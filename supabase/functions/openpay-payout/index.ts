@@ -5,20 +5,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const OPENPAY_BASE = Deno.env.get("OPENPAY_BASE_URL") || "https://openpay-api.lovable.app/smart-contract-api";
+const OPENPAY_BASE =
+  Deno.env.get("OPENPAY_BASE_URL") ||
+  "https://araojncyittkahvvpdrn.supabase.co/functions/v1/partner-transfer-api";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const clientId = Deno.env.get("OPENPAY_CLIENT_ID");
   const apiKey = Deno.env.get("OPENPAY_API_KEY");
-  const platformToken = Deno.env.get("OPENPAY_PLATFORM_TOKEN");
 
-  if (!clientId || !apiKey || !platformToken) {
+  if (!apiKey) {
     return new Response(JSON.stringify({ error: "OpenPay not configured" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
