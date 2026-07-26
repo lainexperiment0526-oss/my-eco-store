@@ -77,22 +77,22 @@ Deno.serve(async (req) => {
     }
     if (!username) throw new Error("Developer has no OpenPay @username on file");
 
-    // Send via OpenPay
-    const res = await fetch(`${OPENPAY_BASE}/send`, {
+    // Send via OpenPay partner transfer API
+    const res = await fetch(`${OPENPAY_BASE}/transfers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Client-Id": clientId,
-        "X-Api-Key": apiKey,
-        "Authorization": `Bearer ${platformToken}`,
+        "Authorization": `Bearer ${apiKey}`,
+        "Idempotency-Key": `withdrawal_${wr.id}`,
       },
       body: JSON.stringify({
         to: username.startsWith("@") ? username : `@${username}`,
         amount: Number(wr.amount),
-        currency: "PI",
-        memo: `OpenApp payout #${wr.id.slice(0, 8)}`,
+        note: `OpenApp payout #${wr.id.slice(0, 8)}`,
+        idempotency_key: `withdrawal_${wr.id}`,
       }),
     });
+
     const data = await res.json();
     if (!res.ok) {
       await supabase.from("withdrawal_requests").update({
