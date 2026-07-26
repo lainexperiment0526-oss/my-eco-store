@@ -273,7 +273,10 @@ export default function DeveloperDashboard() {
           Withdraw earnings via OpenPay or your Pi Wallet
         </p>
 
+        <OpenPayConnectCard />
+
         <div className="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-4">
+
           <div className="rounded-2xl bg-card p-4 border border-border text-center">
             <Coins className="h-6 w-6 text-primary mx-auto mb-2" />
             <p className="text-xs text-muted-foreground">Total Income</p>
