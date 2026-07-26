@@ -39,6 +39,8 @@ import BlogPostPage from "./pages/BlogPost";
 import AdminBlog from "./pages/AdminBlog";
 import Tutorial from "./pages/Tutorial";
 import PiCallback from "./pages/PiCallback";
+import OpenPayCallback from "./pages/OpenPayCallback";
+
 import SignIn from "./pages/SignIn";
 import NotFound from "./pages/NotFound";
 
@@ -85,6 +87,8 @@ function RouteTransitions() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignIn />} />
         <Route path="/auth/pi/callback" element={<PiCallback />} />
+        <Route path="/openpay/connect/callback" element={<OpenPayCallback />} />
+
         <Route path="/about" element={<AboutOpenApp />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
