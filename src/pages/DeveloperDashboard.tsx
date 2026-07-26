@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { ArrowLeft, Wallet, TrendingUp, Coins } from 'lucide-react';
 import { PageLoader } from '@/components/PageLoader';
+import { OpenPayConnectCard } from '@/components/OpenPayConnectCard';
+
 
 interface EarningsSummary {
   app_id: string;
