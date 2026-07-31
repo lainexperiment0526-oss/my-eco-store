@@ -12,6 +12,7 @@ import { EmailAuth } from '@/components/EmailAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mail, Pi } from 'lucide-react';
 import { buildPiOAuthUrl } from '@/lib/piOAuth';
+import { OpenPayAuthButton } from '@/components/OpenPayAuthButton';
 
 const isPiBrowser = () => {
   if (typeof navigator === 'undefined') return false;
