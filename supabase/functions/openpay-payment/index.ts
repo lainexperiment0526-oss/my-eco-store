@@ -19,6 +19,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const apiKey = Deno.env.get("OPENPAY_API_KEY");
+  const clientSecret = Deno.env.get("OPENPAY_CLIENT_SECRET") || apiKey;
   const clientId = Deno.env.get("OPENPAY_CLIENT_ID");
   if (!apiKey) return json({ error: "OpenPay not configured" }, 500);
 
@@ -83,7 +84,7 @@ Deno.serve(async (req) => {
         charge: data,
         invoice: data, // backwards-compatible alias
         checkout_url: data.checkout_url,
-        paybutton_url: data.id ? `https://openpay.lovable.app/paybutton/${data.id}` : null,
+        paybutton_url: data.id ? `https://openpy.space/paybutton/${data.id}` : null,
       });
     }
 
@@ -155,7 +156,8 @@ Deno.serve(async (req) => {
     // ---------- OAuth: exchange authorization code ----------
     if (action === "oauth-exchange") {
       const { code, redirectUri } = body;
-      if (!code || !redirectUri) return json({ error: "code and redirectUri required" }, 400);
+      const finalRedirect = redirectUri || Deno.env.get("OPENPAY_REDIRECT_URI");
+      if (!code || !finalRedirect) return json({ error: "code and redirectUri required" }, 400);
       if (!clientId) return json({ error: "OPENPAY_CLIENT_ID not configured" }, 500);
 
       const tokenRes = await fetch(`${OPENPAY_BASE}/oauth/token`, {
@@ -164,9 +166,9 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           grant_type: "authorization_code",
           code,
-          redirect_uri: redirectUri,
+          redirect_uri: finalRedirect,
           client_id: clientId,
-          client_secret: apiKey,
+          client_secret: clientSecret,
         }),
       });
       const token = await tokenRes.json();

@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { startOpenPayConnect } from '@/lib/openpay';
+import { startOpenPayConnect, OPENPAY_PARTNER_PORTAL_URL } from '@/lib/openpay';
+import { OpenPayAuthButton } from '@/components/OpenPayAuthButton';
 
 export function OpenPayConnectCard() {
   const { user } = useAuth();
@@ -66,8 +67,21 @@ export function OpenPayConnectCard() {
           </div>
         </div>
       ) : (
-        <Button className="mt-4" onClick={() => startOpenPayConnect()}>Connect with OpenPay</Button>
+        <OpenPayAuthButton className="mt-4" label="Sign in with OpenPay" />
       )}
+
+      <p className="mt-4 text-xs text-muted-foreground">
+        Manage your OpenPay API keys at{' '}
+        <a
+          href={OPENPAY_PARTNER_PORTAL_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-foreground"
+        >
+          openpy.space/partner-api
+        </a>
+        .
+      </p>
     </div>
   );
 }

@@ -87,6 +87,7 @@ function RouteTransitions() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignIn />} />
         <Route path="/auth/pi/callback" element={<PiCallback />} />
+        <Route path="/auth/openpay/callback" element={<OpenPayCallback />} />
         <Route path="/openpay/connect/callback" element={<OpenPayCallback />} />
 
         <Route path="/about" element={<AboutOpenApp />} />
