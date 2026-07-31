@@ -156,7 +156,8 @@ Deno.serve(async (req) => {
     // ---------- OAuth: exchange authorization code ----------
     if (action === "oauth-exchange") {
       const { code, redirectUri } = body;
-      if (!code || !redirectUri) return json({ error: "code and redirectUri required" }, 400);
+      const finalRedirect = redirectUri || Deno.env.get("OPENPAY_REDIRECT_URI");
+      if (!code || !finalRedirect) return json({ error: "code and redirectUri required" }, 400);
       if (!clientId) return json({ error: "OPENPAY_CLIENT_ID not configured" }, 500);
 
       const tokenRes = await fetch(`${OPENPAY_BASE}/oauth/token`, {
@@ -165,9 +166,9 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           grant_type: "authorization_code",
           code,
-          redirect_uri: redirectUri,
+          redirect_uri: finalRedirect,
           client_id: clientId,
-          client_secret: apiKey,
+          client_secret: clientSecret,
         }),
       });
       const token = await tokenRes.json();
