@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
         charge: data,
         invoice: data, // backwards-compatible alias
         checkout_url: data.checkout_url,
-        paybutton_url: data.id ? `https://openpay.lovable.app/paybutton/${data.id}` : null,
+        paybutton_url: data.id ? `https://openpy.space/paybutton/${data.id}` : null,
       });
     }
 
