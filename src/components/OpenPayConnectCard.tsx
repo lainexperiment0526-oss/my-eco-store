@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { startOpenPayConnect } from '@/lib/openpay';
+import { startOpenPayConnect, OPENPAY_PARTNER_PORTAL_URL } from '@/lib/openpay';
+import { OpenPayAuthButton } from '@/components/OpenPayAuthButton';
 
 export function OpenPayConnectCard() {
   const { user } = useAuth();
