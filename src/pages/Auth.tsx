@@ -251,6 +251,15 @@ export default function Auth() {
                   Download Pi Browser
                 </a>
 
+                <div className="my-4 flex items-center gap-3">
+                  <span className="h-px flex-1 bg-border" />
+                  <span className="text-xs text-muted-foreground">or</span>
+                  <span className="h-px flex-1 bg-border" />
+                </div>
+
+                <OpenPayAuthButton className="w-full" label="Sign in with OpenPay" />
+
+
                 <div className="mt-4 grid gap-3 text-sm text-muted-foreground">
                   <div className="flex items-start gap-2">
                     <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
