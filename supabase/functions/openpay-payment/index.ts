@@ -19,6 +19,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const apiKey = Deno.env.get("OPENPAY_API_KEY");
+  const clientSecret = Deno.env.get("OPENPAY_CLIENT_SECRET") || apiKey;
   const clientId = Deno.env.get("OPENPAY_CLIENT_ID");
   if (!apiKey) return json({ error: "OpenPay not configured" }, 500);
 
