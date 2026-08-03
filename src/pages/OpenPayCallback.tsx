@@ -35,11 +35,25 @@ export default function OpenPayCallback() {
         const { data, error } = await supabase.functions.invoke('openpay-payment', {
           body: { action: 'oauth-exchange', code, redirectUri: OPENPAY_REDIRECT_URI },
         });
-        if (error) throw new Error(error.message || 'OpenPay connection failed');
+        if (error) {
+          const details = await error.context?.json().catch(() => null);
+          throw new Error(details?.error || error.message || 'OpenPay connection failed');
+        }
         if (!data?.success) throw new Error(data?.error || 'OpenPay connection failed');
 
-        toast.success(`OpenPay connected${data.profile?.username ? ` as @${data.profile.username}` : ''}`);
-        navigate('/developer-dashboard', { replace: true });
+        if (data.login_token_hash) {
+          const { error: sessionError } = await supabase.auth.verifyOtp({
+            token_hash: data.login_token_hash,
+            type: 'magiclink',
+          });
+          if (sessionError) throw new Error(`OpenPay verified, but sign-in failed: ${sessionError.message}`);
+        }
+
+        const { data: authenticated } = await supabase.auth.getUser();
+        if (!authenticated.user) throw new Error('OpenPay was verified, but no OpenApp session was created');
+
+        toast.success(`Signed in with OpenPay${data.profile?.username ? ` as @${data.profile.username}` : ''}`);
+        navigate('/', { replace: true });
       } catch (e) {
         const message = e instanceof Error ? e.message : 'OpenPay connection failed';
         console.error('[OpenPay callback]', message);

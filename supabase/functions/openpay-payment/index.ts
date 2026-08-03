@@ -1,9 +1,5 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const OPENPAY_BASE =
   Deno.env.get("OPENPAY_BASE_URL") ||
@@ -23,22 +19,28 @@ Deno.serve(async (req) => {
   const clientId = Deno.env.get("OPENPAY_CLIENT_ID");
   if (!apiKey) return json({ error: "OpenPay not configured" }, 500);
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!supabaseUrl || !serviceRoleKey || !anonKey) {
+    return json({ error: "Backend authentication is not configured" }, 500);
+  }
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== "object") return json({ error: "Invalid request body" }, 400);
+  const { action, amount, memo, metadata, chargeId, successUrl, cancelUrl, reference } = body;
 
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
-
-  const userClient = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!,
-    { global: { headers: { Authorization: authHeader } } },
-  );
-  const { data: userData } = await userClient.auth.getUser();
-  const userId = userData?.user?.id;
-  if (!userId) return json({ error: "Unauthorized" }, 401);
+  let userId: string | null = null;
+  if (authHeader?.startsWith("Bearer ")) {
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData } = await userClient.auth.getUser();
+    userId = userData?.user?.id ?? null;
+  }
+  if (action !== "oauth-exchange" && !userId) return json({ error: "Unauthorized" }, 401);
 
   const partnerHeaders = {
     "Content-Type": "application/json",
@@ -46,9 +48,6 @@ Deno.serve(async (req) => {
   };
 
   try {
-    const body = await req.json();
-    const { action, amount, memo, metadata, chargeId, successUrl, cancelUrl, reference } = body;
-
     // ---------- Create a PayButton checkout charge ----------
     if (action === "create-charge" || action === "create-invoice") {
       const res = await fetch(`${OPENPAY_BASE}/charges`, {
@@ -58,7 +57,7 @@ Deno.serve(async (req) => {
           amount: Number(amount),
           currency: "OUSD",
           description: memo || "OpenApp purchase",
-          reference: reference || `openapp_${userId.slice(0, 8)}_${Date.now()}`,
+          reference: reference || `openapp_${userId?.slice(0, 8)}_${Date.now()}`,
           success_url: successUrl || null,
           cancel_url: cancelUrl || null,
         }),
