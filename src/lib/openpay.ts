@@ -1,4 +1,4 @@
-export const OPENPAY_CLIENT_ID = '1d221d46-74a6-453b-8cf8-ab6e9b035269';
+export const OPENPAY_CLIENT_ID = '526ebb5e-a269-45c4-b247-3dc204564b94';
 export const OPENPAY_AUTHORIZE_URL = 'https://openpy.space/connect';
 export const OPENPAY_SITE_URL = 'https://openpy.space';
 export const OPENPAY_PARTNER_PORTAL_URL = 'https://openpy.space/partner-api';
