@@ -192,12 +192,51 @@ Deno.serve(async (req) => {
       }
 
 
-      const expiresAt = new Date(Date.now() + Number(token.expires_in || 2592000) * 1000).toISOString();
+      const openPayUserId = String(me.user_id ?? me.id ?? token.user_id ?? "");
+      if (!openPayUserId) {
+        return json({ success: false, error: "OpenPay did not return a user identifier" });
+      }
 
-      await supabase.from("openpay_connections").upsert(
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(openPayUserId));
+      const identityKey = Array.from(new Uint8Array(digest))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("")
+        .slice(0, 32);
+      const authEmail = `openpay-${identityKey}@openapp.local`;
+
+      let connectedUserId = userId;
+      if (!connectedUserId) {
+        const { data: existingConnection } = await supabase
+          .from("openpay_connections")
+          .select("user_id")
+          .eq("openpay_user_id", openPayUserId)
+          .maybeSingle();
+        connectedUserId = existingConnection?.user_id ?? null;
+      }
+
+      if (!connectedUserId) {
+        const { data: created, error: createError } = await supabase.auth.admin.createUser({
+          email: authEmail,
+          email_confirm: true,
+          user_metadata: {
+            auth_provider: "openpay",
+            openpay_user_id: openPayUserId,
+            full_name: me.full_name ?? me.username ?? "OpenPay user",
+            avatar_url: me.avatar_url ?? null,
+          },
+        });
+        if (createError || !created.user) {
+          console.error("OpenPay app user creation failed", createError?.message);
+          return json({ success: false, error: "Could not create the OpenApp account for this OpenPay user" });
+        }
+        connectedUserId = created.user.id;
+      }
+
+      const expiresAt = new Date(Date.now() + Number(token.expires_in || 2592000) * 1000).toISOString();
+      const { error: connectionError } = await supabase.from("openpay_connections").upsert(
         {
-          user_id: userId,
-          openpay_user_id: String(me.user_id ?? token.user_id ?? ""),
+          user_id: connectedUserId,
+          openpay_user_id: openPayUserId,
           account_number: me.account_number ?? null,
           username: me.username ?? null,
           full_name: me.full_name ?? null,
@@ -209,9 +248,27 @@ Deno.serve(async (req) => {
         },
         { onConflict: "user_id" },
       );
+      if (connectionError) {
+        console.error("OpenPay connection save failed", connectionError.message);
+        return json({ success: false, error: "OpenPay was verified but the connection could not be saved" });
+      }
+
+      let loginTokenHash: string | null = null;
+      if (!userId) {
+        const { data: loginLink, error: loginError } = await supabase.auth.admin.generateLink({
+          type: "magiclink",
+          email: authEmail,
+        });
+        loginTokenHash = loginLink?.properties?.hashed_token ?? null;
+        if (loginError || !loginTokenHash) {
+          console.error("OpenPay app session creation failed", loginError?.message);
+          return json({ success: false, error: "OpenPay connected, but the OpenApp session could not be created" });
+        }
+      }
 
       return json({
         success: true,
+        login_token_hash: loginTokenHash,
         profile: {
           account_number: me.account_number,
           username: me.username,
