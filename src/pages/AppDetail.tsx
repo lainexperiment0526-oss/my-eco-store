@@ -404,12 +404,13 @@ export default function AppDetail() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-2 pt-2">
-          <Button onClick={() => processPayment('pi')} disabled={isPaying}>
-            Pay with Pi ({app?.price_amount} Pi)
-          </Button>
-          <Button variant="secondary" onClick={() => processPayment('openpay')} disabled={isPaying}>
+          <Button onClick={() => processPayment('openpay')} disabled={isPaying}>
             Pay with OpenPay ({app?.price_amount} Pi)
           </Button>
+          <Button variant="secondary" onClick={() => processPayment('pi')} disabled={isPaying || !isPiReady}>
+            {isPiReady ? `Pay with Pi (${app?.price_amount} Pi)` : 'Pay with Pi (Pi Browser only)'}
+          </Button>
+
           {(app as any)?.openpay_link && (
             <Button variant="outline" onClick={() => processPayment('openpay_link')} disabled={isPaying}>
               Pay via Developer's OpenPay link
