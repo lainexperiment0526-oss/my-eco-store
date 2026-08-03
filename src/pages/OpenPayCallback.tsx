@@ -5,6 +5,7 @@ import { PageLoader } from '@/components/PageLoader';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { OPENPAY_REDIRECT_URI } from '@/lib/openpay';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 
 export default function OpenPayCallback() {
   const navigate = useNavigate();
@@ -36,7 +37,9 @@ export default function OpenPayCallback() {
           body: { action: 'oauth-exchange', code, redirectUri: OPENPAY_REDIRECT_URI },
         });
         if (error) {
-          const details = await error.context?.json().catch(() => null);
+          const details = error instanceof FunctionsHttpError
+            ? await error.context.json().catch(() => null)
+            : null;
           throw new Error(details?.error || error.message || 'OpenPay connection failed');
         }
         if (!data?.success) throw new Error(data?.error || 'OpenPay connection failed');
