@@ -157,8 +157,8 @@ Deno.serve(async (req) => {
     if (action === "oauth-exchange") {
       const { code, redirectUri } = body;
       const finalRedirect = redirectUri || Deno.env.get("OPENPAY_REDIRECT_URI");
-      if (!code || !finalRedirect) return json({ error: "code and redirectUri required" }, 400);
-      if (!clientId) return json({ error: "OPENPAY_CLIENT_ID not configured" }, 500);
+      if (!code || !finalRedirect) return json({ success: false, error: "code and redirectUri required" });
+      if (!clientId) return json({ success: false, error: "OPENPAY_CLIENT_ID not configured" });
 
       const tokenRes = await fetch(`${OPENPAY_BASE}/oauth/token`, {
         method: "POST",
@@ -171,23 +171,27 @@ Deno.serve(async (req) => {
           client_secret: clientSecret,
         }),
       });
-      const token = await tokenRes.json();
+      const token = await tokenRes.json().catch(() => ({}));
       if (!tokenRes.ok || !token?.access_token) {
         console.error("OpenPay token exchange failed", tokenRes.status, JSON.stringify(token));
-        return json(
-          { error: token?.error || `Token exchange failed (${tokenRes.status})`, details: token },
-          tokenRes.status === 200 ? 400 : tokenRes.status,
-        );
+        return json({
+          success: false,
+          error: `OpenPay sign-in failed (${tokenRes.status}): ${token?.error || token?.error_description || "unknown error"}`,
+        });
       }
 
       const meRes = await fetch(`${OPENPAY_BASE}/user/me`, {
         headers: { Authorization: `Bearer ${token.access_token}` },
       });
-      const me = await meRes.json();
+      const me = await meRes.json().catch(() => ({}));
       if (!meRes.ok) {
         console.error("OpenPay /user/me failed", meRes.status, JSON.stringify(me));
-        return json({ error: me?.error || "Failed to load OpenPay profile", details: me }, meRes.status);
+        return json({
+          success: false,
+          error: `Failed to load OpenPay profile (${meRes.status}): ${me?.error || "unknown error"}`,
+        });
       }
+
 
       const expiresAt = new Date(Date.now() + Number(token.expires_in || 2592000) * 1000).toISOString();
 
