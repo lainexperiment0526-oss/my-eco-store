@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { TranslationProvider } from "@/contexts/TranslationContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
@@ -41,7 +41,7 @@ import Tutorial from "./pages/Tutorial";
 import PiCallback from "./pages/PiCallback";
 import OpenPayCallback from "./pages/OpenPayCallback";
 
-import SignIn from "./pages/SignIn";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,8 +84,8 @@ function RouteTransitions() {
       <Routes location={location}>
         {/* Public routes */}
         <Route path="/auth" element={<Auth />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignIn />} />
+        <Route path="/signin" element={<Navigate to="/auth" replace />} />
+        <Route path="/signup" element={<Navigate to="/auth" replace />} />
         <Route path="/auth/pi/callback" element={<PiCallback />} />
         <Route path="/auth/openpay/callback" element={<OpenPayCallback />} />
         <Route path="/openpay/connect/callback" element={<OpenPayCallback />} />
