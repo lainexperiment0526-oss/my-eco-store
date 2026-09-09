@@ -8,11 +8,8 @@ import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
 import { AdInterstitial } from '@/components/AdInterstitial';
 import { PageLoader } from '@/components/PageLoader';
-import { EmailAuth } from '@/components/EmailAuth';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mail, Pi } from 'lucide-react';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { buildPiOAuthUrl } from '@/lib/piOAuth';
-import { OpenPayAuthButton } from '@/components/OpenPayAuthButton';
 
 const isPiBrowser = () => {
   if (typeof navigator === 'undefined') return false;
@@ -143,47 +140,6 @@ export default function Auth() {
     }
   };
 
-  const handleEmailAuth = async (email: string, password: string, isSignUp: boolean) => {
-    try {
-      if (isSignUp) {
-        const { error } = await signUp(email, password);
-        if (error) {
-          if (error.message.includes('already registered')) {
-            toast.error('An account with this email already exists. Try signing in instead.');
-          } else {
-            toast.error('Failed to create account: ' + error.message);
-          }
-          return;
-        }
-        toast.success('Account created! Please check your email to verify your account.');
-      } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          toast.error('Failed to sign in: ' + error.message);
-          return;
-        }
-        
-        // Update user profile to mark as OpenApp user and email auth method
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase
-            .from('profiles')
-            .update({ 
-              uses_openapp: true,
-              auth_method: 'email',
-              email_verified: true
-            })
-            .eq('id', user.id);
-        }
-        
-        toast.success('Welcome back!');
-        navigate(redirectTo, { replace: true });
-      }
-    } catch (error) {
-      toast.error('Authentication failed. Please try again.');
-    }
-  };
-
   if (loading) {
     return <PageLoader />;
   }
@@ -203,19 +159,6 @@ export default function Auth() {
           </div>
 
           <Tabs defaultValue="pi" className="w-full">
-            {!inPiBrowser && (
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="pi" className="flex items-center gap-2">
-                  <Pi className="h-4 w-4" />
-                  Pi Network
-                </TabsTrigger>
-                <TabsTrigger value="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </TabsTrigger>
-              </TabsList>
-            )}
-
             <TabsContent value="pi">
               <div className="rounded-2xl bg-card p-6 shadow-lg">
                 <Button
@@ -252,15 +195,6 @@ export default function Auth() {
                   Download Pi Browser
                 </a>
 
-                <div className="my-4 flex items-center gap-3">
-                  <span className="h-px flex-1 bg-border" />
-                  <span className="text-xs text-muted-foreground">or</span>
-                  <span className="h-px flex-1 bg-border" />
-                </div>
-
-                <OpenPayAuthButton className="w-full" label="Sign in with OpenPay" />
-
-
                 <div className="mt-4 grid gap-3 text-sm text-muted-foreground">
                   <div className="flex items-start gap-2">
                     <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
@@ -278,23 +212,8 @@ export default function Auth() {
               </div>
             </TabsContent>
 
-            {!inPiBrowser && (
-              <TabsContent value="email">
-                <EmailAuth 
-                  onEmailAuth={handleEmailAuth} 
-                  loading={loading || piLoading}
-                />
-              </TabsContent>
-            )}
           </Tabs>
 
-          {!inPiBrowser && (
-            <div className="mt-6 text-center">
-              <p className="text-xs text-muted-foreground mb-2">
-                <strong>Note:</strong> Use email authentication if you plan to use the OpenApp mobile application.
-              </p>
-            </div>
-          )}
 
           <div className="mt-4 text-center text-xs text-muted-foreground space-x-3">
             <a href="/privacy" className="hover:text-foreground">Privacy</a>
