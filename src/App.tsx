@@ -41,7 +41,7 @@ import Tutorial from "./pages/Tutorial";
 import PiCallback from "./pages/PiCallback";
 import OpenPayCallback from "./pages/OpenPayCallback";
 
-import SignIn from "./pages/SignIn";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
