@@ -186,15 +186,6 @@ export default function Auth() {
                   </>
                 )}
 
-                <a
-                  href="https://minepi.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center w-full h-11 rounded-md border border-input bg-background px-8 text-sm font-medium transition-all duration-150 ease-out hover:bg-accent hover:text-accent-foreground hover:-translate-y-px active:scale-[0.96]"
-                >
-                  Download Pi Browser
-                </a>
-
                 <div className="mt-4 grid gap-3 text-sm text-muted-foreground">
                   <div className="flex items-start gap-2">
                     <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
@@ -203,10 +194,6 @@ export default function Auth() {
                   <div className="flex items-start gap-2">
                     <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
                     <p>Access your app listings, ads, and analytics across devices.</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
-                    <p>New here? Install Pi Browser to get started.</p>
                   </div>
                 </div>
               </div>
