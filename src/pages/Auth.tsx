@@ -203,19 +203,6 @@ export default function Auth() {
           </div>
 
           <Tabs defaultValue="pi" className="w-full">
-            {!inPiBrowser && (
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="pi" className="flex items-center gap-2">
-                  <Pi className="h-4 w-4" />
-                  Pi Network
-                </TabsTrigger>
-                <TabsTrigger value="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </TabsTrigger>
-              </TabsList>
-            )}
-
             <TabsContent value="pi">
               <div className="rounded-2xl bg-card p-6 shadow-lg">
                 <Button
