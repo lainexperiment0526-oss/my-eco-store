@@ -140,47 +140,6 @@ export default function Auth() {
     }
   };
 
-  const handleEmailAuth = async (email: string, password: string, isSignUp: boolean) => {
-    try {
-      if (isSignUp) {
-        const { error } = await signUp(email, password);
-        if (error) {
-          if (error.message.includes('already registered')) {
-            toast.error('An account with this email already exists. Try signing in instead.');
-          } else {
-            toast.error('Failed to create account: ' + error.message);
-          }
-          return;
-        }
-        toast.success('Account created! Please check your email to verify your account.');
-      } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          toast.error('Failed to sign in: ' + error.message);
-          return;
-        }
-        
-        // Update user profile to mark as OpenApp user and email auth method
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase
-            .from('profiles')
-            .update({ 
-              uses_openapp: true,
-              auth_method: 'email',
-              email_verified: true
-            })
-            .eq('id', user.id);
-        }
-        
-        toast.success('Welcome back!');
-        navigate(redirectTo, { replace: true });
-      }
-    } catch (error) {
-      toast.error('Authentication failed. Please try again.');
-    }
-  };
-
   if (loading) {
     return <PageLoader />;
   }
