@@ -77,12 +77,7 @@ export default function Auth() {
   };
 
   const handlePiAuth = async () => {
-    // Trigger Pi Ad Network interstitial (only runs inside Pi Browser; no-op otherwise)
-    try {
-      await showPiAd('interstitial');
-    } catch (err) {
-      console.warn('Pi Ad failed (non-blocking):', err);
-    }
+    // Authenticate first (Pi requires the user gesture to reach authenticate directly)
     const piUser = await authenticateWithPi();
     if (piUser) {
       const ensured = await ensurePiAccountServerSide(piUser.uid, piUser.username);
