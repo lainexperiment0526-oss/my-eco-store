@@ -6,7 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
-import { AdInterstitial } from '@/components/AdInterstitial';
 import { PageLoader } from '@/components/PageLoader';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { buildPiOAuthUrl } from '@/lib/piOAuth';
@@ -24,8 +23,7 @@ export default function Auth() {
   const location = useLocation();
   const redirectTo = (location.state as { from?: string } | null)?.from || '/';
   const { user, signIn, signUp, loading } = useAuth();
-  const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
-  const [showAd, setShowAd] = useState(true);
+  const { authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [inPiBrowser, setInPiBrowser] = useState(false);
 
   useEffect(() => {
@@ -77,12 +75,7 @@ export default function Auth() {
   };
 
   const handlePiAuth = async () => {
-    // Trigger Pi Ad Network interstitial (only runs inside Pi Browser; no-op otherwise)
-    try {
-      await showPiAd('interstitial');
-    } catch (err) {
-      console.warn('Pi Ad failed (non-blocking):', err);
-    }
+    // Authenticate first (Pi requires the user gesture to reach authenticate directly)
     const piUser = await authenticateWithPi();
     if (piUser) {
       const ensured = await ensurePiAccountServerSide(piUser.uid, piUser.username);
@@ -127,13 +120,24 @@ export default function Auth() {
         }
       }
 
-      // Update user profile to mark as OpenApp user
-      await supabase
-        .from('profiles')
-        .update({ uses_openapp: true })
-        .eq('id', piUser.uid);
+      // Update user profile to mark as OpenApp user (use the signed-in account id)
+      const { data: authData } = await supabase.auth.getUser();
+      if (authData.user?.id) {
+        await supabase
+          .from('profiles')
+          .update({ uses_openapp: true })
+          .eq('id', authData.user.id);
+      }
 
       toast.success(`Welcome, ${piUser.username}!`);
+
+      // Show a Pi Ad Network ad after a successful sign-in (Pi Browser only; no-op elsewhere)
+      try {
+        await showPiAd('interstitial');
+      } catch (err) {
+        console.warn('Pi Ad failed (non-blocking):', err);
+      }
+
       navigate(redirectTo, { replace: true });
     } else {
       toast.error('Pi authentication failed. Make sure you are in Pi Browser.');
@@ -146,7 +150,6 @@ export default function Auth() {
 
   return (
     <>
-      {showAd && <AdInterstitial trigger="auth" onComplete={() => setShowAd(false)} />}
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
@@ -163,7 +166,7 @@ export default function Auth() {
               <div className="rounded-2xl bg-card p-6 shadow-lg">
                 <Button
                   onClick={handlePiAuth}
-                  disabled={!isPiReady || piLoading}
+                  disabled={piLoading}
                   className="w-full mb-4 bg-[#0A84FF] hover:bg-[#0074E8] dark:bg-[#0A84FF] dark:hover:bg-[#0074E8] text-white font-semibold"
                   size="lg"
                 >
