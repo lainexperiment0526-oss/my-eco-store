@@ -124,53 +124,21 @@ export function PiProvider({ children }: { children: ReactNode }) {
   const [piLoading, setPiLoading] = useState(true);
 
   useEffect(() => {
-    // Check if already loaded
-    if (initPi()) {
-      setIsPiReady(true);
-      setPiLoading(false);
-      return;
-    }
+    let cancelled = false;
 
     // Skip Pi SDK loading on localhost if not in Pi Browser to avoid cross-origin errors
     if (!isPiBrowser() && window.location.hostname === 'localhost') {
-      console.log('Pi SDK loading skipped on localhost (not in Pi Browser)');
       setPiLoading(false);
       return;
     }
 
-    const script = document.createElement('script');
-    script.src = PI_SDK_URL;
-    script.async = true;
-    script.onload = () => {
-      // Pi object can be attached slightly after script onload on some WebViews.
-      if (initPi()) {
-        setIsPiReady(true);
-        setPiLoading(false);
-        return;
-      }
-
-      let retries = 0;
-      const maxRetries = 10;
-      const retryInterval = window.setInterval(() => {
-        retries += 1;
-        if (initPi()) {
-          window.clearInterval(retryInterval);
-          setIsPiReady(true);
-          setPiLoading(false);
-          return;
-        }
-        if (retries >= maxRetries) {
-          window.clearInterval(retryInterval);
-          console.warn('Pi SDK loaded but Pi object is unavailable');
-          setPiLoading(false);
-        }
-      }, 200);
-    };
-    script.onerror = () => {
-      console.warn('Pi SDK not available (not in Pi Browser)');
+    loadPiSdk().then((ok) => {
+      if (cancelled) return;
+      setIsPiReady(ok);
       setPiLoading(false);
-    };
-    document.head.appendChild(script);
+    });
+
+    return () => { cancelled = true; };
   }, []);
 
   const onIncompletePaymentFound = useCallback(async (payment: any) => {
