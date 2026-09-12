@@ -65,8 +65,57 @@ const isPiBrowser = () => {
 };
 const initPi = () => {
   if (!window.Pi) return false;
-  window.Pi.init({ version: '2.0' });
+  try {
+    window.Pi.init({ version: '2.0' });
+  } catch {
+    // init may throw if already initialised — safe to ignore
+  }
   return true;
+};
+
+let sdkLoadPromise: Promise<boolean> | null = null;
+
+const loadPiSdk = (): Promise<boolean> => {
+  if (initPi()) return Promise.resolve(true);
+  if (sdkLoadPromise) return sdkLoadPromise;
+
+  sdkLoadPromise = new Promise<boolean>((resolve) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${PI_SDK_URL}"]`);
+    const waitForPi = () => {
+      let retries = 0;
+      const timer = window.setInterval(() => {
+        retries += 1;
+        if (initPi()) {
+          window.clearInterval(timer);
+          resolve(true);
+        } else if (retries >= 25) {
+          window.clearInterval(timer);
+          resolve(false);
+        }
+      }, 200);
+    };
+
+    if (existing) {
+      waitForPi();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = PI_SDK_URL;
+    script.async = true;
+    script.onload = () => {
+      if (initPi()) resolve(true);
+      else waitForPi();
+    };
+    script.onerror = () => {
+      sdkLoadPromise = null;
+      console.warn('Pi SDK failed to load');
+      resolve(false);
+    };
+    document.head.appendChild(script);
+  });
+
+  return sdkLoadPromise;
 };
 
 export function PiProvider({ children }: { children: ReactNode }) {
