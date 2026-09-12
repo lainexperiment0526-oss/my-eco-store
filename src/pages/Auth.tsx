@@ -6,7 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
-import { AdInterstitial } from '@/components/AdInterstitial';
 import { PageLoader } from '@/components/PageLoader';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { buildPiOAuthUrl } from '@/lib/piOAuth';
@@ -25,7 +24,6 @@ export default function Auth() {
   const redirectTo = (location.state as { from?: string } | null)?.from || '/';
   const { user, signIn, signUp, loading } = useAuth();
   const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
-  const [showAd, setShowAd] = useState(true);
   const [inPiBrowser, setInPiBrowser] = useState(false);
 
   useEffect(() => {
@@ -152,7 +150,6 @@ export default function Auth() {
 
   return (
     <>
-      {showAd && <AdInterstitial trigger="auth" onComplete={() => setShowAd(false)} />}
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
