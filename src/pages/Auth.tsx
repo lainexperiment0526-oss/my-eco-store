@@ -23,7 +23,7 @@ export default function Auth() {
   const location = useLocation();
   const redirectTo = (location.state as { from?: string } | null)?.from || '/';
   const { user, signIn, signUp, loading } = useAuth();
-  const { isPiReady, authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
+  const { authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [inPiBrowser, setInPiBrowser] = useState(false);
 
   useEffect(() => {
