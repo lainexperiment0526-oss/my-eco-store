@@ -1,0 +1,3 @@
+- [ ] Fix Pi SDK initialization and native ad playback, preserving OpenApp ad alternation.
+- [ ] Keep sign-in on the page until its post-login ad completes.
+- [ ] Test Pi-only gating, loading failures, and completion behavior.
