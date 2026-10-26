@@ -1,4 +1,7 @@
 project_id = "akztkqerqflasxvoulpj"
 
-[functions.translate]
-verify_jwt = false
+[functions]
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.translate]
+    verify_jwt = false
