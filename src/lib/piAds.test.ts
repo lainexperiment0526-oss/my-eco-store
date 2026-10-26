@@ -65,6 +65,7 @@ describe('Pi Browser ad rules', () => {
     if (!close) throw new Error('Ad was not shown');
     close({ result: 'AD_CLOSED' });
     expect(await first).toBe(true);
+    sdk.Ads.showAd = async () => ({ result: 'AD_CLOSED' });
     expect(await player('interstitial')).toBe(true);
   });
 
@@ -74,6 +75,6 @@ describe('Pi Browser ad rules', () => {
   });
 
   test('stalled readiness requests time out rather than trapping navigation', async () => {
-    expect(withPiTimeout(new Promise(() => {}), 5)).rejects.toThrow('Pi SDK request timed out');
+    await expect(withPiTimeout(new Promise(() => {}), 5)).rejects.toThrow('Pi SDK request timed out');
   });
 });
