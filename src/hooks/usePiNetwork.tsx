@@ -58,10 +58,8 @@ const PI_SDK_URL = 'https://sdk.minepi.com/pi-sdk.js';
 const isPiBrowser = () => {
   if (typeof navigator === 'undefined') return false;
   const ua = navigator.userAgent || '';
-  // Pi Browser UA contains "PiBrowser" but also presence of window.Pi.Ads is a strong signal
-  if (/pibrowser|pi browser|minepi/i.test(ua)) return true;
-  if (typeof window !== 'undefined' && (window as any).Pi?.Ads) return true;
-  return false;
+  // The SDK exposes Ads in ordinary browsers too; it is not browser detection.
+  return /pibrowser|pi browser|minepi/i.test(ua);
 };
 const initPi = () => {
   if (!window.Pi) return false;
@@ -126,8 +124,8 @@ export function PiProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    // Skip Pi SDK loading on localhost if not in Pi Browser to avoid cross-origin errors
-    if (!isPiBrowser() && window.location.hostname === 'localhost') {
+    // Initialize the native bridge only inside Pi Browser, on every host.
+    if (!isPiBrowser()) {
       setPiLoading(false);
       return;
     }
@@ -259,6 +257,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
   }, [piUser]);
 
   const showPiAd = useCallback(async (adType: 'interstitial' | 'rewarded'): Promise<boolean> => {
+    if (!isPiBrowser()) return false;
     if (!window.Pi?.Ads) {
       console.warn('[Pi Ads] SDK not available — likely not in Pi Browser');
       return false;

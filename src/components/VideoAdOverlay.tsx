@@ -15,7 +15,7 @@ interface AdData {
   description: string | null;
   skip_after_seconds: number;
   duration_seconds: number | null;
-  app: App & { category?: Category };
+  app: (App & { category?: Category }) | null;
 }
 
 interface VideoAdOverlayProps {
@@ -140,6 +140,13 @@ export function VideoAdOverlay({ ad, onClose, onNavigate }: VideoAdOverlayProps)
       localStorage.setItem('openapp_ad_disclaimer_seen', 'true');
     }
   }, []);
+
+  useEffect(() => {
+    if (!ad.app) onClose();
+  }, [ad.app, onClose]);
+
+  // A cached ad can outlive the linked app; never render its missing details.
+  if (!ad.app) return null;
 
   return (
     <div className="fixed inset-0 z-[100] bg-black flex flex-col">
