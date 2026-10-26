@@ -9,14 +9,7 @@ import { Logo } from '@/components/Logo';
 import { PageLoader } from '@/components/PageLoader';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { buildPiOAuthUrl } from '@/lib/piOAuth';
-
-const isPiBrowser = () => {
-  if (typeof navigator === 'undefined') return false;
-  const ua = navigator.userAgent || '';
-  if (/pibrowser|pi browser|minepi/i.test(ua)) return true;
-  if (typeof window !== 'undefined' && (window as any).Pi?.Ads) return true;
-  return false;
-};
+import { isPiBrowser } from '@/lib/piAds';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -25,16 +18,17 @@ export default function Auth() {
   const { user, signIn, signUp, loading } = useAuth();
   const { authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [inPiBrowser, setInPiBrowser] = useState(false);
+  const [authenticating, setAuthenticating] = useState(false);
 
   useEffect(() => {
     setInPiBrowser(isPiBrowser());
   }, []);
 
   useEffect(() => {
-    if (user && !loading) {
+    if (user && !loading && !authenticating) {
       navigate(redirectTo, { replace: true });
     }
-  }, [user, loading, navigate, redirectTo]);
+  }, [user, loading, authenticating, navigate, redirectTo]);
 
   const getStablePiPassword = (piUid: string) => `openapp_pi_auth_${piUid}`;
   const getLegacyPiPassword = (accessToken: string, piUid: string) => `${accessToken.slice(0, 20)}${piUid}`;
@@ -75,6 +69,9 @@ export default function Auth() {
   };
 
   const handlePiAuth = async () => {
+    if (authenticating) return;
+    setAuthenticating(true);
+    try {
     // Authenticate first (Pi requires the user gesture to reach authenticate directly)
     const piUser = await authenticateWithPi();
     if (piUser) {
@@ -142,9 +139,12 @@ export default function Auth() {
     } else {
       toast.error('Pi authentication failed. Make sure you are in Pi Browser.');
     }
+    } finally {
+      setAuthenticating(false);
+    }
   };
 
-  if (loading) {
+  if (loading && !authenticating) {
     return <PageLoader />;
   }
 
@@ -166,11 +166,11 @@ export default function Auth() {
               <div className="rounded-2xl bg-card p-6 shadow-lg">
                 <Button
                   onClick={handlePiAuth}
-                  disabled={piLoading}
+                  disabled={piLoading || authenticating}
                   className="w-full mb-4 bg-[#0A84FF] hover:bg-[#0074E8] dark:bg-[#0A84FF] dark:hover:bg-[#0074E8] text-white font-semibold"
                   size="lg"
                 >
-                  {piLoading ? 'Connecting...' : 'Sign in with Pi Network'}
+                  {piLoading || authenticating ? 'Connecting...' : 'Sign in with Pi Network'}
                 </Button>
 
                 {!inPiBrowser && (

@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { createPiAdPlayer, isPiBrowser, withPiTimeout } from '@/lib/piAds';
 
 declare global {
   interface Window {
     Pi: {
-      init: (config: { version: string; sandbox?: boolean }) => void;
+      init: (config: { version: string; sandbox?: boolean }) => void | Promise<void>;
+      nativeFeaturesList: () => Promise<string[]>;
       authenticate: (
         scopes: string[],
         onIncompletePaymentFound: (payment: any) => void
@@ -55,66 +57,56 @@ interface PiContextType {
 const PiContext = createContext<PiContextType | undefined>(undefined);
 
 const PI_SDK_URL = 'https://sdk.minepi.com/pi-sdk.js';
-const isPiBrowser = () => {
-  if (typeof navigator === 'undefined') return false;
-  const ua = navigator.userAgent || '';
-  // The SDK exposes Ads in ordinary browsers too; it is not browser detection.
-  return /pibrowser|pi browser|minepi/i.test(ua);
-};
-const initPi = () => {
+let initializedSdk: Window['Pi'] | null = null;
+const initPi = async () => {
   if (!window.Pi) return false;
+  if (initializedSdk === window.Pi) return true;
   try {
-    window.Pi.init({ version: '2.0' });
+    await withPiTimeout(Promise.resolve(window.Pi.init({ version: '2.0' })));
+    initializedSdk = window.Pi;
+    return true;
   } catch {
-    // init may throw if already initialised — safe to ignore
+    console.warn('Pi SDK initialization failed');
+    return false;
   }
-  return true;
 };
 
 let sdkLoadPromise: Promise<boolean> | null = null;
 
 const loadPiSdk = (): Promise<boolean> => {
-  if (initPi()) return Promise.resolve(true);
+  if (initializedSdk && initializedSdk === window.Pi) return Promise.resolve(true);
   if (sdkLoadPromise) return sdkLoadPromise;
 
   sdkLoadPromise = new Promise<boolean>((resolve) => {
+    if (window.Pi) { void initPi().then(resolve); return; }
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${PI_SDK_URL}"]`);
-    const waitForPi = () => {
-      let retries = 0;
-      const timer = window.setInterval(() => {
-        retries += 1;
-        if (initPi()) {
-          window.clearInterval(timer);
-          resolve(true);
-        } else if (retries >= 25) {
-          window.clearInterval(timer);
-          resolve(false);
-        }
-      }, 200);
+    const script = existing ?? document.createElement('script');
+    const finish = (loaded: boolean) => {
+      window.clearTimeout(timeout);
+      window.clearInterval(poll);
+      if (!loaded) { script.remove(); resolve(false); return; }
+      void initPi().then(resolve);
     };
-
-    if (existing) {
-      waitForPi();
-      return;
-    }
-
-    const script = document.createElement('script');
+    const timeout = window.setTimeout(() => finish(false), 10000);
+    const poll = window.setInterval(() => { if (window.Pi) finish(true); }, 200);
+    if (existing) return;
     script.src = PI_SDK_URL;
     script.async = true;
-    script.onload = () => {
-      if (initPi()) resolve(true);
-      else waitForPi();
-    };
-    script.onerror = () => {
-      sdkLoadPromise = null;
-      console.warn('Pi SDK failed to load');
-      resolve(false);
-    };
+    script.onload = () => { if (window.Pi) finish(true); };
+    script.onerror = () => finish(false);
     document.head.appendChild(script);
+  }).then((ok) => {
+    if (!ok) sdkLoadPromise = null;
+    return ok;
   });
 
   return sdkLoadPromise;
 };
+
+const playPiAd = createPiAdPlayer(async () => {
+  const loaded = await loadPiSdk();
+  return loaded ? window.Pi : null;
+});
 
 export function PiProvider({ children }: { children: ReactNode }) {
   const [piUser, setPiUser] = useState<PiUser | null>(null);
@@ -256,40 +248,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
     });
   }, [piUser]);
 
-  const showPiAd = useCallback(async (adType: 'interstitial' | 'rewarded'): Promise<boolean> => {
-    if (!isPiBrowser()) return false;
-    if (!window.Pi?.Ads) {
-      console.warn('[Pi Ads] SDK not available — likely not in Pi Browser');
-      return false;
-    }
-    try {
-      console.log(`[Pi Ads] Checking readiness for ${adType}...`);
-      const readiness = await window.Pi.Ads.isAdReady(adType);
-      console.log('[Pi Ads] isAdReady:', readiness);
-
-      if (!readiness?.ready) {
-        console.log(`[Pi Ads] Requesting ${adType} ad...`);
-        const requested = await window.Pi.Ads.requestAd(adType);
-        console.log('[Pi Ads] requestAd result:', requested);
-        if (requested?.result !== 'AD_LOADED') {
-          console.warn('[Pi Ads] Ad not loaded, result:', requested?.result);
-          return false;
-        }
-      }
-
-      console.log(`[Pi Ads] Showing ${adType} ad...`);
-      const shown = await window.Pi.Ads.showAd(adType);
-      console.log('[Pi Ads] showAd result:', shown);
-      return (
-        shown?.result === 'AD_REWARDED' ||
-        shown?.result === 'AD_CLOSED' ||
-        shown?.result === 'AD_DISPLAYED'
-      );
-    } catch (err) {
-      console.error('[Pi Ads] Error:', err);
-      return false;
-    }
-  }, []);
+  const showPiAd = useCallback(playPiAd, []);
 
   const signOutPi = useCallback(() => {
     setPiUser(null);
