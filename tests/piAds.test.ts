@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { createPiAdPlayer, isPiBrowser, withPiTimeout, type PiAdSdk } from './piAds';
+import { createPiAdPlayer, isPiBrowser, withPiTimeout, type PiAdSdk } from '../src/lib/piAds';
 
 function fixture({ supported = true, ready = true, loaded = 'AD_LOADED', shown = 'AD_CLOSED' } = {}) {
   const calls: string[] = [];
