@@ -25,7 +25,8 @@ export function useActiveAds() {
         .eq('is_active', true)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data as any[];
+      // Skip ads whose app is unavailable (e.g. unapproved or removed) to avoid null app crashes.
+      return ((data as any[]) || []).filter((ad) => ad?.app?.id);
     },
   });
 }
