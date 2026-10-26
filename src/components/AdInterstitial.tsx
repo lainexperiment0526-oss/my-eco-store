@@ -4,8 +4,7 @@ import { useActiveAds } from '@/hooks/useAds';
 import { useActiveCampaigns } from '@/hooks/useAdCampaigns';
 import { VideoAdOverlay } from './VideoAdOverlay';
 import { CampaignAdOverlay } from './CampaignAdOverlay';
-
-const isPiBrowser = () => /pibrowser|pi browser/i.test(navigator.userAgent);
+import { isPiBrowser } from '@/lib/piAds';
 
 interface AdInterstitialProps {
   onComplete: () => void;
@@ -69,14 +68,14 @@ export function AdInterstitial({ onComplete, trigger }: AdInterstitialProps) {
     // Auth flow — same alternation logic
     if (canUsePiAds && hasInventory) {
       if (Math.random() < 0.5) {
-        playPiAd(Math.random() > 0.5 ? 'interstitial' : 'rewarded');
+        playPiAd('interstitial');
       } else {
         showRandomAd();
       }
     } else if (hasInventory) {
       showRandomAd();
     } else if (canUsePiAds) {
-      playPiAd(Math.random() > 0.5 ? 'interstitial' : 'rewarded');
+      playPiAd('interstitial');
     } else {
       onComplete();
     }
