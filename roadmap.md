@@ -1,5 +1,5 @@
 - [x] Fix Pi SDK initialization and native ad playback, preserving OpenApp ad alternation.
 - [x] Keep sign-in on the page until its post-login ad completes.
 - [x] Test Pi-only gating, loading failures, and completion behavior (9 tests and authenticated Open App flow with simulated native SDK).
-- [ ] Grant Wain2020 admin access and verify permissions.
-- [ ] Waive admin listing fees and test an authenticated submission.
+- [x] Confirm Wain2020’s existing admin role and fix premature admin-page redirects; verified authenticated admin access.
+- [x] Waive admin listing fees; two fee tests passed and authenticated free submission read back successfully. Temporary test app removed.

@@ -29,21 +29,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Defer admin check with setTimeout to avoid deadlock
         if (session?.user) {
+          setLoading(true);
           setTimeout(() => {
-            checkAdminRole(session.user.id);
+            checkAdminRole(session.user.id).finally(() => setLoading(false));
           }, 0);
         } else {
           setIsAdmin(false);
+          setLoading(false);
         }
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        checkAdminRole(session.user.id);
+        await checkAdminRole(session.user.id);
       }
       setLoading(false);
     });
