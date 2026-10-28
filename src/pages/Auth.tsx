@@ -117,25 +117,18 @@ export default function Auth() {
         }
       }
 
-      // Update user profile to mark as OpenApp user (use the signed-in account id)
-      const { data: authData } = await supabase.auth.getUser();
-      if (authData.user?.id) {
-        await supabase
-          .from('profiles')
-          .update({ uses_openapp: true })
-          .eq('id', authData.user.id);
-      }
+      // Mark profile as OpenApp user in the background (non-blocking)
+      void supabase.auth.getUser().then(({ data: authData }) => {
+        if (authData.user?.id) {
+          void supabase.from('profiles').update({ uses_openapp: true }).eq('id', authData.user.id);
+        }
+      });
 
       toast.success(`Welcome, ${piUser.username}!`);
-
-      // Show a Pi Ad Network ad after a successful sign-in (Pi Browser only; no-op elsewhere)
-      try {
-        await showPiAd('interstitial');
-      } catch (err) {
-        console.warn('Pi Ad failed (non-blocking):', err);
-      }
-
       navigate(redirectTo, { replace: true });
+
+      // Pi Ad after sign-in, non-blocking (Pi Browser only; no-op elsewhere)
+      void showPiAd('interstitial').catch((err) => console.warn('Pi Ad failed (non-blocking):', err));
     } else {
       toast.error('Pi authentication failed. Make sure you are in Pi Browser.');
     }
@@ -143,10 +136,6 @@ export default function Auth() {
       setAuthenticating(false);
     }
   };
-
-  if (loading && !authenticating) {
-    return <PageLoader />;
-  }
 
   return (
     <>
