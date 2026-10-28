@@ -3,7 +3,7 @@ export const OPENPAY_AUTHORIZE_URL = 'https://openpy.space/connect';
 export const OPENPAY_SITE_URL = 'https://openpy.space';
 export const OPENPAY_PARTNER_PORTAL_URL = 'https://openpy.space/partner-api';
 export const OPENPAY_LOGO_URL = 'https://openpy.space/openpay-auth-logo.png';
-export const OPENPAY_REDIRECT_URI = 'https://www.openappdev.space/auth/openpay/callback';
+export const OPENPAY_REDIRECT_URI = 'https://open-app.store/auth/openpay/callback';
 
 export const OPENPAY_SCOPES = ['profile', 'balance'] as const;
 
