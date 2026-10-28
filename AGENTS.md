@@ -5,3 +5,4 @@
 - Keep Pi Browser detection and native ad playback in the shared Pi ad adapter; await initialization, check native capabilities, and serialize native ads so all triggers follow the same SDK contract.
 - Automatic sign-in and app-open ads use interstitials rather than rewarded ads because these flows do not offer a verified user reward.
 - Resolve listing-fee exemptions from protected admin roles and recheck with `has_role` before submission; never infer privileges from Pi usernames or client metadata.
+- Keep sign-in screens visible during session/SDK warm-up, and navigate after verified sign-in before background profile updates or Pi ads; these operations must not prolong authentication.
