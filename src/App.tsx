@@ -122,7 +122,9 @@ function RouteTransitions() {
 }
 
 function useSplashScreen() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() =>
+    !/^\/(auth(?:\/|$)|signin\/?$|signup\/?$)/.test(window.location.pathname)
+  );
   const [hideSplash, setHideSplash] = useState(false);
   return { showSplash, setShowSplash, hideSplash, setHideSplash };
 }

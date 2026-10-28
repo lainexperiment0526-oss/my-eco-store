@@ -111,21 +111,20 @@ const playPiAd = createPiAdPlayer(async () => {
 export function PiProvider({ children }: { children: ReactNode }) {
   const [piUser, setPiUser] = useState<PiUser | null>(null);
   const [isPiReady, setIsPiReady] = useState(false);
-  const [piLoading, setPiLoading] = useState(true);
+  // SDK warm-up is not an active sign-in; keep the button available immediately.
+  const [piLoading, setPiLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     // Initialize the native bridge only inside Pi Browser, on every host.
     if (!isPiBrowser()) {
-      setPiLoading(false);
       return;
     }
 
     loadPiSdk().then((ok) => {
       if (cancelled) return;
       setIsPiReady(ok);
-      setPiLoading(false);
     });
 
     return () => { cancelled = true; };
@@ -149,7 +148,7 @@ export function PiProvider({ children }: { children: ReactNode }) {
   const authenticateWithPi = useCallback(async (): Promise<PiUser | null> => {
     try {
       setPiLoading(true);
-      if (!window.Pi) {
+      if (initializedSdk !== window.Pi || !window.Pi) {
         const ok = await loadPiSdk();
         setIsPiReady(ok);
         if (!ok || !window.Pi) {
