@@ -6,7 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
-import { PageLoader } from '@/components/PageLoader';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { buildPiOAuthUrl } from '@/lib/piOAuth';
 import { isPiBrowser } from '@/lib/piAds';
