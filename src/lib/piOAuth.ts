@@ -2,7 +2,7 @@
 // The client_id is issued in the Pi Developer Portal.
 // Redirect URI must be registered there exactly.
 export const PI_OAUTH_CLIENT_ID = '9Nln8T-RnQM_nl1RzJfuv45shfnVtMb9glRnUJen9yQ';
-export const PI_OAUTH_REDIRECT_URI = 'https://openappdev.space/auth/pi/callback';
+export const PI_OAUTH_REDIRECT_URI = 'https://open-app.store/auth/pi/callback';
 
 // Pi OAuth authorization endpoint (implicit flow — returns access_token in URL fragment).
 export const PI_OAUTH_AUTHORIZE_URL = 'https://accounts.pinet.com/oauth/authorize';
