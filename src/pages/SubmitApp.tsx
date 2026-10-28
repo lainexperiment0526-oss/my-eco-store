@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Upload, X, Image, ArrowLeft, CheckCircle, Video, FileText, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DraftPlansEditor, DraftPlan } from '@/components/DraftPlansEditor';
+import { listingFeePi } from '@/lib/listingFee';
 
 type SubmitStep = 'details' | 'payment' | 'submitting' | 'done';
 
@@ -114,7 +115,8 @@ const CATEGORY_SELECTION_ORDER = [
 ];
 
 export default function SubmitApp() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
+  const listingFee = listingFeePi(isAdmin);
   const { createPiPayment, isPiReady, authenticateWithPi, isPiAuthenticated } = usePiNetwork();
   const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
   const addScreenshot = useAddScreenshot();
@@ -439,7 +441,14 @@ export default function SubmitApp() {
     try {
       const id = await saveDraft();
       setDraftId(id);
-      setStep('payment');
+      if (!user) throw new Error('Please sign in again');
+      const { data: admin, error } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+      if (error) throw error;
+      if (listingFeePi(admin === true) === 0) {
+        await submitApp(id);
+      } else {
+        setStep('payment');
+      }
     } catch (error: any) {
       toast.error(error.message || 'Failed to save draft');
     } finally {
@@ -505,7 +514,7 @@ export default function SubmitApp() {
     }
   };
 
-  const submitApp = async () => {
+  const submitApp = async (savedDraftId = draftId) => {
     if (!user) return;
     if (!formData.category_id || formData.languages.length === 0) {
       toast.error('Please select a category and at least one language');
@@ -525,9 +534,14 @@ export default function SubmitApp() {
 
     try {
       // Get draft data
-      const { data: draft } = draftId
-        ? await supabase.from('app_drafts').select('*').eq('id', draftId).single()
+      const { data: draft } = savedDraftId
+        ? await supabase.from('app_drafts').select('*').eq('id', savedDraftId).single()
         : { data: null };
+      const { data: admin, error: roleError } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+      if (roleError) throw roleError;
+      if (listingFeePi(admin === true) > 0 && draft?.payment_status !== 'paid') {
+        throw new Error('Please complete the 25 Pi listing payment first');
+      }
 
       const logoUrl = draft?.logo_url || null;
       const isPaid = formData.pricing_model === 'paid';
@@ -604,7 +618,7 @@ export default function SubmitApp() {
 
       // Materialize subscription plans for this app
       const draftPlans: DraftPlan[] = Array.isArray(draft?.subscription_plans)
-        ? (draft!.subscription_plans as any)
+        ? (draft?.subscription_plans as any)
         : subscriptionPlans;
       if (draftPlans.length > 0) {
         const rows = draftPlans
@@ -628,8 +642,8 @@ export default function SubmitApp() {
       }
 
       // Mark draft as submitted
-      if (draftId) {
-        await supabase.from('app_drafts').delete().eq('id', draftId);
+      if (savedDraftId) {
+        await supabase.from('app_drafts').delete().eq('id', savedDraftId);
       }
 
       setStep('done');
@@ -637,7 +651,7 @@ export default function SubmitApp() {
     } catch (error: any) {
       console.error('Submit error:', error);
       toast.error(error.message || 'Failed to submit app');
-      setStep(draftId ? 'payment' : 'details');
+      setStep(isAdmin ? 'details' : savedDraftId ? 'payment' : 'details');
     } finally {
       setIsSubmitting(false);
     }
@@ -754,7 +768,7 @@ export default function SubmitApp() {
 
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground">Submit Your App</h1>
-          <p className="text-muted-foreground">Share your app with the community - Listing fee: 25 Pi</p>
+          <p className="text-muted-foreground">{listingFee === 0 ? 'Admin listing — no payment required' : 'Share your app with the community - Listing fee: 25 Pi'}</p>
         </div>
 
         {/* Drafts */}
@@ -773,7 +787,7 @@ export default function SubmitApp() {
                   <div>
                     <p className="font-medium text-foreground">{draft.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {draft.payment_status === 'paid' ? 'Paid' : 'Payment pending'} -
+                      {listingFee === 0 ? 'No payment required' : draft.payment_status === 'paid' ? 'Paid' : 'Payment pending'} -
                       Updated {new Date(draft.updated_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -1169,10 +1183,10 @@ export default function SubmitApp() {
               {draftActionLoading === 'proceed' ? (
                 <span className="inline-flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Preparing Payment...
+                  {listingFee === 0 ? 'Submitting App...' : 'Preparing Payment...'}
                 </span>
               ) : (
-                'Proceed to Payment (25 Pi)'
+                listingFee === 0 ? 'Submit App (Free)' : 'Proceed to Payment (25 Pi)'
               )}
             </Button>
           </div>
