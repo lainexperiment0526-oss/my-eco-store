@@ -1,3 +1,5 @@
 - [x] Fix Pi SDK initialization and native ad playback, preserving OpenApp ad alternation.
 - [x] Keep sign-in on the page until its post-login ad completes.
 - [x] Test Pi-only gating, loading failures, and completion behavior (9 tests and authenticated Open App flow with simulated native SDK).
+- [ ] Grant Wain2020 admin access and verify permissions.
+- [ ] Waive admin listing fees and test an authenticated submission.
