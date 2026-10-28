@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
+import { PageLoader } from '@/components/PageLoader';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { buildPiOAuthUrl } from '@/lib/piOAuth';
 import { isPiBrowser } from '@/lib/piAds';
@@ -14,7 +15,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = (location.state as { from?: string } | null)?.from || '/';
-  const { user, signIn, loading } = useAuth();
+  const { user, signIn, signUp, loading } = useAuth();
   const { authenticateWithPi, piLoading, showPiAd } = usePiNetwork();
   const [inPiBrowser, setInPiBrowser] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
@@ -29,53 +30,123 @@ export default function Auth() {
     }
   }, [user, loading, authenticating, navigate, redirectTo]);
 
+  const getStablePiPassword = (piUid: string) => `openapp_pi_auth_${piUid}`;
+  const getLegacyPiPassword = (accessToken: string, piUid: string) => `${accessToken.slice(0, 20)}${piUid}`;
+  const isAlreadyRegisteredError = (error: Error | null) => {
+    if (!error?.message) return false;
+    const message = error.message.toLowerCase();
+    return message.includes('already registered') || message.includes('already been registered');
+  };
+  const isEmailNotConfirmedError = (error: Error | null) => {
+    if (!error?.message) return false;
+    return error.message.toLowerCase().includes('email not confirmed');
+  };
+
+  const ensurePiAccountServerSide = async (piUid: string, username: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('pi-auth', {
+        body: { piUid, username },
+      });
+
+      if (error) {
+        console.warn('pi-auth function invoke failed:', error.message);
+        return null;
+      }
+
+      if (!data?.email || !data?.password) {
+        console.warn('pi-auth function returned incomplete data');
+        return null;
+      }
+
+      return {
+        email: data.email as string,
+        password: data.password as string,
+      };
+    } catch (err) {
+      console.warn('pi-auth function unavailable, using client fallback:', err);
+      return null;
+    }
+  };
+
   const handlePiAuth = async () => {
     if (authenticating) return;
     setAuthenticating(true);
     try {
-      // Keep native authentication attached to the button gesture.
-      const piUser = await authenticateWithPi();
-      if (!piUser) {
-        toast.error('Pi authentication failed. Please try again in Pi Browser.');
-        return;
-      }
+    // Authenticate first (Pi requires the user gesture to reach authenticate directly)
+    const piUser = await authenticateWithPi();
+    if (piUser) {
+      const ensured = await ensurePiAccountServerSide(piUser.uid, piUser.username);
+      const piEmail = ensured?.email ?? `${piUser.uid}@pi.user`;
+      const stablePassword = ensured?.password ?? getStablePiPassword(piUser.uid);
+      const legacyPassword = getLegacyPiPassword(piUser.accessToken, piUser.uid);
 
-      // The server verifies Pi and prepares returning/new accounts in one request.
-      // Abort a stalled request instead of cascading through failed login/signup retries.
-      const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), 15000);
-      let credentials;
-      try {
-        const { data, error } = await supabase.functions.invoke('pi-auth', {
-          body: { accessToken: piUser.accessToken },
-          signal: controller.signal,
-        });
-        if (error || !data?.email || !data?.password) {
-          throw new Error('Unable to finish Pi sign-in. Please try again.');
+      // First try stable credentials so returning users can log in consistently.
+      let { error: signInError } = await signIn(piEmail, stablePassword);
+
+      // Backward compatibility for accounts created with the older token-derived password.
+      if (signInError) {
+        const { error: legacySignInError } = await signIn(piEmail, legacyPassword);
+        if (!legacySignInError) {
+          const { error: updatePasswordError } = await supabase.auth.updateUser({ password: stablePassword });
+          if (updatePasswordError) {
+            console.warn('Pi password migration failed:', updatePasswordError.message);
+          }
+          signInError = null;
         }
-        credentials = data;
-      } finally {
-        window.clearTimeout(timeout);
       }
 
-      const { error } = await signIn(credentials.email, credentials.password);
-      if (error) throw new Error('Unable to finish Pi sign-in. Please try again.');
+      // If no existing account works, create one with stable credentials.
+      if (signInError) {
+        const { error: signUpError } = await signUp(piEmail, stablePassword);
+        if (signUpError && !isAlreadyRegisteredError(signUpError)) {
+          console.error('Pi sign-up failed:', signUpError.message);
+          toast.error('Failed to authenticate with Pi Network');
+          return;
+        }
+
+        // Account might already exist; retry sign-in with stable password once.
+        const { error: retrySignInError } = await signIn(piEmail, stablePassword);
+        if (retrySignInError) {
+          if (isEmailNotConfirmedError(retrySignInError)) {
+            toast.error('Pi account exists but is not confirmed. Deploy the pi-auth edge function and try again.');
+            return;
+          }
+          console.error('Pi retry sign-in failed:', retrySignInError.message);
+          toast.error('Failed to authenticate with Pi Network');
+          return;
+        }
+      }
+
+      // Update user profile to mark as OpenApp user (use the signed-in account id)
+      const { data: authData } = await supabase.auth.getUser();
+      if (authData.user?.id) {
+        await supabase
+          .from('profiles')
+          .update({ uses_openapp: true })
+          .eq('id', authData.user.id);
+      }
 
       toast.success(`Welcome, ${piUser.username}!`);
-      navigate(redirectTo, { replace: true });
 
-      // Profile bookkeeping and native ad availability never hold the sign-in page open.
-      void supabase.auth.getSession().then(({ data }) => {
-        if (!data.session?.user.id) return;
-        return supabase.from('profiles').update({ uses_openapp: true }).eq('id', data.session.user.id);
-      }).catch(() => console.warn('Profile update unavailable'));
-      void showPiAd('interstitial').catch(() => console.warn('Pi ad unavailable'));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Pi sign-in failed. Please try again.');
+      // Show a Pi Ad Network ad after a successful sign-in (Pi Browser only; no-op elsewhere)
+      try {
+        await showPiAd('interstitial');
+      } catch (err) {
+        console.warn('Pi Ad failed (non-blocking):', err);
+      }
+
+      navigate(redirectTo, { replace: true });
+    } else {
+      toast.error('Pi authentication failed. Make sure you are in Pi Browser.');
+    }
     } finally {
       setAuthenticating(false);
     }
   };
+
+  if (loading && !authenticating) {
+    return <PageLoader />;
+  }
 
   return (
     <>
